@@ -1,0 +1,20 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: r
+r: bioc-devel
+sudo: required
+warnings_are_errors: true
+
+
+r_binary_packages:
+  - XML
+
+bioc_packages:
+  - AnnotationHub
+  - biomaRt
+  - DESeq2
+  - gage
+  - gageData
+  - pathview
+
+cache: packages

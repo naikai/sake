@@ -1,21 +1,50 @@
 Package: icash
 Type: Package
-Title: Interactive tool for assessing single-cell heterogeneity
-Version: 0.1
+Title: Interactive clustering tool for assessing single-cell heterogeneity
+Version: 0.0.9000
 Date: 2016-05-31
-Author: Yu-Jui Ho
-Maintainer: Yu-Jui Ho <naikai@gmail.com>
-Description: More about what it does (maybe more than one line)
+Authors@R: person("Yu-Jui", "Ho", email = "naikai@gmail.com",
+                  role = c("aut", "cre"))
+Description: This tool can help you quickly navigate through the expression profile,
+    Using NMF method for unsupervised clustering.
+Depends: R (>= 3.1.0)
 Imports:
+    AnnotationHub,
+    biomaRt,
+    caret,
+    corrplot,
+    d3heatmap,
+    data.table,
+    dendextend,
+    DESeq2,
+    DT,
     dplyr,
+    gage,
     ggplot2,
+    magrittr,
     NMF,
+    pathview,
+    plotly,
+    Rtsne,
     shiny,
-    Rtsne
+    shinythemes,
+    shinydashboard,
+    snowfall,
+    tools
+Suggests:
+    annotate,
+    gageData,
+    hgu133a.db,
+    hgu133a2.db,
+    hgu133b.db,
+    hgu133plus2.db,
+    knitr,
+    matrixStats,
+    RColorBrewer,
+    rmarkdown,
+    testthat,
+    vcd
 License: GPL 3.0
 LazyData: TRUE
 RoxygenNote: 5.0.1
-Suggests: knitr,
-    rmarkdown,
-    testthat
 VignetteBuilder: knitr
