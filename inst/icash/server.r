@@ -11,7 +11,7 @@ library(tools)
 library(snowfall)
 library(NMF)
 library(DT)
-# library(naikai)
+library(icash)
 library(gage)
 library(gageData)
 library(pathview)
@@ -107,7 +107,7 @@ shinyServer(function(input, output, session) {
       }
 
       if(input$normdata=="takeRPM"){
-        transdata <- RPM(transdata, colSums(transdata))
+        transdata <- rpm(transdata, colSums(transdata))
       }else if(input$normdata=="takesizeNorm"){
         sf <- norm_factors(transdata)
         transdata <- t(t(transdata)/sf)
@@ -147,7 +147,7 @@ shinyServer(function(input, output, session) {
     }
 
     if(input$list_type=='Ranks from data'){
-      select.genes <- select.top.n(apply(rawdata,1,input$math), n=input$top.num, bottom=ifelse(input$orders=="bottom", T, F))
+      select.genes <- select_top_n(apply(rawdata,1,input$math), n=input$top.num, bottom=ifelse(input$orders=="bottom", T, F))
       genelist <- names(select.genes)
     }else if(input$list_type=='Upload your list of genes'){
       validate(
@@ -297,7 +297,7 @@ shinyServer(function(input, output, session) {
                                Y = y,
                                logFC = logFC,
                                meanFC = mean(x+y)*logFC) %>%
-                    arrange(desc(abs(logFC)))
+                    dplyr::arrange(desc(abs(logFC)))
     DT::datatable(scatter_data, rownames= FALSE,
                   options = list(scrollX = TRUE,
                                  pageLength = 8),
@@ -584,7 +584,7 @@ shinyServer(function(input, output, session) {
       gene.list <- nmf_features$Gene
     }
     else if(input$heatmapGene=='rank'){
-      select.genes <- select.top.n(apply(rawdata,1,input$heat.math), n=as.numeric(input$heat.top.num), bottom=F)
+      select.genes <- select_top_n(apply(rawdata,1,input$heat.math), n=as.numeric(input$heat.top.num), bottom=F)
       gene.list <- names(select.genes)
     }
     else if(input$heatmapGene=='preload'){
