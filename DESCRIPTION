@@ -21,7 +21,6 @@ Imports:
     data.table,
     DESeq2,
     dplyr,
-    gage,
     ggplot2,
     magrittr,
     pathview,
@@ -36,6 +35,8 @@ Imports:
 Suggests:
     annotate,
     caret,
+    devtools,
+    gage,
     gageData,
     hgu133a.db,
     hgu133a2.db,
