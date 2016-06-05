@@ -360,7 +360,7 @@ shinyServer(function(input, output, session) {
   output$estimSummary = DT::renderDataTable({
     runSummary <- runSummary()
     DT::datatable(runSummary, rownames= TRUE,
-                  extensions = c('Buttons', 'RowReorder', 'ColReorder'),
+                  extensions = c('Buttons'),
                   options = list(dom = 'Bfrtip',
                                  buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
                   )
