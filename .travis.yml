@@ -4,7 +4,9 @@ language: r
 r: bioc-devel
 sudo: required
 warnings_are_errors: true
-# cache: packages
+github_packages:
+  - assertthat
+  - devtools
 r_binary_packages:
   - XML
 bioc_packages:
@@ -14,3 +16,4 @@ bioc_packages:
   - gage
   - gageData
   - pathview
+# cache: packages
