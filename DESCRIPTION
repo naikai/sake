@@ -46,6 +46,7 @@ Suggests:
     grid,
     knitr,
     irr,
+    matrixStats,
     RColorBrewer,
     rmarkdown,
     testthat,
@@ -58,7 +59,6 @@ Remotes:
     bioc::3.3/DESeq2,
     bioc::3.3/gage,
     bioc::3.3/gageData,
-    bioc::3.3/matrixStats,
     bioc::3.3/pathview
 License: GPL (>=2)
 LazyData: TRUE
