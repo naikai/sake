@@ -55,6 +55,7 @@ Suggests:
     WGCNA,
     vcd
 Remotes:
+    hadley/devtools,
     rstudio/DT,
     rstudio/d3heatmap@colorlabels,
     bioc::3.3/AnnotationHub,
