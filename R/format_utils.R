@@ -5,8 +5,7 @@
 #' @keywords standardize
 #' @export
 #' @examples
-#' gene_convert_human_to_mouse("TP53")
-
+#' affy_probe_to_gene_symbol("TP53")
 affy_probe_to_gene_symbol <- function(probe_id, GPL, sel.columns="SYMBOL"){
   PROBES<- as.character(probe_id)
 
@@ -27,9 +26,9 @@ affy_probe_to_gene_symbol <- function(probe_id, GPL, sel.columns="SYMBOL"){
 }
 
 
-#' Automatically convert genecnt into Entrez ID 
+#' Automatically convert genecnt into Entrez ID
 #'
-#' Standize gene id into Entrez ID 
+#' Standize gene id into Entrez ID
 #' @param data Gene id list you want to convert
 #' @keywords conversion
 #' @export
@@ -52,6 +51,7 @@ detect_genecnt_id <- function(data, sum.method="mean"){
 #' leave normal gene_symbols intact
 #' @param data Gene list you want to convert
 #' @keywords standardize
+#' @import data.table
 #' @export
 #' @examples
 #' detect_genecnt_platform("TP53")
@@ -60,20 +60,20 @@ detect_genecnt_platform <- function(data, method="mean"){
   num.genes <- nrow(data)
   # for now just use simple nrow as check point
   if(num.genes == 22283){
-      require(hgu133a.db) # 22283 probes
+    library(hgu133a.db) # 22283 probes
     GPL="GPL96"
     print ("Guess it's hgu133a")
   }else if(num.genes == 22645){
-      require(hgu133b.db) # 22645 probes
+    library(hgu133b.db) # 22645 probes
     GPL="GPL97"
     print ("Guess it's hgu133b")
   }else if(num.genes == 54675 || num.genes == 44137){
-      require(hgu133plus2.db) # 54675 probes
-      # hard fix here for now, need to add mapped rownames to all these probe.annotation and then decide which one 
+    library(hgu133plus2.db) # 54675 probes
+    # hard fix here for now, need to add mapped rownames to all these probe.annotation and then decide which one
     GPL="GPL570"
     print ("Guess it's hgu133plus2")
   }else if(num.genes == 22277){
-      require(hgu133a2.db) 
+    library(hgu133a2.db)
     GPL="GPL571"
     print ("Guess it's hgu133a2")
   }else{
@@ -96,34 +96,35 @@ detect_genecnt_platform <- function(data, method="mean"){
   # one is that each probe_ids may have multiple mapped gene_symbols
   # For now, we just select the first gene_symbols if there are multiples
   gene.symbols <- affy_probe_to_gene_symbol(PROBES, GPL) %>%
-                  filter(!duplicated(PROBEID)) %>%
+                  dplyr::filter(!duplicated(PROBEID)) %>%
                   dplyr::select(SYMBOL) %>%
                   unlist
 
   # Another place is that there may be multiple probes designed for each gene
   # Now we select the probes with the max(mean expression across samples)
   # Mayb fix it later by adding more different filter selections? Ray. 2015-10-30
-  data.gene <- data %>% as.data.table %>%
+  data.gene <- data %>% as.data.table() %>%
                         '['(, RowExp := select.fun(.SD)) %>%
-                        '['(, SYMBOL := gene.symbols) %>% group_by(., SYMBOL) %>%
-                        filter(., which.max(RowExp))
+                        '['(, SYMBOL := gene.symbols) %>%
+                        dplyr::group_by(., SYMBOL) %>%
+                        dplyr::filter(., which.max(RowExp))
 
   # Remove rows without gene_symbols (NAs), then convert back to data.frame
   final.data <- data.gene %>%
-                    filter(!is.na(SYMBOL)) %>%
-                    setDF %>%
-                    set_rownames(.$SYMBOL) %>%
-                    '['(, !(colnames(.) %in% c("RowExp", "SYMBOL")))
+                dplyr::filter(!is.na(SYMBOL)) %>%
+                setDF %>%
+                magrittr::set_rownames(.$SYMBOL) %>%
+                '['(, !(colnames(.) %in% c("RowExp", "SYMBOL")))
 
   return(final.data)
 }
 
 
-#' Extract ensembl_id using gene symbol 
+#' Extract ensembl_id using gene symbol
 #'
 #' Can be extened by providing the "columan name" that we want to match in snpinfo #
-#' @param genelist 
-#' @param ensembl 
+#' @param genelist input genelist
+#' @param ensembl where to extract emsembl information
 #' @keywords ensembl, annotate
 #' @export
 #' @examples
@@ -151,11 +152,11 @@ ext_gene_function <- function(genelist, ensembl, attributes=c('ensembl_gene_id',
 }
 
 
-#' Use biomaRT to convert human gene to mouse gene 
+#' Use biomaRT to convert human gene to mouse gene
 #'
 #' For the human gene symbols that we can not find corresponding mouse symbols,
 #' we will simply convert the first letter into Capital and return it
-#' @param genelist Gene list you want to convert 
+#' @param genelist Gene list you want to convert
 #' @keywords standardize
 #' @export
 #' @examples
@@ -175,12 +176,12 @@ gene_convert_human_to_mouse <- function(genelist){
   colnames(unmatched) <- colnames(res)
   res <- rbind(res, unmatched)
 
-  # resort the result to match original order 
+  # resort the result to match original order
   idx <- match(genelist, res[,1])
   return(res[idx, ])
 }
 
-#' use biomaRT to convert mouse gene to human gene 
+#' use biomaRT to convert mouse gene to human gene
 #'
 #' This function allows you to express your love of cats.
 #' @param love Do you love cats? Defaults to TRUE.
@@ -203,7 +204,7 @@ gene_convert_mouse_to_human <- function(genelist){
   colnames(unmatched) <- colnames(res)
   res <- rbind(res, unmatched)
 
-  # resort the result to match original order 
+  # resort the result to match original order
   idx <- match(genelist, res[,1])
   return(res[idx, ])
 }

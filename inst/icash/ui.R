@@ -38,7 +38,7 @@ sidebar <- dashboardSidebar(
                               selectInput("VisType",
                                           label = "What kind of plot?",
                                           choices = c("Heatmap", "PCA", "t-SNE"),
-                                          selected = "PCA")
+                                          selected = "t-SNE")
              ),
 #     menuItem("Differential analysis", tabName="DE", icon = icon('tasks', lib="glyphicon"),
 #              menuSubItem("Monocle", tabName="DEMonocle"),
@@ -334,12 +334,20 @@ body <- dashboardBody(
                                 choices = c("consensus", "samples"),
                                 selected = "consensus"),
                            checkboxInput('matchOrder', 'Match original sample order for result?', FALSE),
+                           checkboxInput('nmf_prob', 'Change point size based on prob?', FALSE),
                            DT::dataTableOutput('nmfGroups')
                     )
                   )
               ),
               box(title="t-SNE Plots", width=8, solidHeader=TRUE, status="info",
-                    plotlyOutput('nmftsneplot', height=680, width=680)
+                  column(width=2, numericInput("nmftsne_perplexity", label = "Perplexity", value=10)),
+                  column(width=2, br(),
+                         actionButton("run_tsnenmf", "Run NMF!", icon("play-circle"),
+                                      style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                  ),
+                  column(width=12,
+                         plotlyOutput('nmftsneplot', height=680, width=680)
+                  )
               )
             )
     ),
@@ -715,8 +723,13 @@ body <- dashboardBody(
                     )
                   )
               ),
-              box(width=12,
-                  DT::dataTableOutput('go_summary')
+              box(width=12, height = "430px",
+                  DT::dataTableOutput('go_summary'),
+                  tags$hr(),
+                  p(
+                    class = "text-muted",
+                    paste("Note: Make sure you select the correct species.")
+                  )
               ),
               conditionalPanel(
                 condition = "input.EnrichType == 'KEGG'",

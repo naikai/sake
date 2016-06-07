@@ -3,7 +3,7 @@
 #' Load predefined gene list files for heatmap (clustering) result
 #' @param folder Where the files are
 #' @param pattern file extensions for the ones you want to load
-#' @keywords lodad 
+#' @keywords lodad
 #' @export
 #' @examples
 #' load_genelist("data", ".txt")
@@ -19,12 +19,12 @@ load_genelist <- function(folder, pattern=".txt"){
 }
 
 
-#' load predefined gene set files for GSEA 
+#' load predefined gene set files for GSEA
 #'
 #' Load predefined gene list files for gene set enrichment analysis (GSEA)
 #' @param folder Where the files are
 #' @param pattern file extensions for the ones you want to load
-#' @keywords lodad 
+#' @keywords lodad
 #' @export
 #' @examples
 #' load_geneset("data", ".txt")
@@ -40,22 +40,29 @@ load_geneset <- function(folder, pattern=".gmt"){
 
 
 
-#' Run DEseq2 
+#' Run DEseq2
 #'
-#' This function allows you to run DESeq2 if provided required data 
+#' This function allows you to run DESeq2 if provided required data
 #' @keywords DESeq2
 #' @export
 #' @examples
 #' run.DESeq2()
 run.DESeq2 <- function(sub.data, sub.expinfo, design, workers=16)
 {
-   register(MulticoreParam(workers))
-      colData <- sub.expinfo
-      contrast.var <- as.character(design)[2] 
-      ddsfeatureCounts <- DESeqDataSetFromMatrix(countData=sub.data, colData=colData, design=design)
-### Set betaPrior=FALSE to go with MLE LFC to get simple LFC = (avg in group2/ avg in group1)
-      dds <- DESeq(ddsfeatureCounts, parallel=T, betaPrior=FALSE)
-      return(dds)
+  register(BiocParallel::MulticoreParam(workers))
+  colData <- sub.expinfo
+  contrast.var <- as.character(design)[2]
+  ddsfeatureCounts <- DESeqDataSetFromMatrix(countData=sub.data, colData=colData, design=design)
+  ### Set betaPrior=FALSE to go with MLE LFC to get simple LFC = (avg in group2/ avg in group1)
+  dds <- DESeq(ddsfeatureCounts, parallel=T, betaPrior=FALSE)
+  return(dds)
 }
 
+
+#' Wrapper function to run the icahs Shiny App
+#' @export
+run_icash <- function()
+{
+  shiny::runApp(system.file('icash', package='icash'))
+}
 

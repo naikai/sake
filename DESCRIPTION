@@ -22,6 +22,7 @@ Imports:
     DESeq2,
     dplyr,
     ggplot2,
+    GO.db,
     magrittr,
     pathview,
     plotly,
@@ -35,6 +36,7 @@ Imports:
 Suggests:
     annotate,
     caret,
+    dendextenda,
     devtools,
     gage,
     gageData,
@@ -54,6 +56,7 @@ Suggests:
     vcd
 Remotes:
     rstudio/DT,
+    rstudio/d3heatmap@colorlabels,
     bioc::3.3/AnnotationHub,
     bioc::3.3/biomaRt,
     bioc::3.3/DESeq2,

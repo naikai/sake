@@ -62,6 +62,7 @@ shinyServer(function(input, output, session) {
     )
     DT::datatable(rawdata(), rownames= TRUE,
                   options = list(scroll = TRUE,
+                                 scrollX = TRUE,
                                  pageLength = 8
                   )
     )
@@ -423,6 +424,7 @@ shinyServer(function(input, output, session) {
     colnames(nmf_groups)[which(colnames(nmf_groups)=="nmf_subtypes")] <- "Group"
     DT::datatable(nmf_groups, rownames=FALSE, escape=-1,
                   options = list(pageLength=10,
+                                 searching=FALSE,
                                  scrollX = TRUE,
                                  order=list(list(2,'desc'))
                   )
@@ -442,8 +444,8 @@ shinyServer(function(input, output, session) {
   nmf_tsne_res <- reactive({
     merged <- merged()
     title <- paste(input$type, input$math, paste0(input$orders, paste0(nrow(merged()), "genes")), sep=".")
-    run_tsne(merged, iter=input$iter, dims=2,
-             perplexity=input$perplexity, cores=4)
+    run_tsne(merged, iter=20, dims=2,
+             perplexity=input$nmftsne_perplexity, cores=4)
   })
 
   nmfplottsne <- function(){
@@ -460,15 +462,15 @@ shinyServer(function(input, output, session) {
       stop("Error: color scheme undefined")
     }
 
-    # default by user selection
-    point.size <- input$point_size
-    if(input$nmf_prob){
-      if(input$predict=="consensus"){
-        point.size <- point.size * (1-nmf_groups()$sil_width)
-      }else if(input$predict == "samples"){
-        point.size <- point.size * (1-nmf_groups()$prob)
-      }
-    }
+    # # default by user selection
+    # point.size <- input$point_size
+    # if(input$nmf_prob){
+    #   if(input$predict=="consensus"){
+    #     point.size <- point.size * (1-nmf_groups()$sil_width)
+    #   }else if(input$predict == "samples"){
+    #     point.size <- point.size * (1-nmf_groups()$prob)
+    #   }
+    # }
     naikai <- plot_tsne(nmf_tsne_res(), color=color, alpha=input$point_alpha,
                         add.label = input$label, save.plot=F, real.plot=F,
                         add.legend = input$legend,
@@ -483,13 +485,11 @@ shinyServer(function(input, output, session) {
     return(naikai)
   }
   # this only plot the heatmap when user click on the 'Plot it' button
-  nmfHitplotInput <- eventReactive(input$goButton, {
+  nmfHitplotInput <- eventReactive(input$runtSNENMF, {
     ggplotly(nmfplottsne())
   })
   output$nmftsneplot <- renderPlotly({
-    n <- 2
-    withProgress(message = 'Genrating tSNE plot', value = 0, {
-      incProgress(1/n, detail = "Usually takes 15~20 seconds")
+    withProgress(message = 'Genrating tSNE plot', value = NULL, {
       nmfHitplotInput()
     })
   })
@@ -892,18 +892,31 @@ shinyServer(function(input, output, session) {
     # cpus[min(which(sapply(cpus, function(x) input$nPerm%%x)==0))]
     return(8)
   })
-  tsne_2d <- eventReactive(input$runtSNE, {
-    merged <- heatmap_data()[['heatmap_data']]
-    run_tsne(merged, iter=input$tsne_iter, dims=2,
-             perplexity=input$tsne_perplexity, cores=cores())
+  tsne_2d <- reactive({
+    NULL
   })
+  observe({
+    if(input$runtSNE || input$run_tsnenmf){
+        merged <- heatmap_data()[['heatmap_data']]
+        tsne_2d <- run_tsne(merged, iter=input$tsne_iter, dims=2,
+                            perplexity=input$tsne_perplexity, cores=cores())
+    }
+  })
+  # tsne_2d <- eventReactive(input$runtSNE, {
+  #   merged <- heatmap_data()[['heatmap_data']]
+  #   run_tsne(merged, iter=input$tsne_iter, dims=2,
+  #            perplexity=input$tsne_perplexity, cores=cores())
+  # })
   tsne_3d <- eventReactive(input$runtSNE, {
     merged <- heatmap_data()[['heatmap_data']]
     run_tsne(merged, iter=input$tsne_iter, dims=3,
              perplexity=input$tsne_perplexity, cores=cores())
   })
-  output$tsneplot_2d <- renderPlotly({
+  plot_tsne_2d <- reactive({
     tsne_out <- tsne_2d()
+    validate(
+      need(!is.null(input$predefined_list), "Please select at least one predefined gene sets")
+    )
     n <- 2
     withProgress(message = 'Genrating tSNE plot', value = 0, {
       incProgress(1/n, detail = "Usually takes 15~20 seconds")
@@ -928,6 +941,9 @@ shinyServer(function(input, output, session) {
                    xaxis = list(title = "Component 1", zeroline=FALSE),
                    yaxis = list(title = "Component 2", zeroline=FALSE))
     })
+  })
+  output$tsneplot_2d <- renderPlotly({
+    plot_tsne_2d()
   })
   output$tsneplot_3d <- renderPlotly({
     if(is.null(tsne_3d())) return ()
@@ -1037,19 +1053,31 @@ shinyServer(function(input, output, session) {
   })
   kegg.gs <- reactive({
     species <- input$species
-    if(species == "Human" | species == "human" | species == "hg19" | species == "hsa"){
-      kg.human<- kegg.gsets("human")
-      kegg.gs<- kg.human$kg.sets[kg.human$sigmet.idx]
-    }else if(species == "Mouse" | species == "mouse" | species == "mm9" | species == "mmu"){
-      kg.mouse<- kegg.gsets("mouse")
-      kegg.gs<- kg.mouse$kg.sets[kg.mouse$sigmet.idx]
-    }
+    withProgress(message = 'Extracting KEGG pathway information', value = NULL, {
+      if(species == "Human" | species == "human" | species == "hg19" | species == "hsa"){
+        kg.human<- kegg.gsets("human")
+        kegg.gs<- kg.human$kg.sets[kg.human$sigmet.idx]
+      }else if(species == "Mouse" | species == "mouse" | species == "mm9" | species == "mmu"){
+        kg.mouse<- kegg.gsets("mouse")
+        kegg.gs<- kg.mouse$kg.sets[kg.mouse$sigmet.idx]
+      }
+    })
     return(kegg.gs)
   })
   go.gs <- reactive({
-    data(go.sets.hs)
-    data(go.subs.hs)
-    go.gs <- go.sets.hs[go.subs.hs[[input$goTerm]]]
+    # data(go.sets.hs)
+    # data(go.subs.hs)
+    # go.gs <- go.sets.hs[go.subs.hs[[input$goTerm]]]
+    species <- input$species
+    withProgress(message = 'Extracting GO term information', value = NULL, {
+      if(species == "Human" | species == "human" | species == "hg19" | species == "hsa"){
+        go.gs <- go.gsets(species="human", pkg.name=NULL, id.type = "eg")
+      }else if(species == "Mouse" | species == "mouse" | species == "mm9" | species == "mmu"){
+        go.gs <- go.gsets(species="mouse", pkg.name=NULL, id.type = "eg")
+      }
+    })
+    go.res <- go.gs$go.sets[ go.gs$go.subs[[input$goTerm]] ]
+    return(go.res)
   })
   gage.exp.fc <- reactive({
     rankdata <- nmf_group_feature_rank()
@@ -1066,8 +1094,6 @@ shinyServer(function(input, output, session) {
     exp.fc=deseq2.fc
     return(exp.fc)
   })
-
-
   go.Res <- reactive({
     gage.exp.fc <- gage.exp.fc()
     gsets <- NULL
@@ -1079,14 +1105,8 @@ shinyServer(function(input, output, session) {
     validate(
       need(length(gsets)>0, "Did not find any Gene Sets, maybe your gene count data is not from 'Human'?")
     )
-    withProgress(message = 'Running enrichment analysis', value = 0, {
-      incProgress(1/2, detail = "Takes around 10~20 seconds")
-      if(input$samedir){
-        goRes <- gage(gage.exp.fc, gsets = gsets, ref = NULL, samp = NULL, same.dir=TRUE)
-      }else{
-        goRes <- gage(gage.exp.fc, gsets = gsets, ref = NULL, samp = NULL, same.dir=FALSE)
-      }
-      # goRes <- gage(gage.exp.fc(), gsets = gsets, ref = NULL, samp = NULL, same.dir = input$samedir)
+    withProgress(message = 'Running enrichment analysis', value = NULL, {
+      goRes <- gage(gage.exp.fc, gsets = gsets, ref = NULL, samp = NULL, same.dir=ifelse(input$samedir, TRUE, FALSE))
     })
     return(goRes)
   })
@@ -1116,10 +1136,10 @@ shinyServer(function(input, output, session) {
     print('here')
     print(s.idx)
     validate(
-      need(length(s.idx)>0, "Please select the pathway you want to plot.")
+      need(length(s.idx)>0, "Please select one GO-term/KEGG pathway from above.")
     )
-    # path.pid <- substr(rownames(go_table)[s.idx], 1, 8)
-    path.pid <- substr(s.idx, 1, 8)
+    path.pid <- substr(rownames(go_table)[s.idx], 1, 8)
+    # path.pid <- substr(s.idx, 1, 8)
     out.suffix <- "nmf"
     pathview(gene.data=gage.exp.fc(), pathway.id=path.pid, species=pathview.species(), out.suffix=out.suffix)
 

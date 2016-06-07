@@ -67,11 +67,13 @@ compare_groups <- function(group1, group2, file.prefix="Compare.group", title=""
 #' @examples
 #' deseq_norm(countdata)
 deseq_norm <- function(countdata){
-    condition <- factor(rep("Sample", ncol(countdata)))
-    countdata <- newCountDataSet(countdata,condition )
-    countdata <- estimateSizeFactors( countdata )
-    normalized.countdata <- counts(countdata, normalized=TRUE)
-    return(exprs(normalized.countdata))
+    coldata <- data.frame(condition=factor(rep("Tumour", ncol(countdata))))
+    dds <- DESeq2::DESeqDataSetFromMatrix(countData = round(countdata),
+                                          colData = coldata,
+                                          design = ~ 1)
+    dds <- estimateSizeFactors(dds)
+    normalized.countdata <- counts(dds, normalized=TRUE)
+    return(normalized.countdata)
 }
 
 

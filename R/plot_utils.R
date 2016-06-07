@@ -1,4 +1,4 @@
-#' Adjust label cex based on its number 
+#' Adjust label cex based on its number
 #'
 #' This function allows you to express your love of cats.
 #' @param love Do you love cats? Defaults to TRUE.
@@ -30,7 +30,7 @@ assign_label_cex <- function(n.samples){
 #' Load predefined gene list files for heatmap (clustering) result
 #' @param folder Where the files are
 #' @param pattern file extensions for the ones you want to load
-#' @keywords lodad 
+#' @keywords lodad
 #' @export
 #' @examples
 #' cor_mtest("data", ".txt")
@@ -94,7 +94,7 @@ create.brewer.color <- function(data, num=8, name="Set1")
 
 
 
-#' Manually specify coloring for provided groups 
+#' Manually specify coloring for provided groups
 #'
 #' Assign colors to data, if more unique data than provided colors, will impute the missing ones and fill them in
 #' @param data data
@@ -164,8 +164,8 @@ myboxplot <- function(data, prefix="Boxplot", method="vioplot", title="",
 
 #' Convert name to color
 #'
-#' This function convert the sample_name in the data into different colors 
-#' @param name usually sample name, separate with "_" 
+#' This function convert the sample_name in the data into different colors
+#' @param name usually sample name, separate with "_"
 #' @keywords color
 #' @export
 #' @examples
@@ -174,8 +174,6 @@ name_to_color <- function(name, split_pattern="\\_", num_color=1,
 						  ColScheme=c("naikai", "naikai2", "Set1", "Set2", "Set3", "Dark2", "Pastel1", "Pastel2", "Paired", "Accent")
 						 )
 {
-	require(magrittr)
-
 	col.color <- list()
 	ColSideColors <- NULL
 	col.color.name <- list()
@@ -185,7 +183,8 @@ name_to_color <- function(name, split_pattern="\\_", num_color=1,
 	max_num_breaks <- max(sapply(column.names, length))
 
 	if(num_color != length(ColScheme)){
-		stop(paste0("Error: num_color:", num_color, "is different than num of ColScheme:", length(ColScheme), "\n"))
+		warning(paste0("Error: num_color:", num_color, "is different than num of ColScheme:", length(ColScheme), "\n"))
+	  ColScheme <- ColScheme[1:num_color]
 	}
 	if(max_num_breaks > num_color){
 		warning("There are more possible breaks in the name than the num_color specified. We will use only the num_color")
