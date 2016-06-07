@@ -62,9 +62,9 @@ Remotes:
     bioc::3.3/biomaRt,
     bioc::3.3/DESeq2,
     bioc::3.3/gage,
-    bioc::release/gageData,
     bioc::3.3/pathview
 License: GPL (>=2)
 LazyData: TRUE
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr
+
