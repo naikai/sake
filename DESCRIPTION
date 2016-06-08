@@ -60,12 +60,6 @@ Remotes:
     hadley/devtools,
     rstudio/DT,
     rstudio/d3heatmap@colorlabels,
-    bioc::3.3/AnnotationHub,
-    bioc::3.3/biomaRt,
-    bioc::3.3/DESeq2,
-    bioc::3.3/gage,
-    bioc::3.3/GO.db,
-    bioc::3.3/pathview
 License: GPL (>=2)
 LazyData: TRUE
 RoxygenNote: 5.0.1
