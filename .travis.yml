@@ -17,3 +17,6 @@ bioc_packages:
   - gageData
   - pathview
 # cache: packages
+
+before_install:
+  - tlmgr install index

@@ -237,6 +237,7 @@ body <- dashboardBody(
                   fluidRow(
                     column(width=2, selectizeInput("cor_sample1", label = "Sample on X-axis", choices=NULL, multiple=FALSE)),
                     column(width=2, selectizeInput("cor_sample2", label = "Sample on Y-axis", choices=NULL, multiple=FALSE)),
+                    column(width=2, checkboxInput("scatter_log", label = "Log transformation", TRUE)),
                     column(width=2, checkboxInput("show_r2", label = "Show R2", FALSE)),
                     column(width=2, checkboxInput("show_fc", label = "Show Fold-Change line", TRUE))
                   )
@@ -342,11 +343,11 @@ body <- dashboardBody(
               box(title="t-SNE Plots", width=8, solidHeader=TRUE, status="info",
                   column(width=2, numericInput("nmftsne_perplexity", label = "Perplexity", value=10)),
                   column(width=2, br(),
-                         actionButton("run_tsnenmf", "Run NMF!", icon("play-circle"),
+                         actionButton("run_nmftSNE", "Run t-SNE!", icon("play-circle"),
                                       style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
                   ),
                   column(width=12,
-                         plotlyOutput('nmftsneplot', height=680, width=680)
+                         plotlyOutput('nmftsneplot', height=600, width=600)
                   )
               )
             )
@@ -726,6 +727,7 @@ body <- dashboardBody(
               box(width=12, height = "430px",
                   DT::dataTableOutput('go_summary'),
                   tags$hr(),
+                  # tags$blockquote("Make sure you select the correct species"),
                   p(
                     class = "text-muted",
                     paste("Note: Make sure you select the correct species.")

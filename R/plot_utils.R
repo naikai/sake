@@ -260,3 +260,21 @@ plot_gene_expression <- function (data, gene, groups, type="boxplot", data.retur
 reorderfun <- function(d, w) reorder(d, w)
 
 
+#' Screen shot of plotly object
+#'
+#' @param x a plotly object
+#' @param file output filename
+#' @export
+screenshot_plotly = function(x, file = 'webshot.png', ...) {
+  file2 = normalizePath(file, mustWork = FALSE)
+  d = tempfile()
+  dir.create(d)
+  owd = setwd(d)
+  on.exit({
+    setwd(owd)
+    unlink(d, recursive = TRUE)
+  }, add = TRUE)
+  htmlwidgets::saveWidget(plotly::as.widget(x), 'index.html', FALSE)
+  file.copy(webshot::webshot('index.html', ...), file2)
+  file
+}

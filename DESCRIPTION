@@ -44,6 +44,7 @@ Suggests:
     hgu133a2.db,
     hgu133b.db,
     hgu133plus2.db,
+    htmlwidgets,
     HiClimR,
     grid,
     knitr,
@@ -52,8 +53,9 @@ Suggests:
     RColorBrewer,
     rmarkdown,
     testthat,
+    vcd,
     WGCNA,
-    vcd
+    webshot
 Remotes:
     hadley/devtools,
     rstudio/DT,
@@ -68,4 +70,3 @@ License: GPL (>=2)
 LazyData: TRUE
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr
-

@@ -222,51 +222,6 @@ shinyServer(function(input, output, session) {
   }, height=700)
 
   #' Scatter plot
-  scatterData <- reactive({
-    transform_data <- transform_data()
-    validate(
-      need(input$cor_sample1 != "", "Please select one sample for X axis"),
-      need(input$cor_sample2 != "", "Please select one sample for Y axis")
-    )
-    x <- transform_data[, input$cor_sample1]
-    y <- transform_data[, input$cor_sample2]
-    res <- data.frame(x=x, y=y)
-    return(res)
-  })
-
-  output$scatterPlot <- renderPlotly({
-    transform_data <- transform_data()
-    x <- scatterData()$x
-    y <- scatterData()$y
-    reg = lm(y ~ x)
-    modsum = summary(reg)
-    r <- signif(cor(x,y), 3)
-    R2 = signif(summary(reg)$r.squared, 3)
-    textlab <- paste(paste0("x = ", signif(x,3)), paste0("y = ", signif(y,3)), rownames(transform_data), sep="<br>")
-
-    n <- 2
-    withProgress(message = 'Generating Scatter Plot', value = 0, {
-      p <- plot_ly(x=x, y=y, text=textlab, type = "scattergl", mode="markers", hoverinfo="text",
-                   themes="Catherine",
-                   marker = list(size=8, opacity=0.7)) %>%
-            layout(title = paste("cor:", r),
-                   xaxis = list(title = input$cor_sample1, zeroline=TRUE),
-                   yaxis = list(title = input$cor_sample2, zeroline=TRUE),
-                   showlegend=FALSE)
-      p <- add_trace(p, x=plot_range, y=plot_range, type = "scattergl", mode = "lines", name = "Ref", line = list(width=2))
-    })
-
-    if(input$show_r2){
-      p <- p %>% layout( annotations = list(x = x, y = y, text=paste0("R2=", R2), showarrow=FALSE) )
-    }
-
-    plot_range <- min(x,y):max(x,y)
-    if(input$show_fc){
-      p <- add_trace(p, x=plot_range, y=plot_range[plot_range<=(max(plot_range)-1)]+1, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
-      p <- add_trace(p, x=plot_range[plot_range>=1], y=plot_range[plot_range>=1]-1, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
-    }
-    p
-  })
   observe({
     transform_data <- transform_data()
     if(!is.null(transform_data)){
@@ -282,6 +237,63 @@ shinyServer(function(input, output, session) {
       }
     }
   })
+  scatterData <- reactive({
+    transform_data <- transform_data()
+    validate(
+      need(input$cor_sample1 != "", "Please select one sample for X axis"),
+      need(input$cor_sample2 != "", "Please select one sample for Y axis")
+    )
+    x <- transform_data[, input$cor_sample1]
+    y <- transform_data[, input$cor_sample2]
+    if(input$scatter_log){
+      if(input$transformdata == "takelog"){
+        message("Already did log transformation")
+      }else{
+        x <- log2(x+1)
+        y <- log2(y+1)
+      }
+    }
+    res <- data.frame(x=x, y=y)
+    return(res)
+  })
+  output$scatterPlot <- renderPlotly({
+    transform_data <- transform_data()
+    x <- scatterData()$x
+    y <- scatterData()$y
+    reg = lm(y ~ x)
+    modsum = summary(reg)
+    r <- signif(cor(x,y), 3)
+    R2 = signif(summary(reg)$r.squared, 3)
+    textlab <- paste(paste0("x = ", signif(x,3)), paste0("y = ", signif(y,3)), rownames(transform_data), sep="<br>")
+    n <- 2
+    withProgress(message = 'Generating Scatter Plot', value = 0, {
+      p <- plot_ly(x=x, y=y, text=textlab, type="scattergl", source = "scatter",
+                   mode="markers", hoverinfo="text",
+                   themes="Catherine",
+                   marker = list(size=8, opacity=0.65)) %>%
+            layout(title = paste("cor:", r),
+                   xaxis = list(title = input$cor_sample1, zeroline=TRUE),
+                   yaxis = list(title = input$cor_sample2, zeroline=TRUE),
+                   showlegend=FALSE)
+      p <- add_trace(p, x=plot_range, y=plot_range, type = "scattergl", mode = "lines", name = "Ref", line = list(width=2))
+    })
+    if(input$show_r2){
+      p <- p %>% layout( annotations = list(x = x, y = y, text=paste0("R2=", R2), showarrow=FALSE) )
+    }
+
+    plot_range <- min(x,y):max(x,y)
+    if(input$show_fc){
+      p <- add_trace(p, x=plot_range, y=plot_range[plot_range<=(max(plot_range)-1)]+1, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
+      p <- add_trace(p, x=plot_range[plot_range>=1], y=plot_range[plot_range>=1]-1, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
+    }
+    p %>% layout(dragmode = "select")
+  })
+  # output$dlScatterPlots <- downloadHandler(
+  #   filename = function() { paste("test", '.png', sep='') },
+  #   content = function(file) {
+  #     plotly_IMAGE(patientCircleInput(), format = "png", out_file = file)
+  #   }
+  # )
   output$scatterdatatbl = DT::renderDataTable({
     x <- scatterData()$x
     y <- scatterData()$y
@@ -299,6 +311,16 @@ shinyServer(function(input, output, session) {
                                logFC = logFC,
                                meanFC = mean(x+y)*logFC) %>%
                     dplyr::arrange(desc(abs(logFC)))
+    # Get subset based on selection from scatter plot
+    event.data <- event_data("plotly_hover", source = "scatter")
+    # If NULL dont do anything
+    if(is.null(event.data) == FALSE){
+      print('hi')
+      print(event.data)
+      sel_scatter_data <- scatter_data[subset(event.data, curveNumber == 0)$pointNumber + 1, ]
+      print(sel_scatter_data)
+    }
+
     DT::datatable(scatter_data, rownames= FALSE,
                   options = list(scrollX = TRUE,
                                  pageLength = 8),
@@ -422,7 +444,20 @@ shinyServer(function(input, output, session) {
   output$nmfGroups <- DT::renderDataTable({
     nmf_groups <- nmf_groups()
     colnames(nmf_groups)[which(colnames(nmf_groups)=="nmf_subtypes")] <- "Group"
+
+    # Get subset based on selection from scatter plot
+    event.data <- event_data("plotly_selected", source = "nmfGroups")
+    # If NULL dont do anything
+    if(is.null(event.data) == TRUE){
+      sel_idx <- NULL
+    }else{
+      print(event.data)
+      sel_idx <- subset(event.data, curveNumber == 0)$pointNumber + 1
+      # sel_data <- nmf_groups[subset(event.data, curveNumber == 0)$pointNumber + 1, ]
+      # print(sel_data)
+    }
     DT::datatable(nmf_groups, rownames=FALSE, escape=-1,
+                  selection = list(selected = sel_idx),
                   options = list(pageLength=10,
                                  searching=FALSE,
                                  scrollX = TRUE,
@@ -430,7 +465,6 @@ shinyServer(function(input, output, session) {
                   )
     )
   }, server=TRUE)
-
   # print the selected indices
   output$x4 = renderPrint({
     s = input$nmfGroups_rows_selected
@@ -439,19 +473,19 @@ shinyServer(function(input, output, session) {
       cat(s, sep = ', ')
     }
   })
-
-  ### Add t-SNE plot next to NMF group ###
-  nmf_tsne_res <- reactive({
-    merged <- merged()
-    title <- paste(input$type, input$math, paste0(input$orders, paste0(nrow(merged()), "genes")), sep=".")
-    run_tsne(merged, iter=20, dims=2,
-             perplexity=input$nmftsne_perplexity, cores=4)
+  # Add t-SNE plot next to NMF group
+  observeEvent(input$run_nmftSNE, {
+    merged <- heatmap_data()[['heatmap_data']]
+    tsne_2d$data <- run_tsne(merged, iter=input$tsne_iter, dims=2,
+                             perplexity=input$tsne_perplexity, cores=cores())
   })
-
-  nmfplottsne <- function(){
+  nmfplottsne <- reactive({
     color <- NULL
     validate(
-      need(input$mode=="real", "This part won't work before NMF run \nPlease Try 'NMF_Plot' tab")
+      need(input$mode=="real", "This part won't work for 'estim' module\nPlease Try NMF 'Real' run")
+    )
+    validate(
+      need(!is.null(tsne_2d$data), "Please hit 'Run t-SNE' button")
     )
     # Will add an option to select by default column names from samples
     if(length(nmf_groups()$nmf_subtypes)>0){
@@ -463,34 +497,34 @@ shinyServer(function(input, output, session) {
     }
 
     # # default by user selection
-    # point.size <- input$point_size
-    # if(input$nmf_prob){
-    #   if(input$predict=="consensus"){
-    #     point.size <- point.size * (1-nmf_groups()$sil_width)
-    #   }else if(input$predict == "samples"){
-    #     point.size <- point.size * (1-nmf_groups()$prob)
-    #   }
-    # }
-    naikai <- plot_tsne(nmf_tsne_res(), color=color, alpha=input$point_alpha,
-                        add.label = input$label, save.plot=F, real.plot=F,
-                        add.legend = input$legend,
-                        point.size=point.size, label.size=input$label_size)
+    point_size <- input$plot_point_size - 6
+    if(input$nmf_prob){
+      if(input$predict=="consensus"){
+        point_size <- point_size * (1-nmf_groups()$sil_width)
+      }else if(input$predict == "samples"){
+        point_size <- point_size * (1-nmf_groups()$prob)
+      }
+    }
+    nmf_tsne_res <- tsne_2d$data
+    naikai <- plot_tsne(nmf_tsne_res, color=color, alpha=input$plot_point_alpha,
+                        add.label = input$plot_label, save.plot=F, real.plot=F,
+                        add.legend = input$plot_legend,
+                        point.size=point_size, label.size=input$plot_label_size)
     ### Check if user select rows (samples)
     s = input$nmfGroups_rows_selected
     if (length(s)){
       sub_color <- create.brewer.color(nmf_groups()$nmf_subtypes, length(unique(color)), "naikai")
-      sub_tsne_res <- parse_tsne_res(tsne_res()) %>% as.data.frame %>% dplyr::slice(s)
-      naikai <- naikai + geom_point(data=sub_tsne_res, aes(x=x, y=y), size=input$point_size+2, colour=sub_color[s], alpha=input$point_alpha)
+      sub_tsne_res <- parse_tsne_res(nmf_tsne_res) %>% as.data.frame %>% dplyr::slice(s)
+      naikai <- naikai + geom_point(data=sub_tsne_res, aes(x=x, y=y), size=point_size+2, colour=sub_color[s], alpha=input$plot_point_alpha)
     }
-    return(naikai)
-  }
-  # this only plot the heatmap when user click on the 'Plot it' button
-  nmfHitplotInput <- eventReactive(input$runtSNENMF, {
-    ggplotly(nmfplottsne())
+    p <- ggplotly(naikai, source="nmfGroups") %>% layout(dragmode = "select")
+    return(p)
   })
   output$nmftsneplot <- renderPlotly({
     withProgress(message = 'Genrating tSNE plot', value = NULL, {
-      nmfHitplotInput()
+      nmfplottsne()
+      # ggplotly(nmfplottsne())
+      # plot_tsne_2d()
     })
   })
 
@@ -892,31 +926,23 @@ shinyServer(function(input, output, session) {
     # cpus[min(which(sapply(cpus, function(x) input$nPerm%%x)==0))]
     return(8)
   })
-  tsne_2d <- reactive({
-    NULL
+  tsne_2d <- reactiveValues(data=NULL)
+  observeEvent(input$runtSNE, {
+    merged <- heatmap_data()[['heatmap_data']]
+    tsne_2d$data <- run_tsne(merged, iter=input$tsne_iter, dims=2,
+                             perplexity=input$tsne_perplexity, cores=cores())
   })
-  observe({
-    if(input$runtSNE || input$run_tsnenmf){
-        merged <- heatmap_data()[['heatmap_data']]
-        tsne_2d <- run_tsne(merged, iter=input$tsne_iter, dims=2,
-                            perplexity=input$tsne_perplexity, cores=cores())
-    }
-  })
-  # tsne_2d <- eventReactive(input$runtSNE, {
-  #   merged <- heatmap_data()[['heatmap_data']]
-  #   run_tsne(merged, iter=input$tsne_iter, dims=2,
-  #            perplexity=input$tsne_perplexity, cores=cores())
-  # })
   tsne_3d <- eventReactive(input$runtSNE, {
     merged <- heatmap_data()[['heatmap_data']]
     run_tsne(merged, iter=input$tsne_iter, dims=3,
              perplexity=input$tsne_perplexity, cores=cores())
   })
   plot_tsne_2d <- reactive({
-    tsne_out <- tsne_2d()
     validate(
-      need(!is.null(input$predefined_list), "Please select at least one predefined gene sets")
+      need(!is.null(tsne_2d$data), "Please click 'Run t-SNE' button")
     )
+    tsne_out <- tsne_2d$data
+    # if (is.null(tsne_2d$data)) return()
     n <- 2
     withProgress(message = 'Genrating tSNE plot', value = 0, {
       incProgress(1/n, detail = "Usually takes 15~20 seconds")
