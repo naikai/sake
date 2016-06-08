@@ -274,6 +274,7 @@ shinyServer(function(input, output, session) {
             layout(title = paste("cor:", r),
                    xaxis = list(title = input$cor_sample1, zeroline=TRUE),
                    yaxis = list(title = input$cor_sample2, zeroline=TRUE),
+                   dragmode = "select",
                    showlegend=FALSE)
       p <- add_trace(p, x=plot_range, y=plot_range, type = "scattergl", mode = "lines", name = "Ref", line = list(width=2))
     })
@@ -286,7 +287,7 @@ shinyServer(function(input, output, session) {
       p <- add_trace(p, x=plot_range, y=plot_range[plot_range<=(max(plot_range)-1)]+1, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
       p <- add_trace(p, x=plot_range[plot_range>=1], y=plot_range[plot_range>=1]-1, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
     }
-    p %>% layout(dragmode = "select")
+    p
   })
   # output$dlScatterPlots <- downloadHandler(
   #   filename = function() { paste("test", '.png', sep='') },
@@ -312,15 +313,13 @@ shinyServer(function(input, output, session) {
                                meanFC = mean(x+y)*logFC) %>%
                     dplyr::arrange(desc(abs(logFC)))
     # Get subset based on selection from scatter plot
-    event.data <- event_data("plotly_hover", source = "scatter")
-    # If NULL dont do anything
-    if(is.null(event.data) == FALSE){
-      print('hi')
-      print(event.data)
-      sel_scatter_data <- scatter_data[subset(event.data, curveNumber == 0)$pointNumber + 1, ]
-      print(sel_scatter_data)
-    }
-
+    # event.data <- event_data("plotly_hover", source = "scatter")
+    # # If NULL dont do anything
+    # if(is.null(event.data) == FALSE){
+    #   print(event.data)
+    #   sel_scatter_data <- scatter_data[subset(event.data, curveNumber == 0)$pointNumber + 1, ]
+    #   print(sel_scatter_data)
+    # }
     DT::datatable(scatter_data, rownames= FALSE,
                   options = list(scrollX = TRUE,
                                  pageLength = 8),
@@ -453,8 +452,6 @@ shinyServer(function(input, output, session) {
     }else{
       print(event.data)
       sel_idx <- subset(event.data, curveNumber == 0)$pointNumber + 1
-      # sel_data <- nmf_groups[subset(event.data, curveNumber == 0)$pointNumber + 1, ]
-      # print(sel_data)
     }
     DT::datatable(nmf_groups, rownames=FALSE, escape=-1,
                   selection = list(selected = sel_idx),
@@ -465,19 +462,18 @@ shinyServer(function(input, output, session) {
                   )
     )
   }, server=TRUE)
-  # print the selected indices
-  output$x4 = renderPrint({
-    s = input$nmfGroups_rows_selected
-    if (length(s)) {
-      cat('These rows were selected:\n\n')
-      cat(s, sep = ', ')
-    }
-  })
+
   # Add t-SNE plot next to NMF group
   observeEvent(input$run_nmftSNE, {
     merged <- heatmap_data()[['heatmap_data']]
-    tsne_2d$data <- run_tsne(merged, iter=input$tsne_iter, dims=2,
-                             perplexity=input$tsne_perplexity, cores=cores())
+    withProgress(message = 'Running t-SNE', value = NULL, {
+      incProgress(1/3, detail = "For t-SNE 2D")
+      tsne_2d$data <- run_tsne(merged, iter=input$tsne_iter, dims=2,
+                               perplexity=input$tsne_perplexity, cores=cores())
+      incProgress(2/3, detail = "For t-SNE 3D")
+      tsne_3d$data <- run_tsne(merged, iter=input$tsne_iter, dims=3,
+                               perplexity=input$tsne_perplexity, cores=cores())
+    })
   })
   nmfplottsne <- reactive({
     color <- NULL
@@ -495,7 +491,6 @@ shinyServer(function(input, output, session) {
     }else{
       stop("Error: color scheme undefined")
     }
-
     # # default by user selection
     point_size <- input$plot_point_size - 6
     if(input$nmf_prob){
@@ -521,10 +516,8 @@ shinyServer(function(input, output, session) {
     return(p)
   })
   output$nmftsneplot <- renderPlotly({
-    withProgress(message = 'Genrating tSNE plot', value = NULL, {
+    withProgress(message = 'Genrating t-SNE plot', value = NULL, {
       nmfplottsne()
-      # ggplotly(nmfplottsne())
-      # plot_tsne_2d()
     })
   })
 
@@ -927,15 +920,17 @@ shinyServer(function(input, output, session) {
     return(8)
   })
   tsne_2d <- reactiveValues(data=NULL)
+  tsne_3d <- reactiveValues(data=NULL)
   observeEvent(input$runtSNE, {
     merged <- heatmap_data()[['heatmap_data']]
-    tsne_2d$data <- run_tsne(merged, iter=input$tsne_iter, dims=2,
-                             perplexity=input$tsne_perplexity, cores=cores())
-  })
-  tsne_3d <- eventReactive(input$runtSNE, {
-    merged <- heatmap_data()[['heatmap_data']]
-    run_tsne(merged, iter=input$tsne_iter, dims=3,
-             perplexity=input$tsne_perplexity, cores=cores())
+    withProgress(message = 'Running t-SNE', value = NULL, {
+      incProgress(1/3, detail = "For t-SNE 2D")
+      tsne_2d$data <- run_tsne(merged, iter=input$tsne_iter, dims=2,
+                               perplexity=input$tsne_perplexity, cores=cores())
+      incProgress(2/3, detail = "For t-SNE 3D")
+      tsne_3d$data <- run_tsne(merged, iter=input$tsne_iter, dims=3,
+                               perplexity=input$tsne_perplexity, cores=cores())
+    })
   })
   plot_tsne_2d <- reactive({
     validate(
@@ -943,9 +938,8 @@ shinyServer(function(input, output, session) {
     )
     tsne_out <- tsne_2d$data
     # if (is.null(tsne_2d$data)) return()
-    n <- 2
-    withProgress(message = 'Genrating tSNE plot', value = 0, {
-      incProgress(1/n, detail = "Usually takes 15~20 seconds")
+    withProgress(message = 'Genrating t-SNE plot', value = 0, {
+      incProgress(2/3, detail = "Usually takes 15~20 seconds")
       color <- "steelblue"
 
       projection <- parse_tsne_res(tsne_out)
@@ -972,8 +966,8 @@ shinyServer(function(input, output, session) {
     plot_tsne_2d()
   })
   output$tsneplot_3d <- renderPlotly({
-    if(is.null(tsne_3d())) return ()
-    projection <- as.data.frame(tsne_3d()$Y)
+    if(is.null(tsne_3d$data)) return ()
+    projection <- as.data.frame(tsne_3d$data$Y)
     labels <- rownames(projection)
     N <- nrow(projection)
     plot_ly(x=projection[,1], y=projection[,2], z=projection[,3], type="scatter3d", mode="markers",
