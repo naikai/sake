@@ -2,13 +2,12 @@
 
 language: r
 r: bioc-devel
-sudo: required
+sudo: false
+cache: packages
 warnings_are_errors: true
 github_packages:
   - assertthat
   - devtools
-r_binary_packages:
-  - XML
 bioc_packages:
   - AnnotationHub
   - biomaRt
@@ -16,7 +15,5 @@ bioc_packages:
   - gage
   - gageData
   - pathview
-# cache: packages
-
 before_install:
   - tlmgr install index
