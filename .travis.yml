@@ -5,10 +5,6 @@ r: bioc-devel
 sudo: required
 cache: packages
 warnings_are_errors: true
-install:
-  - Rscript -e 'install.packages("devtools", repos = "http://cran.rstudio.com")'
-  - Rscript -e 'install.packages(c("plyr", "geepack", "snowfall"), repos = "http://cran.rstudio.com")'
-  - Rscript -e 'install.packages("INLA", repos = c("http://www.math.ntnu.no/inla/R/stable", "http://cran.rstudio.com"))'
 r_github_packages:
   - jimhester/covr
 bioc_packages:
