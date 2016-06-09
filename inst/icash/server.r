@@ -58,11 +58,17 @@ shinyServer(function(input, output, session) {
   output$rawdatatbl = DT::renderDataTable({
     rawdata <- rawdata()
     validate(
-      need(ncol(rawdata)>1, "Please modify the parameters on the left and try again!")
+      need(ncol(rawdata)>1,
+           "Please modify the parameters on the left and try again!") %then%
+      # need(!any(duplicated(rawdata)),
+      #      "There are duplicated rows in your data, Please check and try again!") %then%
+      need(!any(duplicated(t(rawdata))),
+           "There are duplicated columns in your data, Please check and try again!")
     )
     DT::datatable(rawdata(), rownames= TRUE,
                   options = list(scroll = TRUE,
                                  scrollX = TRUE,
+                                 scrollY = TRUE,
                                  pageLength = 8
                   )
     )
@@ -274,7 +280,6 @@ shinyServer(function(input, output, session) {
             layout(title = paste("cor:", r),
                    xaxis = list(title = input$cor_sample1, zeroline=TRUE),
                    yaxis = list(title = input$cor_sample2, zeroline=TRUE),
-                   dragmode = "select",
                    showlegend=FALSE)
       p <- add_trace(p, x=plot_range, y=plot_range, type = "scattergl", mode = "lines", name = "Ref", line = list(width=2))
     })
@@ -312,14 +317,6 @@ shinyServer(function(input, output, session) {
                                logFC = logFC,
                                meanFC = mean(x+y)*logFC) %>%
                     dplyr::arrange(desc(abs(logFC)))
-    # Get subset based on selection from scatter plot
-    # event.data <- event_data("plotly_hover", source = "scatter")
-    # # If NULL dont do anything
-    # if(is.null(event.data) == FALSE){
-    #   print(event.data)
-    #   sel_scatter_data <- scatter_data[subset(event.data, curveNumber == 0)$pointNumber + 1, ]
-    #   print(sel_scatter_data)
-    # }
     DT::datatable(scatter_data, rownames= FALSE,
                   options = list(scrollX = TRUE,
                                  pageLength = 8),
@@ -468,21 +465,29 @@ shinyServer(function(input, output, session) {
     merged <- heatmap_data()[['heatmap_data']]
     withProgress(message = 'Running t-SNE', value = NULL, {
       incProgress(1/3, detail = "For t-SNE 2D")
+      try(
       tsne_2d$data <- run_tsne(merged, iter=input$tsne_iter, dims=2,
-                               perplexity=input$tsne_perplexity, cores=cores())
+                               perplexity=input$nmftsne_perplexity, cores=cores())
+      )
       incProgress(2/3, detail = "For t-SNE 3D")
       tsne_3d$data <- run_tsne(merged, iter=input$tsne_iter, dims=3,
-                               perplexity=input$tsne_perplexity, cores=cores())
+                               perplexity=input$nmftsne_perplexity, cores=cores())
     })
   })
   nmfplottsne <- reactive({
-    color <- NULL
+    nsamples <- ncol(heatmap_data()[['heatmap_data']])
+    validate(
+      need(input$nmftsne_perplexity*3 < (nsamples-1),
+           message = paste("Perpleixty", input$nmftsne_perplexity,
+                           "is too large compared to num of samples", nsamples))
+    )
     validate(
       need(input$mode=="real", "This part won't work for 'estim' module\nPlease Try NMF 'Real' run")
     )
     validate(
       need(!is.null(tsne_2d$data), "Please hit 'Run t-SNE' button")
     )
+    color <- NULL
     # Will add an option to select by default column names from samples
     if(length(nmf_groups()$nmf_subtypes)>0){
       color <- nmf_groups()$nmf_subtypes
@@ -501,6 +506,7 @@ shinyServer(function(input, output, session) {
       }
     }
     nmf_tsne_res <- tsne_2d$data
+    print(head(nmf_tsne_res))
     naikai <- plot_tsne(nmf_tsne_res, color=color, alpha=input$plot_point_alpha,
                         add.label = input$plot_label, save.plot=F, real.plot=F,
                         add.legend = input$plot_legend,
@@ -923,6 +929,13 @@ shinyServer(function(input, output, session) {
   tsne_3d <- reactiveValues(data=NULL)
   observeEvent(input$runtSNE, {
     merged <- heatmap_data()[['heatmap_data']]
+    # nsamples <- ncol(merged)
+    # if(input$tsne_perplexity*3 >= nsamples){
+    #   message <- (paste("Perpleixty", input$tsne_perplexity,
+    #                      "is too large compared to num of samples", nsamples))
+    #   tsne_2d$data <- NULL
+    #   tsne_3d$data <- NULL
+    # }else{
     withProgress(message = 'Running t-SNE', value = NULL, {
       incProgress(1/3, detail = "For t-SNE 2D")
       tsne_2d$data <- run_tsne(merged, iter=input$tsne_iter, dims=2,
@@ -930,13 +943,33 @@ shinyServer(function(input, output, session) {
       incProgress(2/3, detail = "For t-SNE 3D")
       tsne_3d$data <- run_tsne(merged, iter=input$tsne_iter, dims=3,
                                perplexity=input$tsne_perplexity, cores=cores())
+
+      # tsne_2d$data <- tryCatch(run_tsne(merged, iter=input$tsne_iter, dims=2,
+      #                                   perplexity=input$tsne_perplexity, cores=cores()),
+      #                          error=function(e){
+      #                            NULL
+      #                          },
+      #                          warning=function(w){
+      #                            NULL
+      #                          })
+      # tsne_2d$data <- try(run_tsne(merged, iter=input$tsne_iter, dims=2,
+      #                              perplexity=input$tsne_perplexity, cores=cores()),
+      #                     silent = FALSE)
+
     })
+      # }
   })
   plot_tsne_2d <- reactive({
+    nsamples <- ncol(heatmap_data()[['heatmap_data']])
+    validate(
+      need(input$tsne_perplexity*3 < (nsamples-1),
+           message = paste("Perpleixty", input$tsne_perplexity,
+                            "is too large compared to num of samples", nsamples))
+    )
     validate(
       need(!is.null(tsne_2d$data), "Please click 'Run t-SNE' button")
     )
-    tsne_out <- tsne_2d$data
+    tsne_out <- isolate(tsne_2d$data)
     # if (is.null(tsne_2d$data)) return()
     withProgress(message = 'Genrating t-SNE plot', value = 0, {
       incProgress(2/3, detail = "Usually takes 15~20 seconds")
@@ -966,6 +999,12 @@ shinyServer(function(input, output, session) {
     plot_tsne_2d()
   })
   output$tsneplot_3d <- renderPlotly({
+    nsamples <- ncol(heatmap_data()[['heatmap_data']])
+    validate(
+      need(input$tsne_perplexity*3 < (nsamples-1),
+           message = paste("Perpleixty", input$tsne_perplexity,
+                            "is too large compared to num of samples", nsamples))
+    )
     if(is.null(tsne_3d$data)) return ()
     projection <- as.data.frame(tsne_3d$data$Y)
     labels <- rownames(projection)
@@ -1096,8 +1135,8 @@ shinyServer(function(input, output, session) {
         go.gs <- go.gsets(species="mouse", pkg.name=NULL, id.type = "eg")
       }
     })
-    go.res <- go.gs$go.sets[ go.gs$go.subs[[input$goTerm]] ]
-    return(go.res)
+    # go.res <- go.gs$go.sets[ go.gs$go.subs[[input$goTerm]] ]
+    return(go.gs)
   })
   gage.exp.fc <- reactive({
     rankdata <- nmf_group_feature_rank()
@@ -1119,6 +1158,7 @@ shinyServer(function(input, output, session) {
     gsets <- NULL
     if(input$EnrichType == 'GO'){
       gsets <- go.gs()
+      gsets <- gsets$go.sets[ gsets$go.subs[[input$goTerm]] ]
     }else if(input$EnrichType == 'KEGG'){
       gsets <- kegg.gs()
     }

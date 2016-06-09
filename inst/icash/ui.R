@@ -62,7 +62,7 @@ body <- dashboardBody(
   tabItems(
     tabItem("File",
             fluidRow(
-              tabBox( width=5, id = "tabset1", height = "555px",
+              tabBox( width=5, id = "tabset1", height = "575px",
                       tabPanel("Upload file",
                                selectInput("selectfile",
                                            label = "How do you want to upload the data?",
@@ -94,8 +94,7 @@ body <- dashboardBody(
                                             c(Comma=',',
                                               Semicolon=';',
                                               Tab='\t'),
-                                            selected='\t'),
-                               actionButton("zoomButton", "Zoom to fit buses")
+                                            selected='\t')
                       ),
                       tabPanel("Simple stats",
                                checkboxInput('chooseSamples', 'Manually select samples?', FALSE),
@@ -108,7 +107,7 @@ body <- dashboardBody(
               ),
               column(width = 7,
                      box(width = NULL, title="Preview Raw Data", status = "warning",
-                         DT::dataTableOutput('rawdatatbl', height = "420px"),
+                         DT::dataTableOutput('rawdatatbl', height = "439px"),
                          tags$hr(),
                          p(
                            class = "text-muted",
@@ -215,7 +214,8 @@ body <- dashboardBody(
                     )
             ),
             box(title="Expression Boxplot", width=6, solidHeader=TRUE, status="info",
-                plotlyOutput("geneboxplot")
+                tags$blockquote("Under Construction ..")
+                # plotlyOutput("geneboxplot")
             )
     ),
     tabItem("samplecor",
@@ -340,14 +340,24 @@ body <- dashboardBody(
                     )
                   )
               ),
-              box(title="t-SNE Plots", width=8, solidHeader=TRUE, status="info",
-                  column(width=2, numericInput("nmftsne_perplexity", label = "Perplexity", value=10)),
-                  column(width=2, br(),
-                         actionButton("run_nmftSNE", "Run t-SNE!", icon("play-circle"),
-                                      style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+              tabBox(title=tagList(shiny::icon("th-large"), "t-SNE Plot"),
+                     width=8, id = "tabset2", side = "right", height = "740px",
+              # box(title="t-SNE Plots", width=8, solidHeader=TRUE, status="info",
+                  tabPanel("2D",
+                           column(width=2, numericInput("nmftsne_perplexity", label = "Perplexity", value=10)),
+                           column(width=2, br(),
+                                  actionButton("run_nmftSNE", "Run t-SNE!", icon("play-circle"),
+                                               style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                           ),
+                           column(width=12,
+                                  plotlyOutput('nmftsneplot', height=600, width=600)
+                           )
                   ),
-                  column(width=12,
-                         plotlyOutput('nmftsneplot', height=600, width=600)
+                  tabPanel("3D",
+                           tags$blockquote("Under Construction ..")
+                           # column(width=12,
+                           #        plotlyOutput('nmftsneplot2', height=600, width=600)
+                           # )
                   )
               )
             )
@@ -398,8 +408,7 @@ body <- dashboardBody(
                                                             "Ranks from data" = "rank",
                                                             "Upload gene list" = "upload",
                                                             "Manually select genes" = "manual",
-                                                            "Preloaded gene list" = "preload",
-                                                            "Whole data" = "whole"),
+                                                            "Preloaded gene list" = "preload"),
                                                 selected = "rank")
                     ),
                     conditionalPanel(
@@ -724,7 +733,7 @@ body <- dashboardBody(
                     )
                   )
               ),
-              box(width=12, height = "430px",
+              box(width=12, #height = "450px",
                   DT::dataTableOutput('go_summary'),
                   tags$hr(),
                   # tags$blockquote("Make sure you select the correct species"),
