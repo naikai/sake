@@ -4,6 +4,7 @@ library(data.table)
 library(magrittr)
 library(corrplot)
 library(biomaRt)
+library(BiocParallel)
 library(AnnotationHub)
 library(RColorBrewer)
 library(matrixStats)
@@ -11,15 +12,9 @@ library(tools)
 library(snowfall)
 library(NMF)
 library(DT)
-library(icash)
 library(gage)
 library(gageData)
 library(pathview)
-
-options(shiny.maxRequestSize=500*1024^2)
-pre_geneset <- load_geneset("genesets", ".gmt")
-pre_genelist <- load_genelist("genesets", ".txt")
-`%then%` <- shiny:::`%OR%`
 
 shinyServer(function(input, output, session) {
   fileinfo <- reactive({
@@ -35,7 +30,7 @@ shinyServer(function(input, output, session) {
         need(input$inputdata!="", "Please select a gene count data set")
       )
       filename <- basename(input$inputdata)
-      filepath <- file.path("./extdata", input$inputdata)
+      filepath <- file.path(raw_fd, input$inputdata)
     }
 
     fileinfo <- list()
@@ -234,11 +229,13 @@ shinyServer(function(input, output, session) {
       if (length(rownames(transform_data)) > 1){
         updateSelectizeInput(session, 'cor_sample1',
                              server = TRUE,
-                             choices = sort(as.character(colnames(transform_data)))
+                             choices = sort(as.character(colnames(transform_data))),
+                             selected = sort(as.character(colnames(transform_data)))[1]
         )
         updateSelectizeInput(session, 'cor_sample2',
                              server = TRUE,
-                             choices = sort(as.character(colnames(transform_data)))
+                             choices = sort(as.character(colnames(transform_data))),
+                             selected = sort(as.character(colnames(transform_data)))[2]
         )
       }
     }
@@ -462,15 +459,15 @@ shinyServer(function(input, output, session) {
 
   # Add t-SNE plot next to NMF group
   observeEvent(input$run_nmftSNE, {
-    merged <- heatmap_data()[['heatmap_data']]
+    heatmap_data <- heatmap_data()[['heatmap_data']]
     withProgress(message = 'Running t-SNE', value = NULL, {
       incProgress(1/3, detail = "For t-SNE 2D")
       try(
-      tsne_2d$data <- run_tsne(merged, iter=input$tsne_iter, dims=2,
+      tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
                                perplexity=input$nmftsne_perplexity, cores=cores())
       )
       incProgress(2/3, detail = "For t-SNE 3D")
-      tsne_3d$data <- run_tsne(merged, iter=input$tsne_iter, dims=3,
+      tsne_3d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=3,
                                perplexity=input$nmftsne_perplexity, cores=cores())
     })
   })
@@ -506,13 +503,13 @@ shinyServer(function(input, output, session) {
       }
     }
     nmf_tsne_res <- tsne_2d$data
-    print(head(nmf_tsne_res))
+    # print(head(nmf_tsne_res))
     naikai <- plot_tsne(nmf_tsne_res, color=color, alpha=input$plot_point_alpha,
                         add.label = input$plot_label, save.plot=F, real.plot=F,
                         add.legend = input$plot_legend,
                         point.size=point_size, label.size=input$plot_label_size)
     ### Check if user select rows (samples)
-    s = input$nmfGroups_rows_selected
+    s = input$nmfGroups_ected
     if (length(s)){
       sub_color <- create.brewer.color(nmf_groups()$nmf_subtypes, length(unique(color)), "naikai")
       sub_tsne_res <- parse_tsne_res(nmf_tsne_res) %>% as.data.frame %>% dplyr::slice(s)
@@ -857,13 +854,15 @@ shinyServer(function(input, output, session) {
   observe({
     updateSelectizeInput(session, 'pt_col',
                          server = TRUE,
-                         choices = as.character(plot_colopts())
+                         choices = as.character(plot_colopts()),
+                         selected = "Filename"
     )
   })
   observeEvent(input$runNMF,{
     updateSelectizeInput(session, 'pt_col',
                          server = TRUE,
-                         choices = as.character(c(plot_colopts(), "NMF"))
+                         choices = as.character(c(plot_colopts(), "NMF")),
+                         selected = 'NMF'
     )
   })
   point_col <- reactive({
@@ -928,49 +927,25 @@ shinyServer(function(input, output, session) {
   tsne_2d <- reactiveValues(data=NULL)
   tsne_3d <- reactiveValues(data=NULL)
   observeEvent(input$runtSNE, {
-    merged <- heatmap_data()[['heatmap_data']]
-    # nsamples <- ncol(merged)
-    # if(input$tsne_perplexity*3 >= nsamples){
-    #   message <- (paste("Perpleixty", input$tsne_perplexity,
-    #                      "is too large compared to num of samples", nsamples))
-    #   tsne_2d$data <- NULL
-    #   tsne_3d$data <- NULL
-    # }else{
+    heatmap_data <- heatmap_data()[['heatmap_data']]
     withProgress(message = 'Running t-SNE', value = NULL, {
       incProgress(1/3, detail = "For t-SNE 2D")
-      tsne_2d$data <- run_tsne(merged, iter=input$tsne_iter, dims=2,
+      tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
                                perplexity=input$tsne_perplexity, cores=cores())
       incProgress(2/3, detail = "For t-SNE 3D")
-      tsne_3d$data <- run_tsne(merged, iter=input$tsne_iter, dims=3,
+      tsne_3d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=3,
                                perplexity=input$tsne_perplexity, cores=cores())
-
-      # tsne_2d$data <- tryCatch(run_tsne(merged, iter=input$tsne_iter, dims=2,
-      #                                   perplexity=input$tsne_perplexity, cores=cores()),
-      #                          error=function(e){
-      #                            NULL
-      #                          },
-      #                          warning=function(w){
-      #                            NULL
-      #                          })
-      # tsne_2d$data <- try(run_tsne(merged, iter=input$tsne_iter, dims=2,
-      #                              perplexity=input$tsne_perplexity, cores=cores()),
-      #                     silent = FALSE)
-
     })
-      # }
   })
   plot_tsne_2d <- reactive({
     nsamples <- ncol(heatmap_data()[['heatmap_data']])
     validate(
       need(input$tsne_perplexity*3 < (nsamples-1),
            message = paste("Perpleixty", input$tsne_perplexity,
-                            "is too large compared to num of samples", nsamples))
-    )
-    validate(
+                            "is too large compared to num of samples", nsamples)) %then%
       need(!is.null(tsne_2d$data), "Please click 'Run t-SNE' button")
     )
     tsne_out <- isolate(tsne_2d$data)
-    # if (is.null(tsne_2d$data)) return()
     withProgress(message = 'Genrating t-SNE plot', value = 0, {
       incProgress(2/3, detail = "Usually takes 15~20 seconds")
       color <- "steelblue"
@@ -1020,6 +995,65 @@ shinyServer(function(input, output, session) {
   })
 
 
+  ### DESeq2 ###
+  observe({
+    updateSelectizeInput(session, 'de_group1',
+                         server = TRUE,
+                         choices = as.character(paste0("NMF", 1:input$num_cluster)),
+                         selected = "NMF1"
+    )
+    updateSelectizeInput(session, 'de_group2',
+                         server = TRUE,
+                         choices = as.character(paste0("NMF", 1:input$num_cluster)),
+                         selected = "NMF2"
+    )
+  })
+
+  deseq_res <- eventReactive(input$runDESeq, {
+    register(BiocParallel::MulticoreParam(workers = cores()))
+    colData <- data.frame(Group = paste0("NMF", nmf_groups()$nmf_subtypes))
+    ddsfeatureCounts <- DESeq2::DESeqDataSetFromMatrix(countData = round(merged()),
+                                                       colData = colData,
+                                                       design = ~ Group)
+    ### Set betaPrior=FALSE to go with MLE LFC to get simple LFC = (avg in group2/ avg in group1)
+    # dds <- DESeq(ddsfeatureCounts, parallel=T, betaPrior=FALSE)
+    withProgress(message = 'Running DESeq2', value = NULL, {
+      dds <- DESeq2::DESeq(ddsfeatureCounts, parallel=T)
+    })
+    return(dds)
+  })
+
+  filt_deseq_res <- reactive({
+    DESeq2::results(deseq_res(), contrast = c("Group", input$de_group1, input$de_group2)) %>%
+      as.data.frame %>%
+      subset(padj <= input$de_alpha) %>%
+      .[order(.$padj), ]
+  })
+
+  output$deseq_table <- DT::renderDataTable({
+    GeneCard <- paste0("<a href='http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
+                       rownames(filt_deseq_res()), "'>", rownames(filt_deseq_res()), "</a>")
+    filt_res <- data.frame(Gene=GeneCard,
+                           filt_deseq_res())
+    DT::datatable(filt_res, selection='single', rownames=FALSE,
+                  options = list(pageLength=12,
+                                 scrollY = TRUE,
+                                 autoWidth = TRUE),
+                  escape = FALSE
+    ) %>% formatRound(2:ncol(filt_res), 3)
+  }, server = TRUE)
+
+  output$deseq_boxplot <- renderPlotly({
+    validate(
+      need(!is.null(input$deseq_table_rows_selected), "Please select a gene")
+    )
+    gene <- rownames(filt_deseq_res())[input$deseq_table_rows_selected]
+    gene.data <- reshape2::melt(merged()[gene, ]) %>%
+                 dplyr::mutate(NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes))) %>%
+                 set_colnames(c("Sample", "Expr", "NMF"))
+    plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
+            boxpoints = "all", jitter = 0.3, pointpos = 0)
+  })
 
 
   ### Pathway analysis ###
@@ -1093,7 +1127,6 @@ shinyServer(function(input, output, session) {
                          choices = as.character(paste0("NMF", 1:input$num_cluster))
     )
   })
-
   pathview.species <- reactive({
     species <- input$species
     if(species == "Human" | species == "human" | species == "hg19" | species == "hsa"){

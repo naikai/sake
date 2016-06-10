@@ -46,8 +46,8 @@ load_geneset <- function(folder, pattern=".gmt"){
 #' @keywords DESeq2
 #' @export
 #' @examples
-#' run.DESeq2()
-run.DESeq2 <- function(sub.data, sub.expinfo, design, workers=16)
+#' run_DESeq2()
+run_DESeq2 <- function(data, colData, design, workers=8)
 {
   register(BiocParallel::MulticoreParam(workers))
   colData <- sub.expinfo
@@ -55,6 +55,7 @@ run.DESeq2 <- function(sub.data, sub.expinfo, design, workers=16)
   ddsfeatureCounts <- DESeqDataSetFromMatrix(countData=sub.data, colData=colData, design=design)
   ### Set betaPrior=FALSE to go with MLE LFC to get simple LFC = (avg in group2/ avg in group1)
   dds <- DESeq(ddsfeatureCounts, parallel=T, betaPrior=FALSE)
+  on.exit()
   return(dds)
 }
 

@@ -13,15 +13,13 @@ NetConnectivity(data, thresh = "soft", tao = 0.7, beta = 1,
 \item{tao}{threshold for hard transformation}
 
 \item{beta}{parameter for soft power transformation}
-
-\item{num_features}{Number of top high connective genes to be used}
 }
 \description{
-Code is adapted and rewrote based on Wange et al, BMC Bioinformatics, 2014 
+Code is adapted and rewrote based on Wange et al, BMC Bioinformatics, 2014
 'Improving the sensitivity of sample clustering by leveraging gene co-expression networks in variable selection'
 }
 \examples{
-NetConnectivity(data, tao=0.5, beta=10, num_feature=0.01)
+NetConnectivity(data, tao=0.5, beta=10)
 }
 \keyword{co-expression,}
 \keyword{connectivity}

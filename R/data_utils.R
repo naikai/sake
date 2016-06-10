@@ -115,7 +115,7 @@ extract_data_by_mad <- function (data, topN=100, by="row", type="data"){
 #' @examples
 #' myfread.table(system.file('icash', package='icash'))
 myfread.table <- function(filepath, check.platform=T, header=T, sep="\t", detect.file.ext=T){
-   ext <- file_ext(filepath)
+   ext <- tools::file_ext(filepath)
    if(detect.file.ext){
       if (ext=="csv"){
         sep=","
@@ -147,7 +147,7 @@ myfread.table <- function(filepath, check.platform=T, header=T, sep="\t", detect
 
    ### Add more checking in case there are duplicated column names
    # make.names(names, unique=TRUE)
-   rawdata %<>% setDF %>% set_rownames(.$V1) %>%
+   rawdata %<>% setDF %>% magrittr::set_rownames(.$V1) %>%
                   '['(colnames(.) != "V1") #%>% as.numeric
 
    # data doesn't have colnames for first row (rownames)

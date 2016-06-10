@@ -4,7 +4,7 @@
 \alias{run_tsne}
 \title{Use multi-core to run t-SNE}
 \usage{
-run_tsne(data, iter = 10, perplexity = 30, dims = 2, cores = 1)
+run_tsne(data, iter = 10, perplexity = 10, dims = 2, cores = 1)
 }
 \arguments{
 \item{data}{expression data}

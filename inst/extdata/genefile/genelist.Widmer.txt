@@ -1,0 +1,135 @@
+Probe_set	Gene	Title	Proliferative	Invasive	Group
+213790_at	ADAM12	ADAM metallopeptidase domain 12	0.3545	1.387	Invasive
+202952_s_at	ADAM12	ADAM metallopeptidase domain 12	0.591	3.175	Invasive
+203002_at	AMOTL2	angiomotin like 2	4.554	11.315	Invasive
+202686_s_at	AXL	AXL receptor tyrosine kinase	0.8225	27.955	Invasive
+210538_s_at	BIRC3	baculoviral IAP repeat-containing 3	0.2515	1.141	Invasive
+204726_at	CDH13	"cadherin 13, H-cadherin (heart)"	0.166	2.12	Invasive
+204604_at	CDK14	cyclin-dependent kinase 14	2.168	6.3055	Invasive
+211343_s_at	COL13A1	"collagen, type XIII, alpha 1"	0.305	4.8645	Invasive
+202552_s_at	CRIM1	cysteine rich transmembrane BMP regulator 1 (chordin-like)	0.827	7.5345	Invasive
+202551_s_at	CRIM1	cysteine rich transmembrane BMP regulator 1 (chordin-like)	1.3245	15.83	Invasive
+221541_at	CRISPLD2	cysteine-rich secretory protein LCCL domain containing 2	0.7625	2.0775	Invasive
+210764_s_at	CYR61	"cysteine-rich, angiogenic inducer, 61"	2.255	21.695	Invasive
+201289_at	CYR61	"cysteine-rich, angiogenic inducer, 61"	3.589	35.96	Invasive
+204646_at	DPYD	dihydropyrimidine dehydrogenase	0.3965	6.108	Invasive
+201842_s_at	EFEMP1	EGF-containing fibulin-like extracellular matrix protein 1	0.429	8.129	Invasive
+201983_s_at	EGFR	epidermal growth factor receptor	0.4825	3.8605	Invasive
+213506_at	F2RL1	coagulation factor II (thrombin) receptor-like 1	0.1935	1.327	Invasive
+204421_s_at	FGF2	fibroblast growth factor 2 (basic)	1.1395	3.1335	Invasive
+208614_s_at	FLNB	"filamin B, beta"	3.1465	11.825	Invasive
+206307_s_at	FOXD1	forkhead box D1	3.3845	10.725	Invasive
+204948_s_at	FST	Follistatin	2.495	12.765	Invasive
+210220_at	FZD2	frizzled homolog 2 (Drosophila)	1.387	5.4265	Invasive
+212822_at	HEG1	HEG homolog 1 (zebrafish)	3.216	9.145	Invasive
+213069_at	HEG1	HEG homolog 1 (zebrafish)	5.844	18.235	Invasive
+219985_at	HS3ST3A1	heparan sulfate (glucosamine) 3-O-sulfotransferase 3A1	0.268	1.668	Invasive
+205032_at	ITGA2	"integrin, alpha 2"	1.337	4.5465	Invasive
+201474_s_at	ITGA3	"integrin, alpha 3"	2.364	8.88	Invasive
+221583_s_at	KCNMA1	potassium large conductance calcium-activated channel M alpha 1	0.2425	1.497	Invasive
+221584_s_at	KCNMA1	potassium large conductance calcium-activated channel M alpha 1	0.586	7.361	Invasive
+202998_s_at	LOXL2	lysyl oxidase-like 2	2.124	50.455	Invasive
+211864_s_at	MYOF	myoferlin	7.407	26.005	Invasive
+212298_at	NRP1	neuropilin 1	0.266	16.01	Invasive
+210510_s_at	NRP1	neuropilin 1	0.7485	7.023	Invasive
+222020_s_at	NTM	neurotrimin	0.6305	3.9455	Invasive
+204589_at	NUAK1	"NUAK family, SNF1-like kinase, 1"	1.211	4.0785	Invasive
+205729_at	OSMR	oncostatin M receptor	0.9445	6.1405	Invasive
+218718_at	PDGFC	platelet derived growth factor C	1.396	13.08	Invasive
+201578_at	PODXL	podocalyxin-like	0.825	6.537	Invasive
+204268_at	S100A2	S100 calcium binding protein A2	1.4025	3.8375	Invasive
+205896_at	SLC22A4	"solute carrier family 22, member 4"	0.5805	1.9755	Invasive
+209897_s_at	SLIT2	slit homolog 2	1.0365	3.6665	Invasive
+210612_s_at	SYNJ2	synaptojanin 2	0.976	3.196	Invasive
+212382_at	TCF4	transcription factor 4	0.358	1.605	Invasive
+203753_at	TCF4	transcription factor 4	0.402	2.848	Invasive
+213891_s_at	TCF4	transcription factor 4	0.43	3.315	Invasive
+201110_s_at	THBS1	thrombospondin 1	0.8315	24.895	Invasive
+201109_s_at	THBS1	thrombospondin 1	1.048	42.19	Invasive
+216997_x_at	TLE4	transducin-like enhancer of split 4	0.1985	0.888	Invasive
+204872_at	TLE4	transducin-like enhancer of split 4	0.853	5.4715	Invasive
+204932_at	TNFRSF11B	"tumor necrosis factor receptor superfamily, member 11b"	0.2045	1.108	Invasive
+203476_at	TPBG	trophoblast glycoprotein	1.0845	17.96	Invasive
+206116_s_at	TPM1	tropomyosin 1 (alpha)	7.6335	51.005	Invasive
+210987_x_at	TPM1	tropomyosin 1 (alpha)	12.585	83.55	Invasive
+210986_s_at	TPM1	tropomyosin 1 (alpha)	18.35	99.125	Invasive
+202369_s_at	TRAM2	translocation associated membrane protein 2	12.505	27.435	Invasive
+213425_at	WNT5A	"wingless-type MMTV integration site family, member 5A"	0.284	7.6665	Invasive
+205990_s_at	WNT5A	"wingless-type MMTV integration site family, member 5A"	0.631	20.68	Invasive
+210875_s_at	ZEB1	zinc finger E-box binding homeobox 1	0.248	2.0565	Invasive
+212764_at	ZEB1	zinc finger E-box binding homeobox 1	0.516	8.2985	Invasive
+212758_s_at	ZEB1	zinc finger E-box binding homeobox 1	0.796	3.4985	Invasive
+222294_s_at	RAB27A	"RAB27A, member RAS oncogene family"	16.675	4.442	Proliferative
+204638_at	ACP5	"acid phosphatase 5, tartrate resistant"	16.94	3.8275	Proliferative
+213217_at	ADCY2	adenylate cyclase 2 (brain)	4.263	0.6735	Proliferative
+203382_s_at	APOE	apolipoprotein E	16.02	2.211	Proliferative
+203381_s_at	APOE	apolipoprotein E	25.515	2.787	Proliferative
+213902_at	ASAH1	N-acylsphingosine amidohydrolase (acid ceramidase) 1	36.02	11.03	Proliferative
+210980_s_at	ASAH1	N-acylsphingosine amidohydrolase (acid ceramidase) 1	83.565	23.32	Proliferative
+213702_x_at	ASAH1	N-acylsphingosine amidohydrolase (acid ceramidase) 1	109.35	39.19	Proliferative
+220451_s_at	BIRC7	baculoviral IAP repeat-containing 7	12.575	1.65	Proliferative
+220941_s_at	C21orf91	chromosome 21 open reading frame 91	6.669	1.6525	Proliferative
+211890_x_at	CAPN3	"calpain 3, (p94)"	42.32	1.4	Proliferative
+214475_x_at	CAPN3	"calpain 3, (p94)"	47.495	0.9265	Proliferative
+201131_s_at	CDH1	"cadherin 1, type 1, E-cadherin (epithelial)"	1.379	0.214	Proliferative
+211804_s_at	CDK2	cyclin-dependent kinase 2	40.085	6.9255	Proliferative
+204252_at	CDK2	cyclin-dependent kinase 2	64.435	15.03	Proliferative
+204995_at	CDK5R1	"cyclin-dependent kinase 5, regulatory subunit 1 (p35)"	4.7575	1.076	Proliferative
+209498_at	CEACAM1	carcinoembryonic antigen-related cell adhesion molecule 1	11.015	1.3005	Proliferative
+203139_at	DAPK1	death-associated protein kinase 1	8.5955	2.7345	Proliferative
+216513_at	DCT	dopachrome tautomerase	8.893	0.607	Proliferative
+216512_s_at	DCT	dopachrome tautomerase	91.09	1.1255	Proliferative
+205337_at	DCT	dopachrome tautomerase	105.85	0.666	Proliferative
+205338_s_at	DCT	dopachrome tautomerase	122.3	1.3885	Proliferative
+51158_at	FAM174B	"family with sequence similarity 174, member B"	2.565	0.8455	Proliferative
+203397_s_at	GALNT3	UDP-N-acetyl- -D-galactosamine:polypeptide N-acetylgalactosaminyltransferase 3	9.4	0.3305	Proliferative
+212959_s_at	GNPTAB	"N-acetylglucosamine-1-phosphate transferase, alpha and beta subunits"	33.74	12.87	Proliferative
+209169_at	GPM6B	glycoprotein M6B	15.035	1.173	Proliferative
+209168_at	GPM6B	glycoprotein M6B	17.415	1.9235	Proliferative
+209167_at	GPM6B	glycoprotein M6B	59.38	4.4745	Proliferative
+209170_s_at	GPM6B	glycoprotein M6B	76.9	6.255	Proliferative
+206696_at	GPR143	G protein-coupled receptor 143	30.905	0.711	Proliferative
+203632_s_at	GPRC5B	"G protein-coupled receptor, family C, group 5, member B"	18.065	4.647	Proliferative
+210964_s_at	GYG2	glycogenin 2	11.44	1.197	Proliferative
+54037_at	HPS4	Hermansky-Pudlak syndrome 4	7.389	2.132	Proliferative
+218402_s_at	HPS4	Hermansky-Pudlak syndrome 4	10.46	3.1065	Proliferative
+205376_at	INPP4B	"inositol polyphosphate-4-phosphatase, type II, 105kDa"	22.035	6.794	Proliferative
+204562_at	IRF4	interferon regulatory factor 4	9.8115	1.59	Proliferative
+201362_at	IVNS1ABP	influenza virus NS1A binding protein	21.455	8.854	Proliferative
+213478_at	KAZ	kazrin	16.1	5.269	Proliferative
+207323_s_at	MBP	myelin basic protein	19.69	1.692	Proliferative
+209072_at	MBP	myelin basic protein	60.56	1.401	Proliferative
+218376_s_at	MICAL1	"microtubule associated monoxygenase, calponin and LIM domain containing 1"	11.975	3.966	Proliferative
+207233_s_at	MITF	microphthalmia-associated transcription factor	104.35	8.1345	Proliferative
+206426_at	MLANA	melan-A	74.925	0.524	Proliferative
+206427_s_at	MLANA	melan-A	187.6	0.687	Proliferative
+212338_at	MYO1D	myosin ID	7.438	1.554	Proliferative
+207978_s_at	NR4A3	"nuclear receptor subfamily 4, group A, member 3"	4.151	0.831	Proliferative
+209959_at	NR4A3	"nuclear receptor subfamily 4, group A, member 3"	8.4255	1.4925	Proliferative
+206498_at	OCA2	oculocutaneous albinism II	11.65	1.2525	Proliferative
+213638_at	PHACTR1	phosphatase and actin regulator 1	26.65	2.1535	Proliferative
+207469_s_at	PIR	pirin (iron-binding nuclear protein)	66.83	12.785	Proliferative
+206470_at	PLXNC1	plexin C1	4.304	0.6245	Proliferative
+206471_s_at	PLXNC1	plexin C1	4.7685	0.477	Proliferative
+213241_at	PLXNC1	plexin C1	24.825	1.1	Proliferative
+209848_s_at	PMEL	Premelanosome protein	246.95	1.1995	Proliferative
+209515_s_at	RAB27A	"RAB27A, member RAS oncogene family"	37.705	9.7065	Proliferative
+219412_at	RAB38	"RAB38, member RAS oncogene family"	56.49	7.02	Proliferative
+210138_at	RGS20	regulator of G-protein signaling 20	10.285	3.3555	Proliferative
+212122_at	RHOQ	"ras homolog gene family, member Q"	11.285	4.0495	Proliferative
+212119_at	RHOQ	"ras homolog gene family, member Q"	56.235	22.075	Proliferative
+221523_s_at	RRAGD	Ras-related GTP binding D	11.63	2.598	Proliferative
+221524_s_at	RRAGD	Ras-related GTP binding D	37.775	8.878	Proliferative
+215028_at	SEMA6A	"sema domain, transmembrane domain, and cytoplasmic domain, 6A"	1.9475	0.298	Proliferative
+202896_s_at	SIRPA	signal-regulatory protein alpha	10.815	4.349	Proliferative
+202897_at	SIRPA	signal-regulatory protein alpha	14.555	4.726	Proliferative
+221644_s_at	SLC45A2	"solute carrier family 45, member 2"	23.145	0.498	Proliferative
+220245_at	SLC45A2	"solute carrier family 45, member 2"	37.72	1.332	Proliferative
+210942_s_at	ST3GAL6	"ST3 beta-galactoside alpha-2,3-sialyltransferase 6"	21.465	3.4385	Proliferative
+212631_at	STX7	syntaxin 7	19.095	5.9865	Proliferative
+209354_at	TNFRSF14	"tumor necrosis factor receptor superfamily, member 14"	13.19	2.4515	Proliferative
+206479_at	TRPM1	"transient receptor potential cation channel, subfamily M, member 1"	1.188	0.2095	Proliferative
+206630_at	TYR	tyrosinase	133.85	1.8765	Proliferative
+205694_at	TYRP1	tyrosinase-related protein 1	73.23	0.745	Proliferative
+218971_s_at	WDR91	WD repeat domain 91	7.699	3.332	Proliferative
+203651_at	ZFYVE16	"zinc finger, FYVE domain containing 16"	19.94	5.565	Proliferative

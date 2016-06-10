@@ -9,7 +9,7 @@
 comp_module_genelist <- function(final_comp_genelist, folderName0){
    pdf(paste0("Overlap", folderName0, ".pdf"), height=10, width=10)
 
-   num <- length(final_comp_genelist) 
+   num <- length(final_comp_genelist)
    for(i in 2:num){
       comb <- combn(num, i)
       apply(comb, 2, function(x) {
@@ -67,7 +67,7 @@ connect_gap_modules <- function(final_summary, final_genelist, allow.gap=1){
 
 
 #' Identify the the edge of the modules (blocks) within the net connectivity matrix
-#' 
+#'
 #' \preformatted{
 #' 1. Run for loops to detect the block
 #' 2. Detect edge genes in each block and their gene idx
@@ -125,10 +125,10 @@ def_net_modules <- function(core_sub_jaccard_dist, sub_jaccard_dist, min.connect
 #' Go back to the original 100x100 matrix and use the edge genes (idx) to define block
 #' @param core_sub_jaccard_dist preprocessed sub_jaccard_dist matrix (after applying filter, binarized the data)
 #' @param sub_jaccard_dist zoomed-in small block size of jaccard_dist
-#' @param min.connectivity threshold for minimum connectivity (set to 75\% quartile in each block)   
-#' @param min.size threshold for minimum block size 
-#' @param start_idx specifiy what is the index for the starting gene in the block 
-#' @param allow.gap allow how man gaps between each sub-modules 
+#' @param min.connectivity threshold for minimum connectivity (set to 75\% quartile in each block)
+#' @param min.size threshold for minimum block size
+#' @param start_idx specifiy what is the index for the starting gene in the block
+#' @param allow.gap allow how man gaps between each sub-modules
 #' @keywords co-expression, network, connectivity
 #' @export
 #' @examples
@@ -150,7 +150,7 @@ def_net_module2 <- function(core_sub_jaccard_dist, sub_jaccard_dist, min.connect
    old <- 1
    size <- 1
    blk_cnt <- 0
-   current_gap <- 0 # parameter to track how many gaps in between modules 
+   current_gap <- 0 # parameter to track how many gaps in between modules
    res <- list()
    res_genelist <- list()
    res_summary <- rep(NULL, 8)
@@ -158,15 +158,15 @@ def_net_module2 <- function(core_sub_jaccard_dist, sub_jaccard_dist, min.connect
    original_names <- colnames(sub_jaccard_dist)
 
    for (current in 2:dim(core_sub_jaccard_dist)[1]){
-      # Allow for 1 (default) gap between each sub-modules 
+      # Allow for 1 (default) gap between each sub-modules
       if (core_sub_jaccard_dist[current, current-1]>=min.connectivity){
          size <- size + 1 + current_gap
          current_gap <- 0
       }else{
          summarize_module()
-         size <- 1 
-         old <- current 
-         current_gap <- 0 
+         size <- 1
+         old <- current
+         current_gap <- 0
       }
    }
    # last check #
@@ -194,14 +194,14 @@ def_net_module2 <- function(core_sub_jaccard_dist, sub_jaccard_dist, min.connect
 module_finder <- function(data, p.value=0.05, tao=0.5, beta=3, num_features=100){
    data <- rmv_constant_0(data)
    # Use fastCor function to compute the correlation matrix
-   xcor <- t(data) %>% fastCor %>% abs 
-   # net connectivity can be calculate using two transformation 
+   xcor <- t(data) %>% fastCor %>% abs
+   # net connectivity can be calculate using two transformation
    # 1. hard threshold, define a tao (signum function)
    # 2. soft threahold, define a beta (power function)
    if(thresh=="hard"){
-     net_dist <- xcor > tao 
+     net_dist <- xcor > tao
    }else if(thresh=="soft"){
-     net_dist <- xcor^beta 
+     net_dist <- xcor^beta
    }
 
    sum_connectivity <- colSums(net_dist)
@@ -211,19 +211,18 @@ module_finder <- function(data, p.value=0.05, tao=0.5, beta=3, num_features=100)
 
 #' Identify the informative genes in Data with top high connectivity in the co-expression network
 #'
-#' Code is adapted and rewrote based on Wange et al, BMC Bioinformatics, 2014 
+#' Code is adapted and rewrote based on Wange et al, BMC Bioinformatics, 2014
 #' 'Improving the sensitivity of sample clustering by leveraging gene co-expression networks in variable selection'
 #'
-#' @param data Input expression data 
-#' @param tao  threshold for hard transformation 
-#' @param beta parameter for soft power transformation 
-#' @param num_features Number of top high connective genes to be used 
-#' @keywords co-expression, network, connectivity 
+#' @param data Input expression data
+#' @param tao  threshold for hard transformation
+#' @param beta parameter for soft power transformation
+#' @keywords co-expression, network, connectivity
 #' @export
 #' @examples
-#' NetConnectivity(data, tao=0.5, beta=10, num_feature=0.01)
+#' NetConnectivity(data, tao=0.5, beta=10)
 NetConnectivity <- function(data, thresh='soft', tao=0.7, beta=1, method="pearson", diag.zero=T){
-   # Use cor in WGCNA 
+   # Use cor in WGCNA
    system.time(xcor0 <- t(data) %>% WGCNA::cor(., method=method) %>% abs)
    if(diag.zero){
       system.time(diag(xcor0) <- 0) #for crossprod later
@@ -273,18 +272,18 @@ plot_modules <- function(core_sub_jaccard_dist, final_genelist, allow.gap=1){
 }
 
 
-#' Preprocess the connecitivty matrix based on mean connectivity and binary switch 
-#' 
+#' Preprocess the connecitivty matrix based on mean connectivity and binary switch
+#'
 #' \preformatted{
 #' 1. First try to remove columns (rows) that have median expression 75% quantile
 #' 2. Convert the matrix into binary based on quantile connectivity'
 #' }
 #'
-#' @param data Input expression data 
-#' @param tao  threshold for hard transformation 
-#' @param beta parameter for soft power transformation 
-#' @param num_features Number of top high connective genes to be used 
-#' @keywords co-expression, network, connectivity 
+#' @param data Input expression data
+#' @param tao  threshold for hard transformation
+#' @param beta parameter for soft power transformation
+#' @param num_features Number of top high connective genes to be used
+#' @keywords co-expression, network, connectivity
 #' @export
 #' @examples
 #' preprocessNetCon(sub_jaccard_dist, rmv.filter=0.5, binary.filter=0.75, plot=F)
@@ -309,15 +308,15 @@ preprocessNetCon <- function(sub_jaccard_dist, rmv.filter=0.5, binary.filter=0.7
 }
 
 
-#' Preprocess the connecitivty matrix based on mean connectivity and binary switch 
+#' Preprocess the connecitivty matrix based on mean connectivity and binary switch
 #' 1. First try to remove columns (rows) that have median expression 75% quantile
 #' 2. Convert the matrix into binary based on quantile connectivity'
 #'
-#' @param data Input expression data 
-#' @param tao  threshold for hard transformation 
-#' @param beta parameter for soft power transformation 
-#' @param num_features Number of top high connective genes to be used 
-#' @keywords co-expression, network, connectivity 
+#' @param data Input expression data
+#' @param tao  threshold for hard transformation
+#' @param beta parameter for soft power transformation
+#' @param num_features Number of top high connective genes to be used
+#' @keywords co-expression, network, connectivity
 #' @export
 #' @examples
 #' run_CoExpression(expdata)
@@ -331,7 +330,7 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
    }
    setwd(folderName0)
 
-   # Get NetConnectivit 
+   # Get NetConnectivit
    net_dist <- NetConnectivity(expdata, thresh=thresh, tao=tao, beta=beta, method=method)
 
    # if(method=="Pearson"){
@@ -358,7 +357,7 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
    #    net_dist <- (xcor > tao) * 1
    # }else if(thresh=="soft"){
    #    net_dist <- xcor^beta
-   #    # stick with hard threshod for now. 
+   #    # stick with hard threshod for now.
    #    # avg_con_thresh <- tao^beta/(2-tao^beta)
    # }
 
@@ -410,7 +409,7 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
    rm(y)
    ### Can store y in symmetric matrices. Ray ###
 
-   ### Store final gene list for comparison. ### 
+   ### Store final gene list for comparison. ###
    blocks <- c(100,150,200,300,500)
    final_comp_genelist <- vector("list", length(blocks))
 
@@ -430,7 +429,7 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
 
          ### extract subsets of them and run module detection ###
          invisible(gc())
-         # initialize a large number to be filled in, later only select the non-NULL ones 
+         # initialize a large number to be filled in, later only select the non-NULL ones
          N <- 20000
          fill_idx <- 1
          summary_colnames <- c("Start", "End", "Size", "Start_Gene", "End_Gene", "Avg_Connectivity", "Original_Start", "Original_End")
@@ -455,7 +454,7 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
             setwd("GeneList/")
             write.table(data.frame(Gene=sub.genes), paste0("Gene",start,"-",end,".txt"), quote=F, row.names=F)
 
-            ### Modules are defined here ### 
+            ### Modules are defined here ###
             ### Clean up the 100x100 matrix and define module edges and size ###
             core_sub_jaccard_dist <- preprocessNetCon(sub_jaccard_dist, rmv.filter=0.5, binary.filter=0.75, plot=T)
             res <- def_net_module2(core_sub_jaccard_dist, sub_jaccard_dist, min.connectivity = quantile(core_sub_jaccard_dist)[4], min.size=5, start_idx=start)
@@ -471,9 +470,9 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
                   for(j in which.idx){
                      final_summary[fill_idx, ] <- res_summary[j, ]
                      final_genelist[[fill_idx]] <- res_genelist[j]
-                     fill_idx <- fill_idx + 1 
+                     fill_idx <- fill_idx + 1
 
-                     # The following is for visual (physical) inspection of the module identification 
+                     # The following is for visual (physical) inspection of the module identification
                      idx <- res_summary[j,1]:res_summary[j,2]
                      new_core_sub_jaccard_dist[idx,idx] = core_sub_jaccard_dist[idx, idx]
                      # save gene names for each modules
@@ -493,18 +492,18 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
 
          final_summary <- final_summary[1:(fill_idx-1), ]
          final_genelist <- final_genelist[1:(fill_idx-1)]
-         # transform these column into numeric data type 
+         # transform these column into numeric data type
          final_summary[, c(1:3,6:8)] <- sapply(final_summary[, c(1:3,6:8)], as.numeric)
 
          # save(final_summary, file="Rdata_final_summary")
          # save(final_genelist, file="Rdata_final_genelist")
 
-         # connect those modules that have small gap in between 
+         # connect those modules that have small gap in between
          final_res <- connect_gap_modules(final_summary, final_genelist, allow.gap=1)
 
          ### Now rerun through the final_summary table to map the start-end genes in module to original jaccard_matrix
-         ### Then define module this way? 
-         
+         ### Then define module this way?
+
          ### final result sorted by module avg.connectivity
          final_summary[order(as.numeric(final_summary[,"Avg_Connectivity"]), decreasing = T),] %>%
                subset(as.numeric(.[,"Size"])>=10) %>%
@@ -514,7 +513,7 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
          write.table(final_summary, paste0("Modules_Summary_Block_top", block_size, "genes.txt"), row.names = F, quote=F, sep="\t")
          write.table(data.frame(Gene=unlist(final_genelist)), paste0("Modules_GeneList_Block_top", block_size, "genes.txt"), row.names = F, quote=F, sep="\t")
 
-         ### For drawing Venn diagram to see how much overlap between diff block size ###  
+         ### For drawing Venn diagram to see how much overlap between diff block size ###
          final_comp_genelist[[block_idx]] <- unlist(final_genelist)
 
          # back to coexpression folder
@@ -522,7 +521,7 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
       }
    })
 
-   ### Plot overlap Venn diagram ### 
+   ### Plot overlap Venn diagram ###
    require(gplots)
    names(final_comp_genelist) <- paste0("Top", blocks, "\n", sapply(final_comp_genelist, length), " genes")
    comp_module_genelist(final_comp_genelist, folderName0)
@@ -538,12 +537,12 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
 }
 
 #' Identify the the edge of the modules (blocks) within the net connectivity matrix
-#' 
+#'
 #' Run for loops to detect the block
 #' Detect edge genes in each block and their gene idx
 #' Go back to the original 100x100 matrix and use the edge genes (idx) to define block
 #'
-#' @param core_sub_jaccard_dist 
+#' @param core_sub_jaccard_dist
 #' @keywords network, co-expression
 #' @export
 #' @examples
@@ -616,7 +615,7 @@ wgcna_ext_hubgenes <- function(datExpr, MM.cutoff=0.7, math.cutoff.quantile=3, m
          # add red dots only if we have genes that are within TopMAD
          if(nrow(mad.module)>0){
            a <- a + geom_point(alpha=0.7, aes(x=MM, y=Exp), colour="red", data=mad.module) +
-                  geom_text(size=1.5, hjust = 0, nudge_x = 0.005, data=mad.module, colour="red") 
+                  geom_text(size=1.5, hjust = 0, nudge_x = 0.005, data=mad.module, colour="red")
          }
          (gg <- ggplotly(a))
          # print(gg)

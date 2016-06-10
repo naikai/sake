@@ -4,11 +4,6 @@ library(d3heatmap)
 library(shinythemes)
 library(shinydashboard)
 library(DT)
-filenames<-list.files(path="./extdata", pattern="\\.txt$")
-# filenames<-list.files(system.file("extdata", "2012.csv", package = "testdat"))
-# system.file("extdata", "1_Islam-Full-counts.txt", package = "scNMF")
-#
-
 
 header <- dashboardHeader(
   title = "Single-Cell NMF"
@@ -30,9 +25,6 @@ sidebar <- dashboardSidebar(
              menuSubItem("Extract features", tabName="nmfFeatures")
     ),
     menuItem("Visualization", tabName="Visualization", icon = icon('calendar', lib = "glyphicon")
-#              menuSubItem("Heatmap", tabName="Heatmap"),
-#              menuSubItem("PCA", tabName="PCA"),
-#              menuSubItem("t-SNE", tabName="t-SNE")
     ),
              conditionalPanel("input.sidebarmenu === 'Visualization'",
                               selectInput("VisType",
@@ -40,14 +32,12 @@ sidebar <- dashboardSidebar(
                                           choices = c("Heatmap", "PCA", "t-SNE"),
                                           selected = "t-SNE")
              ),
-#     menuItem("Differential analysis", tabName="DE", icon = icon('tasks', lib="glyphicon"),
-#              menuSubItem("Monocle", tabName="DEMonocle"),
-#              menuSubItem("SCDE", tabName="DESCDE"),
-#              menuSubItem("DESeq", tabName="DEDESeq")
-#     ),
+    menuItem("Differential analysis", tabName="DE", icon = icon('tasks', lib="glyphicon"),
+             menuSubItem("DESeq2", tabName="DESeq2"),
+             menuSubItem("Monocle", tabName="Monocle"),
+             menuSubItem("SCDE", tabName="SCDE")
+    ),
     menuItem("Enrichment analysis", tabName="enrichment", icon = icon('cogs')
-#              menuSubItem("GO", tabName="GO"),
-#              menuSubItem("KEGG", tabName="KEGG")
     ),
              conditionalPanel("input.sidebarmenu === 'enrichment'",
                               selectInput("EnrichType",
@@ -342,7 +332,6 @@ body <- dashboardBody(
               ),
               tabBox(title=tagList(shiny::icon("th-large"), "t-SNE Plot"),
                      width=8, id = "tabset2", side = "right", height = "740px",
-              # box(title="t-SNE Plots", width=8, solidHeader=TRUE, status="info",
                   tabPanel("2D",
                            column(width=2, numericInput("nmftsne_perplexity", label = "Perplexity", value=10)),
                            column(width=2, br(),
@@ -681,6 +670,39 @@ body <- dashboardBody(
                 box(width=6, title="3D t-SNE Plot", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput("tsneplot_3d", height=500))
               )
             )
+    ),
+    tabItem("DESeq2",
+            fluidRow(
+              box(title="Differential Analysis Parameters", width=12, solidHeader=TRUE, status="success",
+                  fluidRow(
+                    column(width=2, selectizeInput("de_group1",
+                                                   label = "Pick one NMF group",
+                                                   choices=NULL, multiple=FALSE,
+                                                   options = list(placeholder='Choose a NMF group'))
+                    ),
+                    column(width=2, selectizeInput("de_group2",
+                                                   label = "Pick another NMF group",
+                                                   choices=NULL, multiple=FALSE,
+                                                   options = list(placeholder='Choose a NMF group'))
+                    ),
+                    column(width=2, numericInput("de_alpha", label = "alpha cutoff", min=0.01, max=0.1, value=0.05, step = 0.01)),
+                    column(width=2, br(),
+                           actionButton("runDESeq", "Run DESeq!", icon("play-circle"),
+                                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                    )
+                  ),
+                  fluidRow(
+                    column(width=8, DT::dataTableOutput('deseq_table')),
+                    column(width=4, plotlyOutput('deseq_boxplot', height = "500px"))
+                  )
+              )
+            )
+    ),
+    tabItem("Monocle",
+          h3(tagList(shiny::icon("gg"), "Under Construction .."))
+    ),
+    tabItem("SCDE",
+          h3(tagList(shiny::icon("gg"), "Under Construction .."))
     ),
     tabItem("enrichment",
             fluidRow(

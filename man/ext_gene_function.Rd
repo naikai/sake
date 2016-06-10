@@ -8,9 +8,9 @@ ext_gene_function(genelist, ensembl, attributes = c("ensembl_gene_id",
   "hgnc_symbol", "description", "gene_biotype"))
 }
 \arguments{
-\item{genelist}{}
+\item{genelist}{input genelist}
 
-\item{ensembl}{}
+\item{ensembl}{where to extract emsembl information}
 }
 \description{
 Can be extened by providing the "columan name" that we want to match in snpinfo #

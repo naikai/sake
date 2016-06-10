@@ -2,7 +2,7 @@
 % Please edit documentation in R/network_utils.R
 \name{run_CoExpression}
 \alias{run_CoExpression}
-\title{Preprocess the connecitivty matrix based on mean connectivity and binary switch 
+\title{Preprocess the connecitivty matrix based on mean connectivity and binary switch
 1. First try to remove columns (rows) that have median expression 75% quantile
 2. Convert the matrix into binary based on quantile connectivity'}
 \usage{
@@ -20,7 +20,7 @@ run_CoExpression(expdata, thresh = "soft", tao = 0.7, beta = 10,
 \item{num_features}{Number of top high connective genes to be used}
 }
 \description{
-Preprocess the connecitivty matrix based on mean connectivity and binary switch 
+Preprocess the connecitivty matrix based on mean connectivity and binary switch
 1. First try to remove columns (rows) that have median expression 75% quantile
 2. Convert the matrix into binary based on quantile connectivity'
 }

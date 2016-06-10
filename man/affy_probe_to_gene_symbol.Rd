@@ -13,7 +13,7 @@ affy_probe_to_gene_symbol(probe_id, GPL, sel.columns = "SYMBOL")
 Conversion between affy probe_ID to gene_symbol
 }
 \examples{
-gene_convert_human_to_mouse("TP53")
+affy_probe_to_gene_symbol("TP53")
 }
 \keyword{standardize}
 
