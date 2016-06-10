@@ -1010,7 +1010,8 @@ shinyServer(function(input, output, session) {
   })
 
   deseq_res <- eventReactive(input$runDESeq, {
-    register(BiocParallel::MulticoreParam(workers = cores()))
+    cores <- parallel::detectCores()
+    register(BiocParallel::MulticoreParam(workers = cores))
     colData <- data.frame(Group = paste0("NMF", nmf_groups()$nmf_subtypes))
     ddsfeatureCounts <- DESeq2::DESeqDataSetFromMatrix(countData = round(merged()),
                                                        colData = colData,
@@ -1051,8 +1052,12 @@ shinyServer(function(input, output, session) {
     gene.data <- reshape2::melt(merged()[gene, ]) %>%
                  dplyr::mutate(NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes))) %>%
                  set_colnames(c("Sample", "Expr", "NMF"))
+    gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
     plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
-            boxpoints = "all", jitter = 0.3, pointpos = 0)
+            boxpoints = "all", jitter = 0.3, pointpos = 0) %>%
+      layout(xaxis = list(title = "", zeroline=TRUE),
+             yaxis = list(title = "Expression", zeroline=TRUE),
+             showlegend=TRUE)
   })
 
 
