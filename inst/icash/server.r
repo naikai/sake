@@ -1049,7 +1049,7 @@ shinyServer(function(input, output, session) {
       need(!is.null(input$deseq_table_rows_selected), "Please select a gene")
     )
     gene <- rownames(filt_deseq_res())[input$deseq_table_rows_selected]
-    gene.data <- reshape2::melt(merged()[gene, ],  id.vars=0) %>%
+    gene.data <- reshape2::melt(merged()[gene, ]) %>%
                  dplyr::mutate(NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes))) %>%
                  set_colnames(c("Sample", "Expr", "NMF"))
     gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
@@ -1231,8 +1231,6 @@ shinyServer(function(input, output, session) {
   output$pathviewImg <- renderImage({
     go_table <- go_table()
     s.idx <- input$go_summary_rows_selected[length(input$go_summary_rows_selected)]
-    print('here')
-    print(s.idx)
     validate(
       need(length(s.idx)>0, "Please select one GO-term/KEGG pathway from above.")
     )
