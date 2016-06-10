@@ -1049,7 +1049,7 @@ shinyServer(function(input, output, session) {
       need(!is.null(input$deseq_table_rows_selected), "Please select a gene")
     )
     gene <- rownames(filt_deseq_res())[input$deseq_table_rows_selected]
-    gene.data <- reshape2::melt(merged()[gene, ]) %>%
+    gene.data <- reshape2::melt(merged()[gene, ],  id.vars=0) %>%
                  dplyr::mutate(NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes))) %>%
                  set_colnames(c("Sample", "Expr", "NMF"))
     gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
