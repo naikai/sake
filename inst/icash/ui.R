@@ -676,12 +676,12 @@ body <- dashboardBody(
               box(title="Differential Analysis Parameters", width=12, solidHeader=TRUE, status="success",
                   fluidRow(
                     column(width=2, selectizeInput("de_group1",
-                                                   label = "Pick one NMF group",
+                                                   label = "Pick first NMF group",
                                                    choices=NULL, multiple=FALSE,
                                                    options = list(placeholder='Choose a NMF group'))
                     ),
                     column(width=2, selectizeInput("de_group2",
-                                                   label = "Pick another NMF group",
+                                                   label = "Pick second NMF group",
                                                    choices=NULL, multiple=FALSE,
                                                    options = list(placeholder='Choose a NMF group'))
                     ),
