@@ -6,7 +6,6 @@ library(shinydashboard)
 library(DT)
 
 header <- dashboardHeader(
-  tags$head(tags$script(src = "google-analytics.js")),
   title = "Single-Cell NMF"
 )
 
@@ -50,6 +49,7 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
+  tags$head(tags$script(src = "google-analytics.js")),
   tabItems(
     tabItem("File",
             fluidRow(
