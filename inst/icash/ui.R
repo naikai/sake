@@ -149,8 +149,7 @@ body <- dashboardBody(
                       plotlyOutput("geneCoverage")
                   )
                 )
-            ),
-            downloadButton("downloadCsv", "Download")
+            )
     ),
     tabItem("featureSelection",
             fluidRow(

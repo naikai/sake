@@ -119,9 +119,23 @@ shinyServer(function(input, output, session) {
   })
 
   output$transdatatbl = DT::renderDataTable({
-    transform_data <- transform_data() %>% head(n=100)
+    transform_data <- transform_data()
+    filename <- fileinfo()[['name']]
     DT::datatable(transform_data, rownames= TRUE,
-                  options = list(scrollX = TRUE,
+                  extensions = 'Buttons',
+                  options = list(dom = 'Bfrtip',
+                                 buttons =
+                                   list('colvis', 'copy', 'print', list(
+                                     extend = 'collection',
+                                     buttons = list(list(extend='csv',
+                                                         filename = filename),
+                                                    list(extend='excel',
+                                                         filename = filename),
+                                                    list(extend='pdf',
+                                                         filename= filename)),
+                                     text = 'Download'
+                                   )),
+                                 scrollX = TRUE,
                                  scroller = TRUE,
                                  pageLength = 6,
                                  order=list(list(2,'desc'))
@@ -239,22 +253,18 @@ shinyServer(function(input, output, session) {
   }, height=700)
 
   #' Scatter plot
-  observe({
+  observeEvent(transform_data(), {
     transform_data <- transform_data()
-    if(!is.null(transform_data)){
-      if (length(rownames(transform_data)) > 1){
-        updateSelectizeInput(session, 'cor_sample1',
-                             server = TRUE,
-                             choices = sort(as.character(colnames(transform_data))),
-                             selected = sort(as.character(colnames(transform_data)))[1]
-        )
-        updateSelectizeInput(session, 'cor_sample2',
-                             server = TRUE,
-                             choices = sort(as.character(colnames(transform_data))),
-                             selected = sort(as.character(colnames(transform_data)))[2]
-        )
-      }
-    }
+    updateSelectizeInput(session, 'cor_sample1',
+                         server = TRUE,
+                         choices = sort(as.character(colnames(transform_data))),
+                         selected = sort(as.character(colnames(transform_data)))[1]
+    )
+    updateSelectizeInput(session, 'cor_sample2',
+                         server = TRUE,
+                         choices = sort(as.character(colnames(transform_data))),
+                         selected = sort(as.character(colnames(transform_data)))[2]
+    )
   })
   scatterData <- reactive({
     transform_data <- transform_data()
