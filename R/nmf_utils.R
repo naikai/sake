@@ -1,4 +1,4 @@
-#' Function to run NMF with different options 
+#' Function to run NMF with different options
 #'
 #' This function allows you to perform matrix factorization using Non-negative matrix factorization (NMF) method
 #' User need to provide filtered/ordered gene expression data and client info (expinfo) files
@@ -18,7 +18,7 @@
 #' @param cluster Estimated rank (clusters) in the data sets. Default is 3
 #' @param run How many runs to perform? Default is 100
 #' @param algorithm Which algorithms for NMF? (bruent, lee, nsNMF, KL, Frobenius, offset, ls-nmf, pe-nmf, siNMF). Default is brunet
-#' @param mode Which modules to run? (Estim or Real). Default is real 
+#' @param mode Which modules to run? (Estim or Real). Default is real
 #' @keywords NMF cluster
 #' @export
 #' @examples
@@ -34,7 +34,7 @@ myNMF <- function(data, prefix="NMF", cluster=3, top=1500, nrun=100, norm=F, alg
       # print(compare(res.multi.method))
       res <- res.multi.method
    }else if(mode=="real"){
-      # option 't' will toggle error track function 
+      # option 't' will toggle error track function
       res <- nmf(data, cluster, algorithm, .opt="vtp24", nrun=nrun, seed=seed, maxIter=5000)
    }
 
@@ -77,44 +77,40 @@ nmf_summary <- function(res, class=NULL, save.data=F, filename="nmf.summary.txt"
 #' @examples
 #' nmf_estim_plot(estim.r)
 nmf_estim_plot <- function(estim.r){
-   require(NMF)
-
    nmf_rank <- estim.r$measures[, 1]
    for(i in 2:ncol(estim.r$measures)){
       ylabel <- colnames(estim.r$measures)[i]
       # plot(nmf_rank, estim.r$measures[, i], type="o", xlab="Rank", ylab=ylabel)
       a <- ggplot(estim.r$measures, aes_string(x="rank", y=ylabel)) + theme_bw() + geom_point(size=4) + geom_line() +
-            theme(axis.text=element_text(size=15), axis.title=element_text(size=15)) + 
+            theme(axis.text=element_text(size=15), axis.title=element_text(size=15)) +
             ggtitle(ylabel) + theme(plot.title = element_text(lineheight=.8, size=15, face="bold"))
       print(a)
    }
 }
 
 
-#' Extract features from NMF run results 
+#' Extract features from NMF run results
 #'
 #' X = W x H
 #' W is the feature matrix, H is the sample matrix
 #' After NMF run, use this function to select import features and assign groups for the two matrix
 #' @param res NMF run results
-#' @param rawdata Original expression matrix, if we want to rank the genes by 'MAD' value across samples 
+#' @param rawdata Original expression matrix, if we want to rank the genes by 'MAD' value across samples
 #' @param manual.num How many genes to select from each of the group
-#' @param method 'total', 'default', or 'rank' 
+#' @param method 'total', 'default', or 'rank'
 #' @param math Default is 'mad': median absolute deviation
 #' @keywords NMF feature
 #' @export
 #' @examples
 #' nmf_extract_feature(nmf_res)
 nmf_extract_feature <- function(res, rawdata=NULL, manual.num=0, method="default", math="mad", FScutoff=0.9){
-   require(NMF)
-
    feature.score <- featureScore(res)
    predict.feature <- predict(res, what="features", prob=T)
 
    data.feature <- data.frame(Gene=names(feature.score),
                               featureScore=feature.score,
                               Group=predict.feature$predict,
-                              prob=predict.feature$prob, 
+                              prob=predict.feature$prob,
                               stringsAsFactors=FALSE)
    if(method=="total"){
       print("return all featureScores")
@@ -122,16 +118,16 @@ nmf_extract_feature <- function(res, rawdata=NULL, manual.num=0, method="default
       if(method=="default"){
          # extracted features for each group
          if (manual.num==0){
-            extract.feature <- extractFeatures(res) 
+            extract.feature <- extractFeatures(res)
          }else if (manual.num>0 && manual.num<=length(featureNames(res))){
-            extract.feature <- extractFeatures(res, manual.num) 
+            extract.feature <- extractFeatures(res, manual.num)
          }else{
                stop("wrong number of (manual num) features ")
          }
 
-         data.feature <- extract.feature %>% 
-                     lapply(., function(x) data.feature[x, ]) %>% 
-                     rbindlist %>% 
+         data.feature <- extract.feature %>%
+                     lapply(., function(x) data.feature[x, ]) %>%
+                     rbindlist %>%
                      as.data.frame.matrix
       }else if(method=="rank"){
          if(is.null(rawdata)){
@@ -139,11 +135,11 @@ nmf_extract_feature <- function(res, rawdata=NULL, manual.num=0, method="default
          }
          data.feature <- cbind(data.feature, math=apply(log2(rawdata+1), 1, math)) %>%
                               filter(featureScore>=FScutoff) %>%
-                              arrange(Group, dplyr::desc(math), dplyr::desc(prob)) 
+                              arrange(Group, dplyr::desc(math), dplyr::desc(prob))
          if(manual.num>0){
             data.feature <- group_by(data.feature, Group) %>%
                               top_n(manual.num, math)
-                              # filter(min_rank(desc(math))<=manual.num) 
+                              # filter(min_rank(desc(math))<=manual.num)
          }
       }
    }
@@ -151,7 +147,7 @@ nmf_extract_feature <- function(res, rawdata=NULL, manual.num=0, method="default
 }
 
 
-#' Extract groups (sample clustering) from NMF run results 
+#' Extract groups (sample clustering) from NMF run results
 #'
 #' X = W x H
 #' W is the feature matrix, H is the sample matrix
@@ -176,7 +172,7 @@ nmf_extract_group <- function(res, type="consensus", matchConseOrder=F){
                          nmf_subtypes = predict.consensus,
                          sil_width = signif(silhouette.consensus[, "sil_width"], 3))
       # If we want to display as we see in consensusmap, we just need to reoder everything.
-      # Now re-order data to match consensusmap sample order 
+      # Now re-order data to match consensusmap sample order
       if(matchConseOrder){
         sample.order <- attributes(predict.consensus)$iOrd
         data <- data[sample.order, ]
@@ -195,7 +191,7 @@ nmf_extract_group <- function(res, type="consensus", matchConseOrder=F){
 }
 
 
-#' Summary plot for NMF result 
+#' Summary plot for NMF result
 #'
 #' X = W x H
 #' W is the feature matrix, H is the sample matrix
@@ -249,18 +245,17 @@ nmf_plot <- function(res, type="consensus", subsetRow=TRUE, save.image=F, hclust
 #' @examples
 #' nmf_silhouette_plot(res)
 nmf_silhouette_plot <- function(res, type="consensus", silorder=F){
-   require(NMF)
    si <- silhouette(res, what=type)
    plot(si)
 }
 
 
-#' Select the best k from multiple consensus NMF run 
+#' Select the best k from multiple consensus NMF run
 #'
 #' X = W x H
 #' W is the feature matrix, H is the sample matrix
-#' After NMF run, use Cophenatic index to select the best k 
-#' highest value after k=2 
+#' After NMF run, use Cophenatic index to select the best k
+#' highest value after k=2
 #' @param res NMF run results
 #' @keywords NMF feature
 #' @export
@@ -274,7 +269,7 @@ nmf_select_best_k <- function(res, type="consensus"){
       data <- data.frame(Sample_ID=sampleNames(res),
                          nmf_subtypes = predict.consensus)
       # If we want to display as we see in consensusmap, we just need to reoder everything.
-      # Now re-order data to match consensusmap sample order 
+      # Now re-order data to match consensusmap sample order
       if(matchConseOrder){
         sample.order <- attributes(predict.consensus)$iOrd
         data <- data[sample.order, ]

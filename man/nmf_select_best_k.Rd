@@ -12,7 +12,7 @@ nmf_select_best_k(res, type = "consensus")
 \description{
 X = W x H
 W is the feature matrix, H is the sample matrix
-After NMF run, use Cophenatic index to select the best k 
+After NMF run, use Cophenatic index to select the best k
 highest value after k=2
 }
 \examples{

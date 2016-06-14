@@ -51,7 +51,7 @@ shinyServer(function(input, output, session) {
 
   #' Raw data
   output$rawdatatbl = DT::renderDataTable({
-    rawdata <- rawdata()
+    rawdata <- rawdata() %>% head(n=100)
     validate(
       need(ncol(rawdata)>1,
            "Please modify the parameters on the left and try again!") %then%
@@ -60,7 +60,7 @@ shinyServer(function(input, output, session) {
       need(!any(duplicated(t(rawdata))),
            "There are duplicated columns in your data, Please check and try again!")
     )
-    DT::datatable(rawdata(), rownames= TRUE,
+    DT::datatable(rawdata, rownames= TRUE,
                   options = list(scroll = TRUE,
                                  scrollX = TRUE,
                                  scrollY = TRUE,
@@ -119,7 +119,7 @@ shinyServer(function(input, output, session) {
   })
 
   output$transdatatbl = DT::renderDataTable({
-    transform_data <- transform_data()
+    transform_data <- transform_data() %>% head(n=100)
     DT::datatable(transform_data, rownames= TRUE,
                   options = list(scrollX = TRUE,
                                  scroller = TRUE,
@@ -196,6 +196,22 @@ shinyServer(function(input, output, session) {
                   )
     ) %>% formatRound(1:ncol(filter_data), 2)
   }, server=TRUE)
+
+  callModule(corModule, "sample", reactive({ merged() }),
+             tl_cex = reactive(input$cor_sam_lab_cex-0.3),
+             number_cex = reactive(input$cor_num_lab_cex-0.3),
+             type = "full",
+             diag = TRUE)
+  callModule(corModule, "gene", reactive({ t(merged()) }),
+             tl_cex = reactive(input$cor_sam_lab_cex-0.3),
+             number_cex = reactive(0.001))
+  callModule(corModule, "totalsample", reactive({ transform_data() }),
+             tl_cex = reactive(input$cor_sam_lab_cex),
+             number_cex = reactive(input$cor_num_lab_cex),
+             type = "upper",
+             diag = FALSE,
+             height=700
+  )
 
   #' Sample correlation plot
   output$sampleCorPlot <- renderPlot({
@@ -339,7 +355,13 @@ shinyServer(function(input, output, session) {
   })
 
   ### Main part of the program ###
-  # nmf_res <- reactive({
+  nmf_seed <- eventReactive(input$runNMF, {
+    nmf_seed <- as.numeric(input$nmf_seed)
+    if(nmf_seed == 0){
+      set.seed(as.integer(Sys.time()))
+      sample(1:999999, 1)
+    }
+  })
   nmf_res <- eventReactive(input$runNMF, {
     merged <- merged()
     validate(
@@ -353,7 +375,8 @@ shinyServer(function(input, output, session) {
                    mode=input$mode,
                    cluster=input$num_cluster,
                    nrun=input$nrun,
-                   algorithm = input$algorithm
+                   algorithm = input$algorithm,
+                   seed = nmf_seed()
       )
     })
 
@@ -366,6 +389,7 @@ shinyServer(function(input, output, session) {
 
   ### Estimate K ###
   runSummary <- reactive({
+    req(class(nmf_res()) == "NMF.rank")
     nmf_res <- nmf_res()
     summary <- nmf_summary(nmf_res)
     if(input$mode=="estim"){
@@ -376,23 +400,16 @@ shinyServer(function(input, output, session) {
   output$estimSummary = DT::renderDataTable({
     runSummary <- runSummary()
     DT::datatable(runSummary, rownames= TRUE,
-                  extensions = c('Buttons'),
-                  options = list(dom = 'Bfrtip',
-                                 buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+                  options = list(scrollX = TRUE
                   )
     ) %>% formatRound(1:ncol(runSummary), 2)
   }, server=TRUE)
 
-#   output$estimSummary <- renderTable({
-#     validate(
-#       need(input$mode=="estim", "This is only for estimating number of K\nPlease Try other tabs")
-#     )
-#     runSummary()
-#     }, sanitize.text.function = function(x) x, options = list(orderClasses = TRUE, lengthMenu = c(10,25,50,100, NROW(merged)), pageLength=25)
-#   )
   output$estimPlot <- renderPlot({
+    print("class")
+    print(class(nmf_res()))
     validate(
-      need(input$mode=="estim", "This is only for estimating number of K\nPlease Try other tabs")
+      need(class(nmf_res()) == "NMF.rank", "Seems like you haven't run NMF 'estim run' yet")
     )
     nmf_res <- nmf_res()
     if(input$estimtype=="consensus"){
@@ -406,7 +423,7 @@ shinyServer(function(input, output, session) {
   ### NMF plots ###
   output$nmfplot <- renderPlot({
     validate(
-      need(input$mode=="real", "This part won't work for eastimating k\nPlease Try 'run_statistics' tab")
+      need(class(nmf_res()) == "NMFfitX1", "Seems like you haven't run NMF 'real' run yet")
     )
     nmf_res <- nmf_res()
     nmf_plot(nmf_res, type=input$plottype, silorder=T,
@@ -415,7 +432,7 @@ shinyServer(function(input, output, session) {
 
   output$silhouetteplot <- renderPlot({
     validate(
-      need(input$mode=="real", "This part won't work for eastimating k\nPlease Try 'run_statistics' tab")
+      need(class(nmf_res()) == "NMFfitX1", "Seems like you haven't run NMF 'real' run yet")
     )
     nmf_res <- nmf_res()
     nmf_silhouette_plot(nmf_res, type=input$plottype)
@@ -425,12 +442,10 @@ shinyServer(function(input, output, session) {
   ### NMF results
   nmf_groups <- reactive({
     validate(
-      need(input$mode=="real", "This part won't work for Estimate k\nPlease Try Real run")
+      need(class(nmf_res()) == "NMFfitX1", "Seems like you haven't run NMF 'real' run yet")
     )
     nmf_res <- nmf_res()
-    n <- 2
-    withProgress(message = 'Extracting Groups info', value = 0, {
-      incProgress(1/n, detail = "Takes around 5~10 seconds")
+    withProgress(message = 'Extracting Groups info', value = NULL, {
       nmf_extract_group(nmf_res, matchConseOrder = input$matchOrder, type=input$predict )
     })
   })
@@ -503,7 +518,6 @@ shinyServer(function(input, output, session) {
       }
     }
     nmf_tsne_res <- tsne_2d$data
-    # print(head(nmf_tsne_res))
     naikai <- plot_tsne(nmf_tsne_res, color=color, alpha=input$plot_point_alpha,
                         add.label = input$plot_label, save.plot=F, real.plot=F,
                         add.legend = input$plot_legend,
@@ -527,7 +541,8 @@ shinyServer(function(input, output, session) {
 
   nmf_features <- reactive({
     validate(
-      need(input$mode=="real", "This part won't work for eastimating k\nPlease Try NMF 'Realrun'")
+      need(input$mode=="real", "This part won't work for eastimating k\nPlease Try NMF 'Realrun'") %then%
+      need(class(nmf_res())=="NMFfitX1", "Please rerun NMF with 'real run'")
     )
     nmf_res <- nmf_res()
     # add more options to select features here. then compare with ClaNC
