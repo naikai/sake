@@ -459,7 +459,6 @@ shinyServer(function(input, output, session) {
     if(is.null(event.data) == TRUE){
       sel_idx <- NULL
     }else{
-      print(event.data)
       sel_idx <- subset(event.data, curveNumber == 0)$pointNumber + 1
     }
     DT::datatable(nmf_groups, rownames=FALSE, escape=-1,
@@ -512,9 +511,9 @@ shinyServer(function(input, output, session) {
     point_size <- input$plot_point_size - 6
     if(input$nmf_prob){
       if(input$predict=="consensus"){
-        point_size <- point_size * (1-nmf_groups()$sil_width)
+        point_size <- point_size + point_size * (1-nmf_groups()$sil_width)
       }else if(input$predict == "samples"){
-        point_size <- point_size * (1-nmf_groups()$prob)
+        point_size <- point_size + point_size * (1-nmf_groups()$prob)
       }
     }
     nmf_tsne_res <- tsne_2d$data
@@ -523,11 +522,13 @@ shinyServer(function(input, output, session) {
                         add.legend = input$plot_legend,
                         point.size=point_size, label.size=input$plot_label_size)
     ### Check if user select rows (samples)
-    s = input$nmfGroups_ected
+    s = input$nmfGroups_rows_selected
     if (length(s)){
-      sub_color <- create.brewer.color(nmf_groups()$nmf_subtypes, length(unique(color)), "naikai")
-      sub_tsne_res <- parse_tsne_res(nmf_tsne_res) %>% as.data.frame %>% dplyr::slice(s)
-      naikai <- naikai + geom_point(data=sub_tsne_res, aes(x=x, y=y), size=point_size+2, colour=sub_color[s], alpha=input$plot_point_alpha)
+      if(!input$nmf_prob){
+        sub_color <- create.brewer.color(nmf_groups()$nmf_subtypes, length(unique(color)), "naikai")
+        sub_tsne_res <- parse_tsne_res(nmf_tsne_res) %>% as.data.frame %>% dplyr::slice(s)
+        naikai <- naikai + geom_point(data=sub_tsne_res, aes(x=x, y=y), size=point_size+2, colour=sub_color[s], alpha=input$plot_point_alpha)
+      }
     }
     p <- ggplotly(naikai, source="nmfGroups") %>% layout(dragmode = "select")
     return(p)

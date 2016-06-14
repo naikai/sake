@@ -49,6 +49,7 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
+  tags$head(tags$script(src = "google-analytics.js")),
   tabItems(
     tabItem("File",
             fluidRow(
