@@ -31,8 +31,10 @@ Imports:
     Rtsne,
     shiny,
     shinythemes,
+    shinyBS,
     shinydashboard,
     snowfall,
+    tidyr,
     tools
 Suggests:
     annotate,

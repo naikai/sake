@@ -1070,15 +1070,31 @@ shinyServer(function(input, output, session) {
   })
 
   output$deseq_table <- DT::renderDataTable({
+    filename <- fileinfo()[['name']]
     GeneCard <- paste0("<a href='http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
                        rownames(filt_deseq_res()), "'>", rownames(filt_deseq_res()), "</a>")
     filt_res <- data.frame(Gene=GeneCard,
                            filt_deseq_res())
     DT::datatable(filt_res, selection='single', rownames=FALSE,
-                  options = list(pageLength=12,
+                  extensions = 'Buttons',
+                  escape = FALSE,
+                  options = list(dom = 'Bfrtip',
+                                 buttons =
+                                   list('colvis', 'copy', 'print', list(
+                                     extend = 'collection',
+                                     buttons = list(list(extend='csv',
+                                                         filename = filename),
+                                                    list(extend='excel',
+                                                         filename = filename),
+                                                    list(extend='pdf',
+                                                         filename= filename)),
+                                     text = 'Download'
+                                   )),
+                                 # scrollX = TRUE,
                                  scrollY = TRUE,
-                                 autoWidth = TRUE),
-                  escape = FALSE
+                                 pageLength = 12,
+                                 autoWidth = TRUE
+                  )
     ) %>% formatRound(2:ncol(filt_res), 3)
   }, server = TRUE)
 
@@ -1091,6 +1107,8 @@ shinyServer(function(input, output, session) {
                  dplyr::mutate(NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes))) %>%
                  set_colnames(c("Sample", "Expr", "NMF"))
     gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
+    # print(head(gene.data))
+
     plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
             boxpoints = "all", jitter = 0.3, pointpos = 0) %>%
       layout(xaxis = list(title = "", zeroline=TRUE),

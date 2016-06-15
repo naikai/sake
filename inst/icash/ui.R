@@ -117,39 +117,38 @@ body <- dashboardBody(
             )
     ),
     tabItem("datametrics",
-            box(title="Datatable", width=12, solidHeader=TRUE, status="success",
-                box(
-                  width=12,
+            fluidRow(
+              box(title="Datatable", width=12, solidHeader=TRUE, status="success",
                   fluidRow(
-                           column(width=6,
-                                  selectInput("normdata", label = "Normalization",
-                                        choices = list("RPM normalization" = "takeRPM",
-                                                       "DESeq size factor normalization" = "takesizeNorm",
-                                                       "None" = "none"),
-                                        selected = "none")
-                           ),
-                           column(width=6,
-                                  selectInput("transformdata", label = "Transformation",
-                                        choices = list("Variance Stablizing Transformation (VST)" = "takevst",
-                                                       "Log transformation" = "takelog",
-                                                       "None" = "none"),
-                                        selected = "none")
-                           )
-                  )
-                ),
-                fluidRow(
-                  box(width=12,
-                      DT::dataTableOutput('transdatatbl')
-                  )
-                ),
-                fluidRow(
-                  box(title="Read Distribution", width=6, solidHeader=TRUE, status="info",
-                      plotlyOutput("readDistrib")
+                    column(width=6,
+                           selectInput("normdata", label = "Normalization",
+                                       choices = list("RPM normalization" = "takeRPM",
+                                                      "DESeq size factor normalization" = "takesizeNorm",
+                                                      "None" = "none"),
+                                       selected = "none")
+                    ),
+                    column(width=6,
+                           selectInput("transformdata", label = "Transformation",
+                                       choices = list("Variance Stablizing Transformation (VST)" = "takevst",
+                                                      "Log transformation" = "takelog",
+                                                      "None" = "none"),
+                                       selected = "none")
+                    )
                   ),
-                  box(title="Gene Coverage", width=6, solidHeader=TRUE, status="info",
-                      plotlyOutput("geneCoverage")
+                  fluidRow(
+                    box(width=12,
+                        DT::dataTableOutput('transdatatbl')
+                    )
+                  ),
+                  fluidRow(
+                    box(title="Read Distribution", width=6, solidHeader=TRUE, status="info",
+                        plotlyOutput("readDistrib")
+                    ),
+                    box(title="Gene Coverage", width=6, solidHeader=TRUE, status="info",
+                        plotlyOutput("geneCoverage")
+                    )
                   )
-                )
+              )
             )
     ),
     tabItem("featureSelection",
@@ -253,17 +252,23 @@ body <- dashboardBody(
                                        label = "Which module?",
                                        choices = c("Estimate number of k" = "estim",
                                                    "Real run" = "real"),
-                                       selected = "real")
+                                       selected = "real"),
+                           bsTooltip("mode", "We recommend you run estimate number of cluster (k) first <br> Then use the best estimate cluster (k) for real run",
+                                     "right", options = list(container = "body"))
                     ),
                     column(width=2,
                            numericInput("num_cluster",
                                         label = "Estimate clusters",
-                                        min=2, max=10, value=2, step=1)
+                                        min=2, max=10, value=2, step=1),
+                           bsTooltip("num_cluster", "Run NMF using k from 2 to your selection",
+                                     "right", options = list(container = "body"))
                     ),
                     column(width=2,
                            numericInput("nrun",
                                         label = "Num of runs",
-                                        min=10, max=200, value=7, step=10)
+                                        min=10, max=200, value=7, step=10),
+                           bsTooltip("nrun", "Recommend 20-30 for estimate k <br> 50-100 for real run",
+                                     "right", options = list(container = "body"))
                     ),
                     column(width=2,
                            selectInput("algorithm",
@@ -275,7 +280,9 @@ body <- dashboardBody(
                            selectInput("nmf_seed",
                                        label = "Random seed",
                                        choices = c("Yes"=0, "No"=123211),
-                                       selected = 123211)
+                                       selected = 123211),
+                           bsTooltip("nmf_seed", "Whether use random starting seed for your run <br> Default: fixed seed",
+                                     "right", options = list(container = "body"))
                     ),
                     column(width=2, br(),
                            actionButton("runNMF", "Run NMF!", icon("play-circle"),
@@ -690,12 +697,12 @@ body <- dashboardBody(
               box(title="Differential Analysis Parameters", width=12, solidHeader=TRUE, status="success",
                   fluidRow(
                     column(width=2, selectizeInput("de_group1",
-                                                   label = "Pick first NMF group",
+                                                   label = "Reference group",
                                                    choices=NULL, multiple=FALSE,
                                                    options = list(placeholder='Choose a NMF group'))
                     ),
                     column(width=2, selectizeInput("de_group2",
-                                                   label = "Pick second NMF group",
+                                                   label = "Treatment group",
                                                    choices=NULL, multiple=FALSE,
                                                    options = list(placeholder='Choose a NMF group'))
                     ),
