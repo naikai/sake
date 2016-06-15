@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyBS)
 library(plotly)
 library(d3heatmap)
 library(shinythemes)
@@ -699,6 +700,10 @@ body <- dashboardBody(
                                                    options = list(placeholder='Choose a NMF group'))
                     ),
                     column(width=2, numericInput("de_alpha", label = "alpha cutoff", min=0.01, max=0.1, value=0.05, step = 0.01)),
+                    column(width=2, selectInput("de_conv2int", label = "Force convert to integer",
+                                                choices = c("Yes" = TRUE, "No" = FALSE),
+                                                selected = FALSE)
+                    ),
                     column(width=2, br(),
                            actionButton("runDESeq", "Run DESeq!", icon("play-circle"),
                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
@@ -707,6 +712,9 @@ body <- dashboardBody(
                   fluidRow(
                     column(width=8, DT::dataTableOutput('deseq_table')),
                     column(width=4, plotlyOutput('deseq_boxplot', height = "500px"))
+                  ),
+                  fluidRow(
+                    column(width=12, bsAlert("alert"))
                   )
               )
             )

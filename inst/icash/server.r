@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyBS)
 library(ggplot2)
 library(data.table)
 library(magrittr)
@@ -55,8 +56,6 @@ shinyServer(function(input, output, session) {
     validate(
       need(ncol(rawdata)>1,
            "Please modify the parameters on the left and try again!") %then%
-      # need(!any(duplicated(rawdata)),
-      #      "There are duplicated rows in your data, Please check and try again!") %then%
       need(!any(duplicated(t(rawdata))),
            "There are duplicated columns in your data, Please check and try again!")
     )
@@ -136,8 +135,8 @@ shinyServer(function(input, output, session) {
                                      text = 'Download'
                                    )),
                                  scrollX = TRUE,
-                                 scroller = TRUE,
-                                 pageLength = 6,
+                                 scrollY = TRUE,
+                                 pageLength = 8,
                                  order=list(list(2,'desc'))
                   )
     ) %>% formatRound(1:ncol(transform_data), 2)
@@ -1036,10 +1035,23 @@ shinyServer(function(input, output, session) {
   })
 
   deseq_res <- eventReactive(input$runDESeq, {
+    rawdata <- rawdata()
+    if(input$de_conv2int)
+      rawdata <- round(rawdata)
+
+    if(!all(sapply(rawdata, is.whole))){
+      createAlert(session, "alert", "exampleAlert", title = "Oops", style = "warning",
+                  content = "Data contains non-integer value, Please use raw count data for DESeq2. <br>
+                             Or Use the option above to 'Force convert to integer'",
+                  append = FALSE)
+    }else{
+      closeAlert(session, "exampleAlert")
+    }
+
     cores <- parallel::detectCores()
     register(BiocParallel::MulticoreParam(workers = cores))
     colData <- data.frame(Group = paste0("NMF", nmf_groups()$nmf_subtypes))
-    ddsfeatureCounts <- DESeq2::DESeqDataSetFromMatrix(countData = round(merged()),
+    ddsfeatureCounts <- DESeq2::DESeqDataSetFromMatrix(countData = rawdata,
                                                        colData = colData,
                                                        design = ~ Group)
     ### Set betaPrior=FALSE to go with MLE LFC to get simple LFC = (avg in group2/ avg in group1)

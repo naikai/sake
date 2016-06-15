@@ -106,6 +106,17 @@ extract_data_by_mad <- function (data, topN=100, by="row", type="data"){
   }
 }
 
+#' Check whether it is a integer whole value
+#'
+#' @export
+is.whole <- function(a, tol = 1e-7) {
+  is.eq <- function(x,y) {
+    r <- all.equal(x,y, tol=tol)
+    is.logical(r) && r
+  }
+  (is.numeric(a) && is.eq(a, floor(a))) ||
+    (is.complex(a) && {ri <- c(Re(a),Im(a)); is.eq(ri, floor(ri))})
+}
 
 #' Use data.table for faster read.table
 #'
