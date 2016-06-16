@@ -462,8 +462,8 @@ shinyServer(function(input, output, session) {
   })
   output$nmfGroups <- DT::renderDataTable({
     nmf_groups <- nmf_groups()
+    filename <- "nmf_groups"
     colnames(nmf_groups)[which(colnames(nmf_groups)=="nmf_subtypes")] <- "Group"
-
     # Get subset based on selection from scatter plot
     event.data <- event_data("plotly_selected", source = "nmfGroups")
     # If NULL dont do anything
@@ -474,12 +474,25 @@ shinyServer(function(input, output, session) {
     }
     DT::datatable(nmf_groups, rownames=FALSE, escape=-1,
                   selection = list(selected = sel_idx),
-                  options = list(pageLength=10,
-                                 searching=FALSE,
+                  extensions = 'Buttons',
+                  options = list(dom = 'Bfrtip',
+                                 buttons =
+                                   list('copy', 'print', list(
+                                     extend = 'collection',
+                                     buttons = list(list(extend='csv',
+                                                         filename = filename),
+                                                    list(extend='excel',
+                                                         filename = filename),
+                                                    list(extend='pdf',
+                                                         filename= filename)),
+                                     text = 'Download'
+                                   )),
                                  scrollX = TRUE,
+                                 pageLength = 10,
+                                 autoWidth = TRUE,
                                  order=list(list(2,'desc'))
                   )
-    )
+    ) %>% formatRound(2:ncol(nmf_groups), 3)
   }, server=TRUE)
 
   # Add t-SNE plot next to NMF group
@@ -1095,7 +1108,6 @@ shinyServer(function(input, output, session) {
                                                          filename= filename)),
                                      text = 'Download'
                                    )),
-                                 # scrollX = TRUE,
                                  scrollY = TRUE,
                                  pageLength = 12,
                                  autoWidth = TRUE
@@ -1203,6 +1215,8 @@ shinyServer(function(input, output, session) {
       pathview.species <- "hsa"
     }else if(species == "Mouse" | species == "mouse" | species == "mm9" | species == "mmu"){
       pathview.species <- "mmu"
+    }else if(species == "Drosophila" | species == "dm3" | species == "dm6"){
+      pathview.species <- "dm3"
     }
   })
   id.org <- reactive({

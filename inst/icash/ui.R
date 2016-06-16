@@ -304,6 +304,10 @@ body <- dashboardBody(
                                                   choices = c("Quality measures" = "quality",
                                                               "Consensus matrics" = "consensus"),
                                                   selected = "consensus")
+                      ),
+                      column(width=3, br(),
+                             actionButton("dl_estim_plot", "Download", icon("cloud-download"),
+                                          style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
                       )
                     ),
                     fluidRow(
@@ -326,6 +330,10 @@ body <- dashboardBody(
                                                   label = "What kind of plot?",
                                                   choices = c("samples", "features", "consensus"),
                                                   selected = "samples")
+                      ),
+                      column(width=3, br(),
+                             actionButton("dl_estim_plot", "Download", icon("cloud-download"),
+                                          style="color: #fff; background-color: #8E24BF; border-color:#9932CC")
                       )
                     ),
                     fluidRow(
@@ -348,7 +356,9 @@ body <- dashboardBody(
                                 choices = c("consensus", "samples"),
                                 selected = "consensus"),
                            checkboxInput('matchOrder', 'Match original sample order for result?', FALSE),
-                           checkboxInput('nmf_prob', 'Change point size based on prob?', FALSE),
+                           checkboxInput('nmf_prob', 'Change dot size based on probability?', FALSE),
+                           bsTooltip("nmf_prob", "Samples with higher uncertainty (lower probability of being correctly assigned) will become larger dots",
+                                     "right", options = list(container = "body")),
                            DT::dataTableOutput('nmfGroups')
                     )
                   )
@@ -736,17 +746,23 @@ body <- dashboardBody(
     ),
     tabItem("enrichment",
             fluidRow(
-              box(title="Pathway Analysis", width=12, solidHeader=TRUE, status="success",
+              box(title="Enrichment Analysis Parameters", width=12, solidHeader=TRUE, status="success",
                   fluidRow(
-                    column(width=2, selectizeInput("pathway_group",
-                                                   label = "Pick one NMF group?",
-                                                   choices=NULL, multiple=FALSE,
-                                                   options = list(placeholder='Choose a NMF group'))
+                    column(width=2,
+                           selectizeInput("pathway_group",
+                                          label = "Pick one NMF group",
+                                          choices=NULL, multiple=FALSE,
+                                          options = list(placeholder='Choose a NMF group')),
+                           bsTooltip("pathway_group", "Choose one NMF group to perform pathway enrichment test",
+                                     "right", options = list(container = "body"))
                     ),
-                    column(width=2, selectInput("species",
-                                                label = "Species",
-                                                choices = c("Human", "Mouse"),
-                                                selected = "Human")
+                    column(width=2,
+                           selectInput("species",
+                                       label = "Species",
+                                       choices = c("Human", "Mouse"),
+                                       selected = "Human"),
+                           bsTooltip("species", "Default set to Human <br>Please select the corresponding species for your data, the program will run the conversion if necessary",
+                                     "right", options = list(container = "body"))
                     ),
                     conditionalPanel(
                       condition = "input.EnrichType == 'GO'",
@@ -761,26 +777,26 @@ body <- dashboardBody(
                   conditionalPanel(
                     condition = "input.enrichmoreopt == true",
                     fluidRow(
+                      column(width=2, selectInput("rank_method",
+                                                  label = "Rank genes by?",
+                                                  choices = c("NMF FeatureScore"="featureScore",
+                                                              "Log Fold Change" = "logFC"),
+                                                  selected = "logFC")
+                      ),
+                      column(width=2, selectInput("pathway_mode",
+                                                  label = "What kind of results?",
+                                                  choices = c("Enrichment Analysis" = "enrich",
+                                                              "Expr logFC btw groups" = "logFC"),
+                                                  selected = "enrich")
+                      ),
                       column(width=3, selectInput("samedir",
                                                   label = "Require logFC in same direction",
                                                   choices = c("Yes"=TRUE, "NO"=FALSE),
                                                   selected = TRUE)
                       ),
                       column(width=2, sliderInput("min_rowMean",
-                                                  label = "Min mean expression cutoff:",
+                                                  label = "Min expression cutoff:",
                                                   min=0, max=10, value=0.5, step=0.05)
-                      ),
-                      column(width=2, selectInput("rank_method",
-                                                  label = "How to rank the genes",
-                                                  choices = c("By featureScore from NMF"="featureScore",
-                                                              "By Log Fold Change" = "logFC"),
-                                                  selected = "logFC")
-                      ),
-                      column(width=2, selectInput("pathway_mode",
-                                                  label = "Enrichment Analysis or Raw LogFC?",
-                                                  choices = c("Enrichment Analysis" = "enrich",
-                                                              "Expression log Fold Change across groups" = "logFC"),
-                                                  selected = "enrich")
                       )
                     )
                   )
