@@ -463,7 +463,9 @@ shinyServer(function(input, output, session) {
         nmf_plot(nmf_res, type="features", silorder=T,
                  subsetRow = ifelse(input$select_feature_num>0, as.numeric(input$select_feature_num), TRUE ))
         nmf_plot(nmf_res, type="consensus")
-        print(plottsne())
+        if(!is.null(tsne_2d$data)){
+          print(nmfplottsne())
+        }
       }
       dev.off()
     }
@@ -486,7 +488,6 @@ shinyServer(function(input, output, session) {
     colnames(nmf_groups)[which(colnames(nmf_groups)=="nmf_subtypes")] <- "Group"
     # Get subset based on selection from scatter plot
     event.data <- event_data("plotly_selected", source = "nmfGroups")
-    # If NULL dont do anything
     if(is.null(event.data) == TRUE){
       sel_idx <- NULL
     }else{
@@ -508,7 +509,7 @@ shinyServer(function(input, output, session) {
                                      text = 'Download'
                                    )),
                                  scrollX = TRUE,
-                                 pageLength = 10,
+                                 pageLength = 8,
                                  autoWidth = TRUE,
                                  order=list(list(2,'desc'))
                   )
@@ -630,8 +631,25 @@ shinyServer(function(input, output, session) {
     return(merged)
   })
   output$nmfFeatures <- DT::renderDataTable({
-    datatable(nmf_features_annot(), rownames=FALSE, escape=-1, options = list(pageLength=50))
-  })
+    DT::datatable(nmf_features_annot(), rownames=FALSE, escape=-1,
+                  extensions = 'Buttons',
+                  options = list(dom = 'Bfrtip',
+                                 buttons =
+                                   list('copy', 'print', list(
+                                     extend = 'collection',
+                                     buttons = list(list(extend='csv',
+                                                         filename = filename),
+                                                    list(extend='excel',
+                                                         filename = filename),
+                                                    list(extend='pdf',
+                                                         filename= filename)),
+                                     text = 'Download'
+                                   )),
+                                 pageLength = 50,
+                                 autoWidth = TRUE
+                  )
+    )
+  }, server = TRUE)
 
   ori_plus_nmfResult <-reactive({
     rawdata <- rawdata()

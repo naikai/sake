@@ -332,8 +332,10 @@ body <- dashboardBody(
                                                   selected = "samples")
                       ),
                       column(width=3, br(),
-                             actionButton("dl_nmf_realplot", "Download", icon("cloud-download"),
-                                          style="color: #fff; background-color: #8E24BF; border-color:#9932CC")
+                             downloadButton("dl_nmf_realplot", "Download", class="butt"),
+                                          # icon("cloud-download"),
+                                          # style="color: #fff; background-color: #8E24BF; border-color:#9932CC")
+                             tags$head(tags$style(".butt{background-color:#8E24BF;} .butt{color: white;} .butt{border-color:$9932CC;}"))
                       )
                     ),
                     fluidRow(
@@ -592,8 +594,8 @@ body <- dashboardBody(
                       condition = "input.heat_opttype == 'labels'",
                       fluidRow(
                         column(width=2, textInput("title", label= "Figure title", value=NULL)),
-                        column(width=2, numericInput("cexRow", label = "Row LabelSize:", value=0.8, step=0.1)),
-                        column(width=2, numericInput("cexCol", label = "Col LabelSize:", value=0.7, step=0.1)),
+                        column(width=2, numericInput("cexRow", label = "Row LabelSize:", value=0.5, step=0.1)),
+                        column(width=2, numericInput("cexCol", label = "Col LabelSize:", value=0.4, step=0.1)),
                         column(width=3, selectInput('row_legend', label='Show legend for RowSide Colors?',
                                                     choices = c("Yes" = TRUE, "No" = FALSE))),
                         column(width=3, selectInput('col_legend', label='Show legend for ColumnSide Colors?',
