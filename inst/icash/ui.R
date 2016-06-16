@@ -260,7 +260,7 @@ body <- dashboardBody(
                            numericInput("num_cluster",
                                         label = "Estimate clusters",
                                         min=2, max=10, value=2, step=1),
-                           bsTooltip("num_cluster", "Run NMF using k from 2 to your selection",
+                           bsTooltip("num_cluster", "For Estimate number of k, it will run NMF from 2 to k clusters <br><br> For Real run, it will run NMF for that specific k cluster",
                                      "right", options = list(container = "body"))
                     ),
                     column(width=2,
@@ -272,16 +272,18 @@ body <- dashboardBody(
                     ),
                     column(width=2,
                            selectInput("algorithm",
-                                       label = "NMF algorithm?",
+                                       label = "NMF algorithm",
                                        choices = c("brunet", "lee", "nsNMF", "KL", "Frobenius"),
-                                       selected = "brunet")
+                                       selected = "brunet"),
+                           bsTooltip("algorithm", "Different NMF algorithms",
+                                     "right", options = list(container = "body"))
                     ),
                     column(width=2,
                            selectInput("nmf_seed",
                                        label = "Random seed",
                                        choices = c("Yes"=0, "No"=123211),
                                        selected = 123211),
-                           bsTooltip("nmf_seed", "Whether use random starting seed for your run <br> Default: fixed seed",
+                           bsTooltip("nmf_seed", "Whether to use random starting condition for NMF run <br> Default: fixed seed",
                                      "right", options = list(container = "body"))
                     ),
                     column(width=2, br(),

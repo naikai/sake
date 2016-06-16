@@ -374,7 +374,9 @@ shinyServer(function(input, output, session) {
   nmf_res <- eventReactive(input$runNMF, {
     merged <- merged()
     validate(
-      need(input$num_cluster<=ncol(merged), "Number of clusters(K) must be smaller than number of samples\nPlease Try selecting another K")
+      need(is.numeric(input$num_cluster) & is.whole(input$num_cluster) & input$num_cluster>1, "Please provide a valid positive numeric integer value for 'Num of clusters(K)'") %then%
+      need(input$num_cluster <= ncol(merged), "Number of clusters(K) must be smaller than number of samples\nPlease Try selecting another K") %then%
+      need(is.numeric(input$nrun) & is.whole(input$nrun) & input$nrun>1, "Please provide a valid numeric integer value for 'nrun'")
     )
     ptm <- proc.time()
     n <- 2
@@ -1021,7 +1023,10 @@ shinyServer(function(input, output, session) {
 
 
   ### DESeq2 ###
-  observe({
+  observeEvent(input$runNMF, {
+    validate(
+      need(is.numeric(input$num_cluster), "num of cluster is not a valid numeric number")
+    )
     updateSelectizeInput(session, 'de_group1',
                          server = TRUE,
                          choices = as.character(paste0("NMF", 1:input$num_cluster)),
@@ -1119,6 +1124,9 @@ shinyServer(function(input, output, session) {
 
   ### Pathway analysis ###
   nmf_group_feature_rank <- reactive({
+    validate(
+      need(is.numeric(input$num_cluster), "num of cluster is not a numeric value")
+    )
     rawdata <- transform_data()
     rawdata <- rawdata[rowMeans(rawdata) >= input$min_rowMean, ]
     nmf.group <- nmf_groups()$nmf_subtypes
@@ -1182,7 +1190,7 @@ shinyServer(function(input, output, session) {
     cpus[min(which(sapply(cpus, function(x) input$nPerm%%x)==0))]
   })
 
-  observe({
+  observeEvent(input$runNMF, {
     updateSelectizeInput(session, 'pathway_group',
                          server = TRUE,
                          choices = as.character(paste0("NMF", 1:input$num_cluster))
