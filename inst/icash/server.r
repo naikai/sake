@@ -1107,12 +1107,19 @@ shinyServer(function(input, output, session) {
     validate(
       need(!is.null(input$deseq_table_rows_selected), "Please select a gene")
     )
+    norm.data <- DESeq2::counts(deseq_res(), normalized=TRUE)
     gene <- rownames(filt_deseq_res())[input$deseq_table_rows_selected]
-    gene.data <- reshape2::melt(merged()[gene, ]) %>%
-                 dplyr::mutate(NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes))) %>%
-                 set_colnames(c("Sample", "Expr", "NMF"))
+    gene.data <- norm.data[gene, ]
+    # gene.data <- reshape2::melt(norm.data[gene, ])
+    print(gene.data)
+    print(class(gene.data))
+    gene.data <- data.frame(Sample = names(gene.data),
+                            Expr = gene.data,
+                            NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
+    # gene.data <- reshape2::melt(norm.data[gene, ]) %>%
+    #              dplyr::mutate(NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes))) %>%
+    #              set_colnames(c("Sample", "Expr", "NMF"))
     gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
-    # print(head(gene.data))
 
     plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
             boxpoints = "all", jitter = 0.3, pointpos = 0) %>%
