@@ -306,8 +306,8 @@ body <- dashboardBody(
                                                   selected = "consensus")
                       ),
                       column(width=3, br(),
-                             actionButton("dl_estim_plot", "Download", icon("cloud-download"),
-                                          style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                             actionButton("dl_nmf_estimplot", "Download", icon("cloud-download"),
+                                          style="color: #fff; background-color: #8E24BF; border-color:#9932CC")
                       )
                     ),
                     fluidRow(
@@ -332,7 +332,7 @@ body <- dashboardBody(
                                                   selected = "samples")
                       ),
                       column(width=3, br(),
-                             actionButton("dl_estim_plot", "Download", icon("cloud-download"),
+                             actionButton("dl_nmf_realplot", "Download", icon("cloud-download"),
                                           style="color: #fff; background-color: #8E24BF; border-color:#9932CC")
                       )
                     ),

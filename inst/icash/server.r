@@ -417,8 +417,6 @@ shinyServer(function(input, output, session) {
   }, server=TRUE)
 
   output$estimPlot <- renderPlot({
-    print("class")
-    print(class(nmf_res()))
     validate(
       need(class(nmf_res()) == "NMF.rank", "Seems like you haven't run NMF 'estim run' yet")
     )
@@ -448,6 +446,28 @@ shinyServer(function(input, output, session) {
     nmf_res <- nmf_res()
     nmf_silhouette_plot(nmf_res, type=input$plottype)
   },height = 777)
+
+  output$dl_nmf_realplot <- downloadHandler(
+    filename <- function() {
+      paste(file_prefix(), input$mode, "nmf.pdf", sep=".")
+    },
+    content = function(file) {
+      nmf_res <- nmf_res()
+      pdf(file, width=12, height=12)
+      if(input$mode == "estim"){
+        consensusmap(nmf_res)
+        print(plot(nmf_res))
+        nmf_estim_plot(nmf_res)
+      }else if(input$mode == "real"){
+        nmf_plot(nmf_res, type="samples", silorder=T)
+        nmf_plot(nmf_res, type="features", silorder=T,
+                 subsetRow = ifelse(input$select_feature_num>0, as.numeric(input$select_feature_num), TRUE ))
+        nmf_plot(nmf_res, type="consensus")
+        print(plottsne())
+      }
+      dev.off()
+    }
+  )
 
 
   ### NMF results
@@ -878,8 +898,8 @@ shinyServer(function(input, output, session) {
       color = color(),
       Colv = Colv(),
       Rowv = Rowv(),
-      cexCol=input$cexRow - 0.2,
-      cexRow=input$cexCol - 0.1,
+      cexCol=input$cexRow,
+      cexRow=input$cexCol,
       na.rm = T,
       show_grid = FALSE,
       dendrogram = "both",
@@ -1329,27 +1349,6 @@ shinyServer(function(input, output, session) {
   }, deleteFile = FALSE)
 
   ### Download NMF ###
-  output$downloadPlot <- downloadHandler(
-    filename <- function() {
-      paste(file_prefix(), input$mode, "nmf.pdf", sep=".")
-    },
-    content = function(file) {
-      nmf_res <- nmf_res()
-      pdf(file, width=as.numeric(input$w), height=as.numeric(input$h))
-      if(input$mode == "estim"){
-        consensusmap(nmf_res)
-        print(plot(nmf_res))
-        nmf_estim_plot(nmf_res)
-      }else if(input$mode == "real"){
-        nmf_plot(nmf_res, type="samples", silorder=T)
-        nmf_plot(nmf_res, type="features", silorder=T,
-                 subsetRow = ifelse(input$select_feature_num>0, as.numeric(input$select_feature_num), TRUE ))
-        nmf_plot(nmf_res, type="consensus")
-        print(plottsne())
-      }
-      dev.off()
-    }
-  )
 
   output$downloadNMFData <- downloadHandler(
     filename <- function() {
