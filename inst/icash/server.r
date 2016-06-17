@@ -517,7 +517,7 @@ shinyServer(function(input, output, session) {
                                  scrollX = TRUE,
                                  pageLength = 8,
                                  # autoWidth = TRUE,
-                                 order=list(list(1,'desc'))
+                                 order=list(list(1,'asc'))
                   )
     ) %>% formatRound(3:ncol(nmf_groups), 3)
   }, server=FALSE)
