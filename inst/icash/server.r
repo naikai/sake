@@ -516,11 +516,11 @@ shinyServer(function(input, output, session) {
                                    )),
                                  scrollX = TRUE,
                                  pageLength = 8,
-                                 autoWidth = TRUE,
-                                 order=list(list(2,'desc'))
+                                 # autoWidth = TRUE,
+                                 order=list(list(1,'desc'))
                   )
-    ) %>% formatRound(2:ncol(nmf_groups), 3)
-  }, server=TRUE)
+    ) %>% formatRound(3:ncol(nmf_groups), 3)
+  }, server=FALSE)
 
   # Add t-SNE plot next to NMF group
   observeEvent(input$run_nmftSNE, {
