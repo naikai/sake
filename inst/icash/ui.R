@@ -14,10 +14,10 @@ sidebar <- dashboardSidebar(
   sidebarMenu(id = "sidebarmenu",
     menuItem("File", tabName="File", icon=icon('file-text-o')),
     menuItem("Data Metrics", tabName="datametrics", icon = icon('bar-chart-o')),
-    menuItem("Feature Selection", tabName="featureSelection", icon = icon('scissors')),
-    menuItem("Correlations", tabName="correlation", icon = icon('line-chart'),
-             menuSubItem("Sample correlation", tabName="samplecor"),
+    menuItem("Filtering", tabName="filter", icon = icon('scissors'),
+             menuSubItem("Correlation", tabName="featureSelection"),
              menuSubItem("Sample Scatter Plot", tabName="scatter")
+    # menuItem("Correlations", tabName="correlation", icon = icon('line-chart'),
              # menuSubItem("Features correlation", tabName="genecor")
     ),
     menuItem("NMF", tabName="NMF", icon = icon('sitemap'),
@@ -153,66 +153,78 @@ body <- dashboardBody(
     ),
     tabItem("featureSelection",
             fluidRow(
-              column(width=6,
-                     box(title="Filter Gene List", width=NULL, solidHeader=TRUE, status="success",
-                         box(width=NULL,
-                             fluidRow(
-                               column(width=12,
-                                      selectInput("list_type",
-                                                  label = "How to extract/select list of genes",
-                                                  choices = c("Ranks from data",
-                                                              "Upload your list of genes",
-                                                              "WGCNA"),
-                                                  selected = "Ranks from data"
-                                      )
-                               )
-                             ),
-                             conditionalPanel(
-                               condition = "input.list_type == 'Ranks from data'",
-                               fluidRow(
-                                 column(width=6, selectInput("orders",
-                                                             label = "Rank order by",
-                                                             choices = c("top", "bottom"),
-                                                             selected = "top")),
-                                 column(width=6, selectInput("math",
-                                                             label = "Arithmetic",
-                                                             choices = c("mean", "median", "mad", "var"),
-                                                             selected = "mad"))
-                               ),
-                               fluidRow(
-                                 column(width=12, sliderInput("top.num",
-                                                              label = "How many top genes to use:",
-                                                              min=20, max=5000, value=500, step = 20)
-                                 )
-                               )
-                             ),
-                             conditionalPanel(
-                               condition = "input.list_type == 'Upload your list of genes'",
-                               fileInput('genefile', 'Choose gene list file',
-                                         accept=c('text/csv',
-                                                  'text/comma-separated-values,text/plain',
-                                                  '.csv'))
-                             ),
-                             conditionalPanel(
-                               condition = "input.list_type == 'WGCNA'",
-                               column(width=6, selectInput("math",
-                                                           label = "Arithmetic",
-                                                           choices = c("mean", "median", "mad"),
-                                                           selected = "mad"))
-                             )
-                         ),
-                         box(title = "Filtered data", width=NULL,
-                             DT::dataTableOutput('filterdatatbl')
-                         )
-                     )
-              ),
-              column(width=6,
-                     tabBox(title="Correlation plot", id = "cortab1", height = "570px", width=NULL,
-                            tabPanel(title="Sample", corModuleUI("sample")),
-                            tabPanel(title="Gene", corModuleUI("gene"))
-                     )
+              box(width=12, collapsible = TRUE,
+                  fluidRow(
+                    column(width=2,
+                           selectInput("list_type",
+                                       label = "Method to extract genes",
+                                       choices = c("Total transcriptome",
+                                                   "Rank from data",
+                                                   "Upload gene list",
+                                                   "WGCNA"),
+                                       selected = "Rank from data"
+                           )
+                    ),
+                    conditionalPanel(
+                      condition = "input.list_type == 'Rank from data'",
+                      column(width=2, selectInput("orders",
+                                                  label = "Rank order by",
+                                                  choices = c("top", "bottom"),
+                                                  selected = "top")),
+                      column(width=2, selectInput("math",
+                                                  label = "Arithmetic",
+                                                  choices = c("mean", "median", "mad", "var"),
+                                                  selected = "mad")),
+                      column(width=4, sliderInput("top.num",
+                                                  label = "How many genes to select", ticks = FALSE,
+                                                  min=20, max=5000, value=500, step = 20)
+                      )
+                    ),
+                    conditionalPanel(
+                      condition = "input.list_type == 'Upload your list of genes'",
+                      fileInput('genefile', 'Choose gene list file',
+                                accept=c('text/csv',
+                                         'text/comma-separated-values,text/plain',
+                                         '.csv'))
+                    ),
+                    conditionalPanel(
+                      condition = "input.list_type == 'WGCNA'",
+                      tags$blockquote("Under Construction ..")
+                    )
+                  )
               )
-            )
+            ),
+            featureUI("feature")
+            # fluidRow(
+            #   column(width=6,
+            #          box(title="Sample Correlation", width=NULL, solidHeader=TRUE, status="info", height = "600px",
+            #              fluidRow(
+            #                column(width=4, numericInput("cor_sam_lab_cex", label = "text label size", min=0.5, max=1, value=0.7, step = 0.1)),
+            #                column(width=4, numericInput("cor_num_lab_cex", label = "cor label size", min=0, max=1, value=0.4, step = 0.1)),
+            #                column(width=2, br(),
+            #                       actionButton("runSamCor", " Plot!  ", icon("play-circle"),
+            #                                    style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+            #                )
+            #              ),
+            #              fluidRow(
+            #                column(width=12, corModuleUI("sample"))
+            #              )
+            #          )
+            #   ),
+            #   column(width=6,
+            #          box(title="Gene Network", width=NULL, solidHeader=TRUE, status="info", height = "600px",
+            #              fluidRow(
+            #                column(width=2, br(),
+            #                       actionButton("runGeneCor", " Plot!  ", icon("play-circle"),
+            #                                    style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+            #                )
+            #              ),
+            #              fluidRow(
+            #                 column(width=12, corModuleUI("gene"))
+            #              )
+            #          )
+            #   )
+            # )
     ),
     tabItem("samplecor",
             fluidRow(
@@ -306,8 +318,8 @@ body <- dashboardBody(
                                                   selected = "consensus")
                       ),
                       column(width=3, br(),
-                             actionButton("dl_nmf_estimplot", "Download", icon("cloud-download"),
-                                          style="color: #fff; background-color: #8E24BF; border-color:#9932CC")
+                             downloadButton("dl_nmf_estimplot", "Download", class="butt"),
+                             tags$head(tags$style(".butt{background-color:#8E24BF;} .butt{color: white;} .butt{border-color:$9932CC;}"))
                       )
                     ),
                     fluidRow(
@@ -333,8 +345,6 @@ body <- dashboardBody(
                       ),
                       column(width=3, br(),
                              downloadButton("dl_nmf_realplot", "Download", class="butt"),
-                                          # icon("cloud-download"),
-                                          # style="color: #fff; background-color: #8E24BF; border-color:#9932CC")
                              tags$head(tags$style(".butt{background-color:#8E24BF;} .butt{color: white;} .butt{border-color:$9932CC;}"))
                       )
                     ),

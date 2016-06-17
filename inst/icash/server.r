@@ -161,7 +161,7 @@ shinyServer(function(input, output, session) {
       rawdata <- rawdata[, input$selected_samples]
     }
 
-    if(input$list_type=='Ranks from data'){
+    if(input$list_type=='Rank from data'){
       select.genes <- select_top_n(apply(rawdata,1,input$math), n=input$top.num, bottom=ifelse(input$orders=="bottom", T, F))
       genelist <- names(select.genes)
     }else if(input$list_type=='Upload your list of genes'){
@@ -210,21 +210,27 @@ shinyServer(function(input, output, session) {
     ) %>% formatRound(1:ncol(filter_data), 2)
   }, server=TRUE)
 
-  callModule(corModule, "sample", reactive({ merged() }),
-             tl_cex = reactive(input$cor_sam_lab_cex-0.3),
-             number_cex = reactive(input$cor_num_lab_cex-0.3),
-             type = "full",
-             diag = TRUE)
-  callModule(corModule, "gene", reactive({ t(merged()) }),
-             tl_cex = reactive(input$cor_sam_lab_cex-0.3),
-             number_cex = reactive(0.001))
-  callModule(corModule, "totalsample", reactive({ transform_data() }),
-             tl_cex = reactive(input$cor_sam_lab_cex),
-             number_cex = reactive(input$cor_num_lab_cex),
-             type = "upper",
-             diag = FALSE,
-             height=700
-  )
+  callModule(feature, "feature", reactive({ merged() }))
+  # observeEvent(input$runSamCor, {
+  #   callModule(corModule, "sample", reactive({ merged() }),
+  #              tl_cex = reactive(input$cor_sam_lab_cex-0.3),
+  #              number_cex = reactive(input$cor_num_lab_cex-0.3),
+  #              run = reactive(input$runSamCor),
+  #              type = "full",
+  #              diag = TRUE)
+  # })
+  # observeEvent(input$runGeneCor, {
+  #   callModule(corModule, "gene", reactive({ t(merged()) }),
+  #              tl_cex = reactive(input$cor_sam_lab_cex-0.3),
+  #              number_cex = reactive(0.001))
+  # })
+  # callModule(corModule, "totalsample", reactive({ transform_data() }),
+  #            tl_cex = reactive(input$cor_sam_lab_cex),
+  #            number_cex = reactive(input$cor_num_lab_cex),
+  #            type = "upper",
+  #            diag = FALSE,
+  #            height=700
+  # )
 
   #' Sample correlation plot
   output$sampleCorPlot <- renderPlot({

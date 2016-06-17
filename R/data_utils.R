@@ -3,6 +3,7 @@
 #' This function allows you to express your love of cats.
 #' @param love Do you love cats? Defaults to TRUE.
 #' @keywords compare
+#' @export
 #' @examples
 #' cat_function()
 compare_groups <- function(group1, group2, file.prefix="Compare.group", title="", plot=T, save.image=F, add.legend=T, label.size=5, title.size=36){
