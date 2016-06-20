@@ -320,6 +320,18 @@ body <- dashboardBody(
                       column(width=3, br(),
                              downloadButton("dl_nmf_estimplot", "Download", class="butt"),
                              tags$head(tags$style(".butt{background-color:#8E24BF;} .butt{color: white;} .butt{border-color:$9932CC;}"))
+                      ),
+                      fluidRow(
+                        column(width=4,
+                               br(),
+                               checkboxInput('dl_nmf_estimmoreopt', 'More Options', FALSE),
+                               conditionalPanel(
+                                 condition = "input.dl_nmf_estimmoreopt == true",
+                                 strong("PDF size (inches):"),
+                                 sliderInput(inputId="estim_pdf_w", label = "width:", min=3, max=20, value=14, ticks=F),
+                                 sliderInput(inputId="estim_pdf_h", label = "height:", min=3, max=20, value=14, ticks=F)
+                               )
+                        )
                       )
                     ),
                     fluidRow(
@@ -346,6 +358,18 @@ body <- dashboardBody(
                       column(width=3, br(),
                              downloadButton("dl_nmf_realplot", "Download", class="butt"),
                              tags$head(tags$style(".butt{background-color:#8E24BF;} .butt{color: white;} .butt{border-color:$9932CC;}"))
+                      ),
+                      fluidRow(
+                        column(width=4,
+                               br(),
+                               checkboxInput('dl_nmf_realmoreopt', 'More Options', FALSE),
+                               conditionalPanel(
+                                 condition = "input.dl_nmf_realmoreopt == true",
+                                 strong("PDF size (inches):"),
+                                 sliderInput(inputId="real_pdf_w", label = "width:", min=3, max=20, value=14, ticks=F),
+                                 sliderInput(inputId="real_pdf_h", label = "height:", min=3, max=20, value=14, ticks=F)
+                               )
+                        )
                       )
                     ),
                     fluidRow(

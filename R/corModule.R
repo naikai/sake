@@ -52,9 +52,6 @@ featureUI <- function(id) {
 feature <- function(input, output, session, data){
   go <- reactiveValues(run=FALSE)
   # runsam <- reactiveValues(num=0)
-  tl_cex <- reactive(input$cor_sam_lab_cex)
-  number_cex <- reactive(input$cor_num_lab_cex)
-  type <- reactive(input$cor_type)
 
   observeEvent(input$cor_forcego_yes, {
     print('force go yes')
@@ -85,6 +82,9 @@ feature <- function(input, output, session, data){
     isolate({
       print('run')
       print(paste('gorun:', go$run))
+      tl_cex <- reactive(input$cor_sam_lab_cex)
+      number_cex <- reactive(input$cor_num_lab_cex)
+      type <- reactive(input$cor_type)
       callModule(corModule, "sample", reactive({ data() }),
                  tl_cex = tl_cex,
                  number_cex = number_cex,
@@ -118,29 +118,36 @@ corModule <- function(input, output, session, data,
     diag = TRUE
   }
   print('running cormodule .. ')
+  print('corModule run:', run())
 
-  if(run()){
-    output$sampleCorPlot <- renderPlot({
-      n <- 2
-      withProgress(message = 'Calculating correlation', value = 0, {
-        incProgress(1/n, detail = "Takes around 10 seconds")
-        M <- cor(data())
-        p.mat <- cor_mtest(data())
-      })
-      col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA", "#79AEDD", "#FFFFFF", "#2E9988", "#2B4444"))
+  observe({
+    if(run() == TRUE){
+      print('inside observe run:', run())
 
-      withProgress(message = 'Plotting..', value = 0, {
-        incProgress(1/n, detail = "Takes around 10-20 seconds")
-        corrplot(M, method="color", col=rev(col(200)),
-                 type=type(), order="hclust",
-                 addCoef.col = "black", # Add coefficient of correlation
-                 tl.col="black", tl.srt=45, tl.cex=tl_cex(), #Text label color and rotation
-                 number.cex = number_cex(),
-                 p.mat = p.mat, sig.level = 0.01, insig = "blank",
-                 diag=diag
-        )
-      })
-    }, height=height)
-  }
+      isolate(
+        output$sampleCorPlot <- renderPlot({
+          n <- 2
+          withProgress(message = 'Calculating correlation', value = 0, {
+            incProgress(1/n, detail = "Takes around 10 seconds")
+            M <- cor(data())
+            p.mat <- cor_mtest(data())
+          })
+          col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA", "#79AEDD", "#FFFFFF", "#2E9988", "#2B4444"))
+
+          withProgress(message = 'Plotting..', value = 0, {
+            incProgress(1/n, detail = "Takes around 10-20 seconds")
+            corrplot(M, method="color", col=rev(col(200)),
+                     type=type(), order="hclust",
+                     addCoef.col = "black", # Add coefficient of correlation
+                     tl.col="black", tl.srt=45, tl.cex=tl_cex(), #Text label color and rotation
+                     number.cex = number_cex(),
+                     p.mat = p.mat, sig.level = 0.01, insig = "blank",
+                     diag=diag
+            )
+          })
+        }, height=height)
+      )
+    }
+  })
 }
 

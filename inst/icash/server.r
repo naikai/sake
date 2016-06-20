@@ -417,10 +417,24 @@ shinyServer(function(input, output, session) {
   output$estimSummary = DT::renderDataTable({
     runSummary <- runSummary()
     DT::datatable(runSummary, rownames= TRUE,
-                  options = list(scrollX = TRUE
+                  extensions = 'Buttons',
+                  options = list(dom = 'Bfrtip',
+                                 buttons =
+                                   list('copy', 'print', list(
+                                     extend = 'collection',
+                                     buttons = list(list(extend='csv',
+                                                         filename = filename),
+                                                    list(extend='excel',
+                                                         filename = filename),
+                                                    list(extend='pdf',
+                                                         filename= filename)),
+                                     text = 'Download'
+                                   )),
+                                 scrollX = TRUE,
+                                 pageLength = 12
                   )
     ) %>% formatRound(1:ncol(runSummary), 2)
-  }, server=TRUE)
+  }, server=FALSE)
 
   output$estimPlot <- renderPlot({
     validate(
@@ -453,18 +467,30 @@ shinyServer(function(input, output, session) {
     nmf_silhouette_plot(nmf_res, type=input$plottype)
   },height = 777)
 
+  output$dl_nmf_estimplot <- downloadHandler(
+    filename <- function() {
+      paste(file_prefix(), input$mode, "nmf.pdf", sep=".")
+    },
+    content = function(file) {
+      nmf_res <- nmf_res()
+      pdf(file, width=input$estim_pdf_w, height=input$estim_pdf_h)
+      if(input$mode == "estim"){
+        consensusmap(nmf_res)
+        print(plot(nmf_res))
+        # nmf_estim_plot(nmf_res)
+      }
+      dev.off()
+    }
+  )
+
   output$dl_nmf_realplot <- downloadHandler(
     filename <- function() {
       paste(file_prefix(), input$mode, "nmf.pdf", sep=".")
     },
     content = function(file) {
       nmf_res <- nmf_res()
-      pdf(file, width=12, height=12)
-      if(input$mode == "estim"){
-        consensusmap(nmf_res)
-        print(plot(nmf_res))
-        nmf_estim_plot(nmf_res)
-      }else if(input$mode == "real"){
+      pdf(file, width=input$real_pdf_w, height=input$real_pdf_h)
+      if(input$mode == "real"){
         nmf_plot(nmf_res, type="samples", silorder=T)
         nmf_plot(nmf_res, type="features", silorder=T,
                  subsetRow = ifelse(input$select_feature_num>0, as.numeric(input$select_feature_num), TRUE ))
@@ -476,7 +502,6 @@ shinyServer(function(input, output, session) {
       dev.off()
     }
   )
-
 
   ### NMF results
   nmf_groups <- reactive({
