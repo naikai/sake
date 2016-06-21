@@ -1,47 +1,44 @@
 #' @export
-featureUI <- function(id) {
+featureUI <- function(id, title) {
   ns <- NS(id)
-  fluidRow(
-      column(width=6,
-           box(title="Sample Correlation", width=NULL, solidHeader=TRUE, status="info", height = "700px",
-               fluidRow(
-                 uiOutput(ns("ui_coropt1")),
-                 uiOutput(ns("ui_coropt2"))
-               ),
-               fluidRow(
-                 bsModal(ns("modalExample"), "Warning!\nYour sample size is above 200, it will take longer than usual.\nAre you sure you want to continue?",
-                         trigger = "", size = "small",
-                         actionButton(ns("cor_forcego_yes"), 'Yes'),
-                         actionButton(ns("cor_forcego_no"), 'No')
-                         )
-               ),
-               fluidRow(
-                 uiOutput(ns("ui_cordownload"))
-               ),
-               fluidRow(
-                 # column(width=12, corModuleUI(ns("sample")))
-                 column(width=12,  plotOutput(ns('sampleCorPlot')))
-               )
-           )
-    ),
-    column(width=6,
-           box(title="Gene Network", width=NULL, solidHeader=TRUE, status="info", height = "700px",
-               fluidRow(
-                 column(width=2, br(),
-                        actionButton(ns("runGeneCor"), " Plot!  ", icon("play-circle"),
-                                     style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
-                 )
-               ),
-               fluidRow(
-                 column(width=12, corModuleUI(ns("gene")))
-               ),
-               fluidRow(
-                 bsModal(ns("modalExample2"), "Warning! Your sample size is above 200, it will take longer than usual. Are you sure you want to continue?", ns("runGeneCor"), size = "small",
-                         actionButton(ns("corgene_forcego"), 'Run'))
-               )
-           )
-    )
+  box(title=title, width=NULL, solidHeader=TRUE, status="info", height = "700px",
+      fluidRow(
+        uiOutput(ns("ui_coropt1")),
+        uiOutput(ns("ui_coropt2"))
+      ),
+      fluidRow(
+        bsModal(ns("modalExample"), "Warning!\nYour sample size is above 200, it will take longer than usual.\nAre you sure you want to continue?",
+                trigger = "", size = "small",
+                actionButton(ns("cor_forcego_yes"), 'Yes'),
+                actionButton(ns("cor_forcego_no"), 'No')
+        )
+      ),
+      fluidRow(
+        uiOutput(ns("ui_cordownload"))
+      ),
+      fluidRow(
+        # column(width=12, corModuleUI(ns("sample")))
+        column(width=12,  plotOutput(ns('sampleCorPlot')))
+      )
   )
+  # column(width=6,
+  #        box(title="Gene Network", width=NULL, solidHeader=TRUE, status="info", height = "700px",
+  #            fluidRow(
+  #              column(width=2, br(),
+  #                     actionButton(ns("runGeneCor"), " Plot!  ", icon("play-circle"),
+  #                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+  #              )
+  #            ),
+  #            fluidRow(
+  #              column(width=12, corModuleUI(ns("gene")))
+  #            ),
+  #            fluidRow(
+  #              bsModal(ns("modalExample2"), "Warning! Your sample size is above 200, it will take longer than usual. Are you sure you want to continue?", ns("runGeneCor"), size = "small",
+  #                      actionButton(ns("corgene_forcego"), 'Run'))
+  #            )
+  #        )
+  # )
+  # )
 }
 
 #' @export
@@ -53,8 +50,8 @@ feature <- function(input, output, session, data){
     output$ui_coropt1 <- renderUI({
       if(ncol(data()) > 200) return(NULL)
       tagList(
-        column(width=3, numericInput(ns("cor_sam_lab_cex"), label = "Sample label size", min=0.5, max=1, value=0.7, step = 0.1)),
-        column(width=3, numericInput(ns("cor_num_lab_cex"), label = "Corr label size", min=0, max=1, value=0.4, step = 0.1))
+        column(width=3, numericInput(ns("cor_sam_lab_cex"), label = "Sample label size", min=0.5, max=1, value=0.4, step = 0.1)),
+        column(width=3, numericInput(ns("cor_num_lab_cex"), label = "Corr label size", min=0, max=1, value=0.1, step = 0.1))
       )
     })
     output$ui_coropt2 <- renderUI({
@@ -92,12 +89,18 @@ feature <- function(input, output, session, data){
       # tl_cex <- reactive(input$cor_sam_lab_cex)
       # number_cex <- reactive(input$cor_num_lab_cex)
       # type <- reactive(input$cor_type)
-      tl_cex <- input$cor_sam_lab_cex
-      number_cex <- input$cor_num_lab_cex
+      if(ncol(data()) > 200){
+        tl_cex <- 0.005
+        number_cex <- 0.001
+      }else{
+        tl_cex <- input$cor_sam_lab_cex
+        number_cex <- input$cor_num_lab_cex
+      }
+
       type <- input$cor_type
       diag <- ifelse(type=="full", TRUE, FALSE)
-
       col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA", "#79AEDD", "#FFFFFF", "#2E9988", "#2B4444"))
+
       withProgress(message = 'Calculating correlation', value = 0, {
         incProgress(1/2, detail = "Takes around 10 seconds")
         M <- cor(data())

@@ -196,10 +196,10 @@ body <- dashboardBody(
             ),
             fluidRow(
               column(width=6,
-                     featureUI("sample")
+                     featureUI("sample", title = "Sample Correlation")
               ),
               column(width=6,
-                     featureUI("gene")
+                     featureUI("gene", title = "Gene Network")
               )
             )
             # fluidRow(

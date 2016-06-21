@@ -211,7 +211,7 @@ shinyServer(function(input, output, session) {
   }, server=TRUE)
 
   callModule(feature, "sample", reactive({ merged() }))
-  callModule(feature, "gene", reactive({ merged() }))
+  callModule(feature, "gene", reactive({ t(merged()) }))
 
   #' Sample correlation plot
   output$sampleCorPlot <- renderPlot({
