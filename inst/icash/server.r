@@ -1165,7 +1165,7 @@ shinyServer(function(input, output, session) {
                                  autoWidth = TRUE
                   )
     ) %>% formatRound(2:ncol(filt_res), 3)
-  }, server = TRUE)
+  }, server = FALSE)
 
   output$deseq_boxplot <- renderPlotly({
     validate(
