@@ -17,8 +17,6 @@ sidebar <- dashboardSidebar(
     menuItem("Filtering", tabName="filter", icon = icon('scissors'),
              menuSubItem("Correlation", tabName="featureSelection"),
              menuSubItem("Sample Scatter Plot", tabName="scatter")
-    # menuItem("Correlations", tabName="correlation", icon = icon('line-chart'),
-             # menuSubItem("Features correlation", tabName="genecor")
     ),
     menuItem("NMF", tabName="NMF", icon = icon('sitemap'),
              menuSubItem("NMF Run", tabName="nmfRun"),
@@ -201,51 +199,8 @@ body <- dashboardBody(
                      featureUI("sample", title = "Sample Correlation")
               ),
               column(width=6,
-                     featureUI("gene", title = "Gene Network")
-              )
-            )
-            # fluidRow(
-            #   column(width=6,
-            #          box(title="Sample Correlation", width=NULL, solidHeader=TRUE, status="info", height = "600px",
-            #              fluidRow(
-            #                column(width=4, numericInput("cor_sam_lab_cex", label = "text label size", min=0.5, max=1, value=0.7, step = 0.1)),
-            #                column(width=4, numericInput("cor_num_lab_cex", label = "cor label size", min=0, max=1, value=0.4, step = 0.1)),
-            #                column(width=2, br(),
-            #                       actionButton("runSamCor", " Plot!  ", icon("play-circle"),
-            #                                    style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
-            #                )
-            #              ),
-            #              fluidRow(
-            #                column(width=12, corModuleUI("sample"))
-            #              )
-            #          )
-            #   ),
-            #   column(width=6,
-            #          box(title="Gene Network", width=NULL, solidHeader=TRUE, status="info", height = "600px",
-            #              fluidRow(
-            #                column(width=2, br(),
-            #                       actionButton("runGeneCor", " Plot!  ", icon("play-circle"),
-            #                                    style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
-            #                )
-            #              ),
-            #              fluidRow(
-            #                 column(width=12, corModuleUI("gene"))
-            #              )
-            #          )
-            #   )
-            # )
-    ),
-    tabItem("samplecor",
-            fluidRow(
-              box(width=12,
-                fluidRow(
-                  column(width=2, numericInput("cor_sam_lab_cex", label = "text label size", min=0.5, max=1, value=0.7, step = 0.1)),
-                  column(width=2, numericInput("cor_num_lab_cex", label = "cor label size", min=0, max=1, value=0.4, step = 0.1))
-                )
-              ),
-              box(width=12, height="800px",
-                  corModuleUI("totalsample")
-                  # plotOutput('sampleCorPlot')
+                     # featureUI("gene", title = "Gene Network")
+                     networkUI("gene", title = "Gene Network")
               )
             )
     ),

@@ -212,33 +212,9 @@ shinyServer(function(input, output, session) {
 
 
   callModule(feature, "sample", reactive({ merged() }))
-  callModule(feature, "gene", reactive({ t(merged()) }))
+  # callModule(feature, "gene", reactive({ t(merged()) }))
+  callModule(network, "gene", reactive({ merged() }))
 
-
-  #' Sample correlation plot
-  output$sampleCorPlot <- renderPlot({
-    transform_data <- transform_data()
-    n <- 2
-    withProgress(message = 'Calculating correlation', value = 0, {
-      incProgress(1/n, detail = "Takes around 10 seconds")
-      M <- cor(transform_data)
-      p.mat <- cor_mtest(transform_data)
-    })
-    # col<- colorRampPalette(c("green","white", "blue", "white", "red"))(100)
-    col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA", "#79AEDD", "#FFFFFF", "#2E9988", "#2B4444"))
-
-    withProgress(message = 'Plotting..', value = 0, {
-      incProgress(1/n, detail = "Takes around 10 seconds")
-      corrplot(M, method="color", col=rev(col(200)),
-               type="upper", order="hclust",
-               addCoef.col = "black", # Add coefficient of correlation
-               tl.col="black", tl.srt=45, tl.cex=input$cor_sam_lab_cex, #Text label color and rotation
-               number.cex = input$cor_num_lab_cex,
-               p.mat = p.mat, sig.level = 0.01, insig = "blank",
-               diag=FALSE
-      )
-    })
-  }, height=700)
 
   #' Scatter plot
   observeEvent(transform_data(), {

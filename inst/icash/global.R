@@ -1,4 +1,6 @@
 library(icash)
+library(networkD3)
+
 options(shiny.maxRequestSize=500*1024^2)
 raw_fd <- system.file('extdata', 'rawdata', package="icash")
 filenames<-list.files(path=raw_fd)
