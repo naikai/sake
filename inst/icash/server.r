@@ -210,27 +210,8 @@ shinyServer(function(input, output, session) {
     ) %>% formatRound(1:ncol(filter_data), 2)
   }, server=TRUE)
 
-  callModule(feature, "feature", reactive({ merged() }))
-  # observeEvent(input$runSamCor, {
-  #   callModule(corModule, "sample", reactive({ merged() }),
-  #              tl_cex = reactive(input$cor_sam_lab_cex-0.3),
-  #              number_cex = reactive(input$cor_num_lab_cex-0.3),
-  #              run = reactive(input$runSamCor),
-  #              type = "full",
-  #              diag = TRUE)
-  # })
-  # observeEvent(input$runGeneCor, {
-  #   callModule(corModule, "gene", reactive({ t(merged()) }),
-  #              tl_cex = reactive(input$cor_sam_lab_cex-0.3),
-  #              number_cex = reactive(0.001))
-  # })
-  # callModule(corModule, "totalsample", reactive({ transform_data() }),
-  #            tl_cex = reactive(input$cor_sam_lab_cex),
-  #            number_cex = reactive(input$cor_num_lab_cex),
-  #            type = "upper",
-  #            diag = FALSE,
-  #            height=700
-  # )
+  callModule(feature, "sample", reactive({ merged() }))
+  callModule(feature, "gene", reactive({ merged() }))
 
   #' Sample correlation plot
   output$sampleCorPlot <- renderPlot({

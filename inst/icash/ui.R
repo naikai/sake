@@ -194,7 +194,14 @@ body <- dashboardBody(
                   )
               )
             ),
-            featureUI("feature")
+            fluidRow(
+              column(width=6,
+                     featureUI("sample")
+              ),
+              column(width=6,
+                     featureUI("gene")
+              )
+            )
             # fluidRow(
             #   column(width=6,
             #          box(title="Sample Correlation", width=NULL, solidHeader=TRUE, status="info", height = "600px",
