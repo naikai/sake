@@ -210,8 +210,10 @@ shinyServer(function(input, output, session) {
     ) %>% formatRound(1:ncol(filter_data), 2)
   }, server=TRUE)
 
+
   callModule(feature, "sample", reactive({ merged() }))
   callModule(feature, "gene", reactive({ t(merged()) }))
+
 
   #' Sample correlation plot
   output$sampleCorPlot <- renderPlot({
@@ -642,6 +644,7 @@ shinyServer(function(input, output, session) {
     return(merged)
   })
   output$nmfFeatures <- DT::renderDataTable({
+    filename <- fileinfo()[['name']]
     DT::datatable(nmf_features_annot(), rownames=FALSE, escape=-1,
                   extensions = 'Buttons',
                   options = list(dom = 'Bfrtip',
@@ -660,7 +663,7 @@ shinyServer(function(input, output, session) {
                                  autoWidth = TRUE
                   )
     )
-  }, server = TRUE)
+  }, server = FALSE)
 
   ori_plus_nmfResult <-reactive({
     rawdata <- rawdata()
