@@ -158,7 +158,7 @@ body <- dashboardBody(
                     column(width=2,
                            selectInput("list_type",
                                        label = "Method to extract genes",
-                                       choices = c("Total transcriptome",
+                                       choices = c("Whole transcriptome",
                                                    "Rank from data",
                                                    "Upload gene list",
                                                    "WGCNA"),
@@ -181,11 +181,13 @@ body <- dashboardBody(
                       )
                     ),
                     conditionalPanel(
-                      condition = "input.list_type == 'Upload your list of genes'",
-                      fileInput('genefile', 'Choose gene list file',
-                                accept=c('text/csv',
-                                         'text/comma-separated-values,text/plain',
-                                         '.csv'))
+                      condition = "input.list_type == 'Upload gene list'",
+                      column(width=3,
+                             fileInput('genefile', 'Choose gene list file',
+                                       accept=c('text/csv',
+                                                'text/comma-separated-values,text/plain',
+                                                '.csv'))
+                      )
                     ),
                     conditionalPanel(
                       condition = "input.list_type == 'WGCNA'",

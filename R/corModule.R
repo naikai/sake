@@ -21,24 +21,6 @@ featureUI <- function(id, title) {
         column(width=12,  plotOutput(ns('sampleCorPlot')))
       )
   )
-  # column(width=6,
-  #        box(title="Gene Network", width=NULL, solidHeader=TRUE, status="info", height = "700px",
-  #            fluidRow(
-  #              column(width=2, br(),
-  #                     actionButton(ns("runGeneCor"), " Plot!  ", icon("play-circle"),
-  #                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
-  #              )
-  #            ),
-  #            fluidRow(
-  #              column(width=12, corModuleUI(ns("gene")))
-  #            ),
-  #            fluidRow(
-  #              bsModal(ns("modalExample2"), "Warning! Your sample size is above 200, it will take longer than usual. Are you sure you want to continue?", ns("runGeneCor"), size = "small",
-  #                      actionButton(ns("corgene_forcego"), 'Run'))
-  #            )
-  #        )
-  # )
-  # )
 }
 
 #' @export

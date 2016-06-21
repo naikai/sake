@@ -164,14 +164,13 @@ shinyServer(function(input, output, session) {
     if(input$list_type=='Rank from data'){
       select.genes <- select_top_n(apply(rawdata,1,input$math), n=input$top.num, bottom=ifelse(input$orders=="bottom", T, F))
       genelist <- names(select.genes)
-    }else if(input$list_type=='Upload your list of genes'){
+    }else if(input$list_type=='Upload gene list'){
       validate(
         need(!is.null(input$genefile), "Please upload a file with list of genes, with column name 'Gene' ")
       )
       genefile <- read.table(input$genefile$datapath, header=T, sep="\t")
 
       ext <- file_ext(input$genefile[1])
-      print(ext)
       n <- 2
       withProgress(message = 'Loading gene list', value = 0, {
         incProgress(1/n, detail = "Usually takes ~10 seconds")
@@ -184,7 +183,6 @@ shinyServer(function(input, output, session) {
           return(NULL)
         }
       })
-
       validate(
         need(sum(colnames(genefile)=='Gene'), "Please make sure genefile contains column name 'Gene'")
       )
@@ -192,6 +190,8 @@ shinyServer(function(input, output, session) {
         need(length(intersect(genefile$Gene, rownames(rawdata)))>=2, "We did not find enough genes that overlap with the expression data (<2). Please check again and provide a new list! ")
       )
       genelist <- genefile$Gene
+    }else if(input$list_type == 'Whole transcriptome'){
+      genelist <- rownames(rawdata)
     }
 
     idx <- unique(match(genelist, rownames(rawdata)))
