@@ -179,8 +179,18 @@ network <- function(input, output, session, data){
           paste("network.html")
         },
         content = function(file) {
-          simpleNetwork(networkData, zoom = TRUE, opacity = input$opacity) %>%
-            saveNetwork(file = file)
+          if(input$network_type == "Simple"){
+            simpleNetwork(networkData, zoom = TRUE, opacity = input$opacity) %>%
+              saveNetwork(file = file)
+          }else if (input$network_type == "Force"){
+            forceNetwork(Links = Links, Nodes = Nodes,
+                         Source = "source", Target = "target",
+                         Value = "value", NodeID = "name",
+                         Nodesize = "size", Group = "group",
+                         opacity = isolate(input$opacity), opacityNoHover = 0.3,
+                         zoom = TRUE) %>%
+              saveNetwork(file = file)
+          }
         }
       )
       go$run <- FALSE
