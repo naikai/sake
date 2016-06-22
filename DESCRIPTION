@@ -1,8 +1,8 @@
 Package: icash
 Type: Package
 Title: Interactive clustering tool for assessing single-cell heterogeneity
-Version: 0.2.9000
-Date: 2016-05-31
+Version: 0.2.1
+Date: 2016-06-22
 Authors@R: person("Yu-Jui", "Ho", email = "naikai@gmail.com",
                   role = c("aut", "cre"))
 Description: This tool can help you quickly navigate through the expression profile,
