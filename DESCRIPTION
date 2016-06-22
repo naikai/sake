@@ -1,7 +1,7 @@
 Package: icash
 Type: Package
 Title: Interactive clustering tool for assessing single-cell heterogeneity
-Version: 0.1.9000
+Version: 0.2.9000
 Date: 2016-05-31
 Authors@R: person("Yu-Jui", "Ho", email = "naikai@gmail.com",
                   role = c("aut", "cre"))
@@ -36,9 +36,6 @@ Imports:
     snowfall,
     tidyr,
     tools,
-    preprocessCore,
-    WGCNA,
-    impute,
     networkD3
 Suggests:
     annotate,
@@ -65,6 +62,7 @@ Suggests:
     webshot
 Remotes:
     hadley/devtools,
+    bmbolstad/preprocessCore,
     rstudio/DT,
     rstudio/d3heatmap@colorlabels,
 License: GPL (>=2)
