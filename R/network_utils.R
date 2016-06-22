@@ -220,10 +220,10 @@ module_finder <- function(data, p.value=0.05, tao=0.5, beta=3, num_features=100)
 #' @keywords co-expression, network, connectivity
 #' @export
 #' @examples
-#' NetConnectivity(data, tao=0.5, beta=10)
+#' NetConnectivity(mtcars, tao=0.5)
 NetConnectivity <- function(data, thresh='soft', tao=0.7, beta=1, method="pearson", diag.zero=T){
    # Use cor in WGCNA
-   system.time(xcor0 <- t(data) %>% WGCNA::cor(., method=method) %>% abs)
+   xcor0 <- t(data) %>% WGCNA::cor(., method=method) %>% abs
    if(diag.zero){
       system.time(diag(xcor0) <- 0) #for crossprod later
    }

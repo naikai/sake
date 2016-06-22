@@ -11,7 +11,8 @@ URL: http://github.com/naikai/icash
 BugReports: http://github.com/naikai/icash/issues
 Depends:
     R (>= 3.1.0),
-    NMF
+    NMF (>= 0.20.6),
+    dplyr (>= 0.4.3)
 Imports:
     AnnotationHub,
     biomaRt,
@@ -20,10 +21,8 @@ Imports:
     d3heatmap,
     data.table,
     DESeq2,
-    dplyr,
     ggplot2,
     GO.db,
-    magrittr,
     matrixStats,
     pathview,
     plotly,
@@ -53,7 +52,6 @@ Suggests:
     htmlwidgets,
     HiClimR,
     irr,
-    knitr,
     RColorBrewer,
     rmarkdown,
     testthat,

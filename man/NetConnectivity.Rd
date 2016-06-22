@@ -19,7 +19,7 @@ Code is adapted and rewrote based on Wange et al, BMC Bioinformatics, 2014
 'Improving the sensitivity of sample clustering by leveraging gene co-expression networks in variable selection'
 }
 \examples{
-NetConnectivity(data, tao=0.5, beta=10)
+NetConnectivity(mtcars, tao=0.5)
 }
 \keyword{co-expression,}
 \keyword{connectivity}

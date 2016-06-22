@@ -2,9 +2,21 @@ library(shiny)
 library(shinyBS)
 library(plotly)
 library(d3heatmap)
+library(htmltools)
 library(shinythemes)
 library(shinydashboard)
 library(DT)
+
+tg <- tags$div()
+tg <- attachDependencies(
+  tg,
+  htmlDependency(
+    name    = "plotlyjs",
+    version = "1.13.0",
+    src     = c(href = "https://cdn.plot.ly"),
+    script  = "plotly-latest.min.js"
+  )
+)
 
 header <- dashboardHeader(
   title = "Single-Cell NMF"
@@ -52,6 +64,7 @@ body <- dashboardBody(
   tags$head(tags$style(".dwnld{background-color:#8E24BF;} .dwnld{color: white;} .dwnld{border-color:$9932CC;}")),
   tags$head(tags$style(".act{background-color:#337AB7;} .act{color: #FFFFFF;} .act{border-color:$2E6DA4;}")),
   tags$head(tags$style(".stop{background-color:#4F1E0A;} .stop{color: #FFFFFF;} .stop{border-color:#612C0E;}")),
+  tags$head(tg),
 
   tabItems(
     tabItem("File",
