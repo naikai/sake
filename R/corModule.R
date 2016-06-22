@@ -17,7 +17,6 @@ featureUI <- function(id, title) {
         uiOutput(ns("ui_cordownload"))
       ),
       fluidRow(
-        # column(width=12, corModuleUI(ns("sample")))
         column(width=12,  plotOutput(ns('sampleCorPlot')))
       )
   )
@@ -32,16 +31,15 @@ feature <- function(input, output, session, data){
     output$ui_coropt1 <- renderUI({
       if(ncol(data()) > 200) return(NULL)
       tagList(
-        column(width=3, numericInput(ns("cor_sam_lab_cex"), label = "Sample label size", min=0.5, max=1, value=0.4, step = 0.1)),
-        column(width=3, numericInput(ns("cor_num_lab_cex"), label = "Corr label size", min=0, max=1, value=0.1, step = 0.1))
+        column(width=3, numericInput(ns("cor_sam_lab_cex"), label = "Text Size", min=0.5, max=1, value=0.4, step = 0.1)),
+        column(width=3, numericInput(ns("cor_num_lab_cex"), label = "Number Size", min=0, max=1, value=0.1, step = 0.1))
       )
     })
     output$ui_coropt2 <- renderUI({
       tagList(
         column(width=3, selectInput(ns("cor_type"), label = "Plot type", choices = c("upper", "lower", "full"), selected = "full")),
         column(width=2, br(),
-               actionButton(ns("runSamCor"), " Plot!  ", icon("play-circle"),
-                            style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+               actionButton(ns("runSamCor"), " Plot!  ", icon("play-circle"), class = 'act')
         )
       )
     })
@@ -106,7 +104,7 @@ feature <- function(input, output, session, data){
       output$ui_cordownload <- renderUI({
         tagList(
           column(width=4, br(),
-                 downloadButton(ns("dl_corrplot"), "Download", class="butt")
+                 downloadButton(ns("dl_corrplot"), "Download", class="dwnld")
           )
         )
       })

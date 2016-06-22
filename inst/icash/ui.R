@@ -49,6 +49,10 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   tags$head(tags$script(src = "google-analytics.js")),
+  tags$head(tags$style(".dwnld{background-color:#8E24BF;} .dwnld{color: white;} .dwnld{border-color:$9932CC;}")),
+  tags$head(tags$style(".act{background-color:#337AB7;} .act{color: #FFFFFF;} .act{border-color:$2E6DA4;}")),
+  tags$head(tags$style(".stop{background-color:#4F1E0A;} .stop{color: #FFFFFF;} .stop{border-color:#612C0E;}")),
+
   tabItems(
     tabItem("File",
             fluidRow(
@@ -263,8 +267,7 @@ body <- dashboardBody(
                                      "right", options = list(container = "body"))
                     ),
                     column(width=2, br(),
-                           actionButton("runNMF", "Run NMF!", icon("play-circle"),
-                                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                           actionButton("runNMF", "Run NMF!", icon("play-circle"), class = 'act')
                     )
                   )
               )
@@ -282,8 +285,7 @@ body <- dashboardBody(
                                                   selected = "consensus")
                       ),
                       column(width=3, br(),
-                             downloadButton("dl_nmf_estimplot", "Download", class="butt"),
-                             tags$head(tags$style(".butt{background-color:#8E24BF;} .butt{color: white;} .butt{border-color:$9932CC;}"))
+                             downloadButton("dl_nmf_estimplot", "Download", class="dwnld")
                       ),
                       fluidRow(
                         column(width=4,
@@ -320,8 +322,7 @@ body <- dashboardBody(
                                                   selected = "samples")
                       ),
                       column(width=3, br(),
-                             downloadButton("dl_nmf_realplot", "Download", class="butt"),
-                             tags$head(tags$style(".butt{background-color:#8E24BF;} .butt{color: white;} .butt{border-color:$9932CC;}"))
+                             downloadButton("dl_nmf_realplot", "Download", class="dwnld")
                       ),
                       fluidRow(
                         column(width=4,
@@ -368,8 +369,7 @@ body <- dashboardBody(
                   tabPanel("2D",
                            column(width=2, numericInput("nmftsne_perplexity", label = "Perplexity", value=10)),
                            column(width=2, br(),
-                                  actionButton("run_nmftSNE", "Run t-SNE!", icon("play-circle"),
-                                               style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                                  actionButton("run_nmftSNE", "Run t-SNE!", icon("play-circle"), class = "act")
                            ),
                            column(width=12,
                                   plotlyOutput('nmftsneplot', height=600, width=600)
@@ -452,9 +452,6 @@ body <- dashboardBody(
                                                               "Variance" = "var"),
                                                   selected = "mad")
                       ),
-#                       column(width=3, sliderInput("heat.top.num",
-#                                                   label = "How many top genes:",
-#                                                   min=20, max=5000, value=100, step = 20)
                       column(width=2, selectInput("heat.top.num",
                                                   label = "How many top genes:",
                                                   choices = c(seq(10,100,10), seq(200, 1000, 100), seq(2000, 10000, 1000)),
@@ -510,8 +507,7 @@ body <- dashboardBody(
                     column(width=2, checkboxInput('heatmoreopt', 'More Options', FALSE)),
                     conditionalPanel(
                       condition = "input.VisType == 't-SNE' ",
-                      column(width=2, actionButton("runtSNE", "Run t-SNE!", icon("play-circle"), width="100px",
-                                                   style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+                      column(width=2, actionButton("runtSNE", "Run t-SNE!", icon("play-circle"), width="100px", class = 'act'))
                     )
                   ),
                   conditionalPanel(
@@ -724,8 +720,7 @@ body <- dashboardBody(
                                                 selected = FALSE)
                     ),
                     column(width=2, br(),
-                           actionButton("runDESeq", "Run DESeq!", icon("play-circle"),
-                                        style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                           actionButton("runDESeq", "Run DESeq!", icon("play-circle"), class = 'act')
                     )
                   ),
                   fluidRow(
@@ -804,7 +799,6 @@ body <- dashboardBody(
               box(width=12, #height = "450px",
                   DT::dataTableOutput('go_summary'),
                   tags$hr(),
-                  # tags$blockquote("Make sure you select the correct species"),
                   p(
                     class = "text-muted",
                     paste("Note: Make sure you select the correct species.")

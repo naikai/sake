@@ -1,5 +1,4 @@
 # icash 
-***
 
 [![Build Status](https://travis-ci.com/naikai/icash.svg?token=qigAqQi4xmKjKDqnm97n&branch=master)](https://travis-ci.com/naikai/icash)
 [![codecov](https://codecov.io/gh/naikai/icash/branch/master/graph/badge.svg?token=WEipAvcFMf)](https://codecov.io/gh/naikai/icash)
