@@ -619,7 +619,8 @@ shinyServer(function(input, output, session) {
     return(merged)
   })
   output$nmfFeatures <- DT::renderDataTable({
-    filename <- fileinfo()[['name']]
+    filename <- file_prefix()
+    filename <- "nmf_features"
     DT::datatable(nmf_features_annot(), rownames=FALSE, escape=-1,
                   extensions = 'Buttons',
                   options = list(dom = 'Bfrtip',
@@ -1087,7 +1088,7 @@ shinyServer(function(input, output, session) {
     if(!all(sapply(rawdata, is.whole))){
       createAlert(session, "alert", "exampleAlert", title = "Oops", style = "warning",
                   content = "Data contains non-integer value, Please use raw count data for DESeq2. <br>
-                             Or Use the option above to 'Force convert to integer'",
+                             Or Use the option above to 'Force convert to integer' (results are not statistically rigorous)",
                   append = FALSE)
     }else{
       closeAlert(session, "exampleAlert")
