@@ -83,7 +83,7 @@ feature <- function(input, output, session, data){
 
       withProgress(message = 'Calculating correlation', value = 0, {
         incProgress(1/2, detail = "Takes around 10 seconds")
-        M <- cor(data())
+        M <- WGCNA::cor(data(), nThreads = 4)
         p.mat <- cor_mtest(data())
       })
 
@@ -158,7 +158,7 @@ corModule <- function(input, output, session, data,
     n <- 2
     withProgress(message = 'Calculating correlation', value = 0, {
       incProgress(1/n, detail = "Takes around 10 seconds")
-      M <- cor(data())
+      M <- WGCNA::cor(data(), nThreads = 4)
       p.mat <- cor_mtest(data())
     })
     col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA", "#79AEDD", "#FFFFFF", "#2E9988", "#2B4444"))

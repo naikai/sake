@@ -27,6 +27,7 @@ shinyServer(function(input, output, session) {
       filename <- basename(inFile$name)
       filepath <- inFile$datapath
     }else if (input$selectfile == "preload"){
+      req(input$inputdata)
       validate(
         need(input$inputdata!="", "Please select a gene count data set")
       )
@@ -129,9 +130,7 @@ shinyServer(function(input, output, session) {
                                      buttons = list(list(extend='csv',
                                                          filename = filename),
                                                     list(extend='excel',
-                                                         filename = filename),
-                                                    list(extend='pdf',
-                                                         filename= filename)),
+                                                         filename = filename)),
                                      text = 'Download'
                                    )),
                                  scrollX = TRUE,
@@ -1116,6 +1115,9 @@ shinyServer(function(input, output, session) {
   })
 
   output$deseq_table <- DT::renderDataTable({
+    validate(
+      need(nrow(filt_deseq_res()) > 0, "No significant DE results found, Maybe try lower your alpha threshold?")
+    )
     filename <- fileinfo()[['name']]
     GeneCard <- paste0("<a href='http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
                        rownames(filt_deseq_res()), "'>", rownames(filt_deseq_res()), "</a>")
@@ -1131,9 +1133,7 @@ shinyServer(function(input, output, session) {
                                      buttons = list(list(extend='csv',
                                                          filename = filename),
                                                     list(extend='excel',
-                                                         filename = filename),
-                                                    list(extend='pdf',
-                                                         filename= filename)),
+                                                         filename = filename)),
                                      text = 'Download'
                                    )),
                                  scrollY = TRUE,
@@ -1144,6 +1144,7 @@ shinyServer(function(input, output, session) {
   }, server = FALSE)
 
   output$deseq_boxplot <- renderPlotly({
+    req(deseq_res())
     validate(
       need(!is.null(input$deseq_table_rows_selected), "Please select a gene")
     )

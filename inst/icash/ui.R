@@ -53,7 +53,7 @@ sidebar <- dashboardSidebar(
              conditionalPanel("input.sidebarmenu === 'enrichment'",
                               selectInput("EnrichType",
                                           label = "Which Category?",
-                                          choices = c("GO", "KEGG", "GSEA"),
+                                          choices = c("GO", "KEGG"),
                                           selected = "KEGG")
              )
   )
@@ -172,7 +172,7 @@ body <- dashboardBody(
                   fluidRow(
                     column(width=2,
                            selectInput("list_type",
-                                       label = "Method to extract genes",
+                                       label = "How to extract genes",
                                        choices = c("Whole transcriptome",
                                                    "Rank from data",
                                                    "Upload gene list",
@@ -673,7 +673,7 @@ body <- dashboardBody(
                     condition = "input.heatmoreopt == true & (input.VisType=='PCA' || input.VisType=='t-SNE')",
                     fluidRow(
                       column(width=2, selectizeInput("pt_col",
-                                                     label = "How to color each point?",
+                                                     label = "Color sample by?",
                                                      choices=NULL, multiple=FALSE,
                                                      options = list(
                                                        onInitialize = I('function() { this.setValue(""); }')
