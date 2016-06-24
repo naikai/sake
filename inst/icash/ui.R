@@ -44,9 +44,9 @@ sidebar <- dashboardSidebar(
                                           selected = "t-SNE")
              ),
     menuItem("Differential analysis", tabName="DE", icon = icon('tasks', lib="glyphicon"),
-             menuSubItem("DESeq2", tabName="DESeq2"),
-             menuSubItem("Monocle", tabName="Monocle"),
-             menuSubItem("SCDE", tabName="SCDE")
+             menuSubItem("DESeq2", tabName="DESeq2")
+             # menuSubItem("Monocle", tabName="Monocle"),
+             # menuSubItem("SCDE", tabName="SCDE")
     ),
     menuItem("Enrichment analysis", tabName="enrichment", icon = icon('cogs')
     ),

@@ -21,6 +21,7 @@ shinyServer(function(input, output, session) {
   fileinfo <- reactive({
     if (input$selectfile == 'upload'){
       inFile <- input$file1
+      req(inFile)
       validate(
         need(!is.null(inFile), "Please upload a gene count data set")
       )
@@ -53,14 +54,14 @@ shinyServer(function(input, output, session) {
 
   #' Raw data
   output$rawdatatbl = DT::renderDataTable({
-    rawdata <- rawdata() %>% head(n=100)
+    rawdata <- rawdata()
     validate(
       need(ncol(rawdata)>1,
            "Please modify the parameters on the left and try again!") %then%
       need(!any(duplicated(t(rawdata))),
-           "There are duplicated columns in your data, Please check and try again!")
+           "There are columns with the exact same value in your data, Please check and try again!")
     )
-    DT::datatable(rawdata, rownames= TRUE,
+    DT::datatable(head(rawdata, n=100), rownames= TRUE,
                   options = list(scroll = TRUE,
                                  scrollX = TRUE,
                                  scrollY = TRUE,
