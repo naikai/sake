@@ -16,7 +16,7 @@ networkUI <- function(id, title) {
                 actionButton(ns("cor_forcego_yes"), 'Yes'),
                 actionButton(ns("cor_forcego_no"), 'No')
         ),
-        bsModal(ns("modal2"), "Stop!\nThis module will not work for gene size over 2000, please select a smaller number.",
+        bsModal(ns("modal2"), "Stop!\nThis module will not work for gene size over 3000, please select a smaller number.",
                 trigger = "", size = "small"
         )
       ),
@@ -57,7 +57,7 @@ network <- function(input, output, session, data){
   })
 
   observeEvent(input$runSamCor, {
-    if(nrow(data()) > 2000){
+    if(nrow(data()) > 3000){
       toggleModal(session, "modal2", toggle = "open")
     }else if(nrow(data()) > 1000){
       toggleModal(session, "modal1", toggle = "open")
@@ -99,7 +99,8 @@ network <- function(input, output, session, data){
               if(input$stop_network) return()
               validate(
                 need(!is.null(networkData), "Network Data not available") %then%
-                  need(nrow(networkData) > 10, "Number of network connections is not enough") %then%
+                  need(nrow(networkData) > 10,
+                       message = paste("Number of network connections is not enough.\nPlease try increasing the number of genes or lowering the threshold")) %then%
                   need(nrow(networkData) < 20000, "Number of network connections is too high (greater than 20000)")
               )
               withProgress(message = 'Plotting..', value = NULL, {
@@ -141,7 +142,10 @@ network <- function(input, output, session, data){
             })
 
             output$forcenetwork <- renderForceNetwork({
-              if(input$stop_network) return()
+              if(input$stop_network) {
+                gc()
+                return()
+              }
               validate(
                 need(!is.null(Links), "Network Data not available") %then%
                 need(nrow(Links) > 10, "Number of network connections is not enough") %then%

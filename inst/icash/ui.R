@@ -73,15 +73,19 @@ body <- dashboardBody(
                       tabPanel("Upload file",
                                selectInput("selectfile",
                                            label = "How do you want to upload the data?",
-                                           choices = list("Upload your own"='upload',
-                                                          "Select from preloaded data"='preload'),
-                                           selected = "preload"),
+                                           choices = list("Select from preloaded data"='preload',
+                                                          "Upload rawdata"='upload',
+                                                          "Upload saved NMF run"='saved'),
+                                           selected = "saved"),
                                conditionalPanel(
                                  condition = "input.selectfile == 'upload'",
                                  fileInput('file1', 'Choose text File',
                                            accept=c('text/csv',
-                                                    'text/comma-separated-values,text/plain',
+                                                    'text/comma-separated-values',
+                                                    'text/tab-separated-values',
+                                                    'text/plain',
                                                     '.csv',
+                                                    '.tsv',
                                                     '.out'))
                                ),
                                conditionalPanel(
@@ -95,13 +99,22 @@ body <- dashboardBody(
                                                 )
                                  )
                                ),
-                               tags$hr(),
-                               checkboxInput('header', 'Header', TRUE),
-                               radioButtons('sep', 'Separator',
-                                            c(Comma=',',
-                                              Semicolon=';',
-                                              Tab='\t'),
-                                            selected='\t')
+                               conditionalPanel(
+                                 condition = "input.selectfile == 'upload' || input.selectfile == 'preload'",
+                                 tags$hr(),
+                                 checkboxInput('header', 'Header', TRUE),
+                                 radioButtons('sep', 'Separator',
+                                              c(Comma=',',
+                                                Semicolon=';',
+                                                Tab='\t'),
+                                              selected='\t')
+                               ),
+                               conditionalPanel(
+                                 condition = "input.selectfile == 'saved'",
+                                 fileInput('rda', 'Choose saved RData',
+                                           accept=c('.rda',
+                                                    '.RData'))
+                               )
                       ),
                       tabPanel("Simple stats",
                                checkboxInput('chooseSamples', 'Manually select samples?', FALSE),

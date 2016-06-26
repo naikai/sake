@@ -34,6 +34,16 @@ shinyServer(function(input, output, session) {
       )
       filename <- basename(input$inputdata)
       filepath <- file.path(raw_fd, input$inputdata)
+    }else if (input$selectfile == "saved"){
+      inFile <- input$rda
+      req(inFile)
+      validate(
+        need(!is.null(inFile), "Please upload a .rda file")
+      )
+      filename <- basename(inFile$name)
+      filepath <- inFile$datapath
+    }else{
+      return()
     }
 
     fileinfo <- list()
@@ -42,12 +52,69 @@ shinyServer(function(input, output, session) {
     return(fileinfo)
   })
 
+  ### Output Prefix ###
+  File <- reactive({
+    if (input$selectfile == 'upload'){
+      File <- input$file1$name
+    }else if (input$selectfile == "preload"){
+      File <- input$inputdata
+    }else if (input$selectfile == "saved"){
+      File <- input$rda$name
+    }else{
+      return()
+    }
+    return(File)
+  })
+  File_ext <- reactive({
+    file_ext(File())
+  })
+  file_prefix <- reactive({
+    paste( gsub(paste0(".", File_ext()), "", File()),
+           paste0("k", input$num_cluster),
+           paste0(input$top.num,input$algorithm),
+           paste0("nrun", input$nrun),
+           paste0("predict_", input$predict),
+           sep=".")
+  })
+
+  rda <- reactive({
+    req(fileinfo())
+    req(input$selectfile == "saved")
+    filepath <- fileinfo()[['path']]
+    validate(
+      need(File_ext() == "rda" || File_ext() == "RData",
+           message = paste("file extension", File_ext(), "unknown, please try again"))
+    )
+    rda <- local({load(filepath); environment()})
+
+    # start checking for all the required variables
+    validate(
+      need(!is.null(rda$rawdata), "Variable 'rawdata' does not exist in your .rda file, please check it and upload again") %then%
+      need(nrow(rda$rawdata) > 0, "Variable 'rawdata' in your .rda file is empty, please check it and upload again") %then%
+      need(!is.null(rda$nmfres), "Variable 'nmfres' does not exist in your .rda file, please check it and upload again") %then%
+      need(!is.null(rda$tsne_2d), "Variable 'tsne_2d' does not exist in your .rda file, please check it and upload again") %then%
+      need(!is.null(rda$tsne_3d), "Variable 'tsne_3d' does not exist in your .rda file, please check it and upload again") #%then%
+      # need(!is.null(rda$dds), "Variable 'dds' does not exist in your .rda file, please check it and upload again")
+    )
+    return(rda)
+  })
+
+  observeEvent(rda(), {
+    tsne_2d$data <- rda()$tsne_2d
+    tsne_3d$data <- rda()$tsne_3d
+  })
+
   rawdata <- reactive({
+    req(fileinfo())
     filepath <- fileinfo()[['path']]
     n <- 2
     withProgress(message = 'Loading data', value = 0, {
       incProgress(1/n, detail = "Usually takes ~10 seconds")
-      rawdata <- myfread.table(filepath, check.platform=T, sep=input$sep, detect.file.ext=FALSE)
+      if(input$selectfile == "saved"){
+        rawdata <- rda()$rawdata
+      }else{
+        rawdata <- myfread.table(filepath, check.platform=T, sep=input$sep, detect.file.ext=FALSE)
+      }
     })
     return (rawdata)
   })
@@ -58,16 +125,18 @@ shinyServer(function(input, output, session) {
     validate(
       need(ncol(rawdata)>1,
            "Please modify the parameters on the left and try again!") %then%
-      need(!any(duplicated(t(rawdata))),
-           "There are columns with the exact same value in your data, Please check and try again!")
+        need(!any(duplicated(t(rawdata))),
+             "There are columns with the exact same value in your data, Please check and try again!")
     )
-    DT::datatable(head(rawdata, n=100), rownames= TRUE,
-                  options = list(scroll = TRUE,
-                                 scrollX = TRUE,
-                                 scrollY = TRUE,
-                                 pageLength = 8
-                  )
-    )
+    withProgress(message = 'Displying datatable', value = NULL, {
+      DT::datatable(head(rawdata, n=20), rownames= TRUE,
+                    options = list(scroll = TRUE,
+                                   scrollX = TRUE,
+                                   scrollY = TRUE,
+                                   pageLength = 8
+                    )
+      )
+    })
   }, server=TRUE)
 
   #' Info box
@@ -312,22 +381,6 @@ shinyServer(function(input, output, session) {
   }, server=TRUE)
 
 
-  ### Output Prefix ###
-  file_prefix <- reactive({
-    if (input$selectfile == 'upload'){
-      File <- input$file1$name
-    }else if (input$selectfile == "preload"){
-      File <- input$inputdata
-    }
-    ext <- file_ext(File)
-    paste( gsub(paste0(".", ext), "", File),
-           paste0("k", input$num_cluster),
-           paste0(input$top.num,input$algorithm),
-           paste0("nrun", input$nrun),
-           paste0("predict_", input$predict),
-           sep=".")
-  })
-
   ### Main part of the program ###
   nmf_seed <- eventReactive(input$runNMF, {
     nmf_seed <- as.numeric(input$nmf_seed)
@@ -343,24 +396,29 @@ shinyServer(function(input, output, session) {
       need(input$num_cluster <= ncol(merged), "Number of clusters(K) must be smaller than number of samples\nPlease Try selecting another K") %then%
       need(is.numeric(input$nrun) & is.whole(input$nrun) & input$nrun>1, "Please provide a valid numeric integer value for 'nrun'")
     )
-    ptm <- proc.time()
-    n <- 2
-    withProgress(message = 'Running NMF', value = 0, {
-      incProgress(1/n, detail = "Takes around 30~60 seconds")
-      res <- myNMF(merged,
-                   mode=input$mode,
-                   cluster=input$num_cluster,
-                   nrun=input$nrun,
-                   algorithm = input$algorithm,
-                   seed = nmf_seed()
-      )
-    })
 
-    b <- proc.time() - ptm
-    print("### Time to run NMF ### ")
-    print(b)
+    if(input$selectfile == "saved"){
+      nmfres <- rda()$nmfres
+      print('here')
+      print(class(nmfres))
+    }else{
+      ptm <- proc.time()
+      withProgress(message = 'Running NMF', value = 0, {
+        incProgress(1/2, detail = "Takes around 30~60 seconds")
+        nmfres <- myNMF(merged,
+                        mode=input$mode,
+                        cluster=input$num_cluster,
+                        nrun=input$nrun,
+                        algorithm = input$algorithm,
+                        seed = nmf_seed()
+        )
+        b <- proc.time() - ptm
+        print("### Time to run NMF ### ")
+        print(b)
+      })
+    }
 
-    return(res)
+    return(nmfres)
   })
 
   ### Estimate K ###
@@ -397,7 +455,7 @@ shinyServer(function(input, output, session) {
 
   output$estimPlot <- renderPlot({
     validate(
-      need(class(nmf_res()) == "NMF.rank", "Seems like you haven't run NMF 'estim run' yet")
+      need(class(nmf_res()) == "NMF.rank", "Seems like you haven't run NMF 'estim run' yet\nOr the loaded .rda file is from 'real run' result")
     )
     nmf_res <- nmf_res()
     if(input$estimtype=="consensus"){
@@ -411,7 +469,7 @@ shinyServer(function(input, output, session) {
   ### NMF plots ###
   output$nmfplot <- renderPlot({
     validate(
-      need(class(nmf_res()) == "NMFfitX1", "Seems like you haven't run NMF 'real' run yet")
+      need(class(nmf_res()) == "NMFfitX1", "Seems like you haven't run NMF 'real' run yet\nOr the loaded .rda file is from 'estim run' result")
     )
     nmf_res <- nmf_res()
     nmf_plot(nmf_res, type=input$plottype, silorder=T,
@@ -462,7 +520,6 @@ shinyServer(function(input, output, session) {
     }
   )
 
-  ### NMF results
   nmf_groups <- reactive({
     validate(
       need(class(nmf_res()) == "NMFfitX1", "Seems like you haven't run NMF 'real' run yet")
@@ -519,6 +576,7 @@ shinyServer(function(input, output, session) {
                                perplexity=input$nmftsne_perplexity, cores=cores())
     })
   })
+
   nmfplottsne <- reactive({
     nsamples <- ncol(heatmap_data()[['heatmap_data']])
     validate(
@@ -995,6 +1053,7 @@ shinyServer(function(input, output, session) {
   })
   tsne_2d <- reactiveValues(data=NULL)
   tsne_3d <- reactiveValues(data=NULL)
+
   observeEvent(input$runtSNE, {
     heatmap_data <- heatmap_data()[['heatmap_data']]
     withProgress(message = 'Running t-SNE', value = NULL, {
@@ -1082,15 +1141,20 @@ shinyServer(function(input, output, session) {
   })
 
   deseq_res <- eventReactive(input$runDESeq, {
+    if(input$selectfile == "saved"){
+      return(rda()$dds)
+    }
+
     rawdata <- rawdata()
     if(input$de_conv2int)
       rawdata <- round(rawdata)
 
     if(!all(sapply(rawdata, is.whole))){
-      createAlert(session, "alert", "exampleAlert", title = "Oops", style = "warning",
+      createAlert(session, "alert", "exampleAlert", title = "WARNING", style = "warning",
                   content = "Data contains non-integer value, Please use raw count data for DESeq2. <br>
-                             Or Use the option above to 'Force convert to integer' (results are not statistically rigorous)",
+                             Or Use the option above to 'Force convert to integer' <b>(Results are not statistically rigorous)</b>",
                   append = FALSE)
+      return(NULL)
     }else{
       closeAlert(session, "exampleAlert")
     }
@@ -1110,6 +1174,7 @@ shinyServer(function(input, output, session) {
   })
 
   filt_deseq_res <- reactive({
+    req(deseq_res())
     DESeq2::results(deseq_res(), contrast = c("Group", input$de_group1, input$de_group2)) %>%
       as.data.frame %>%
       subset(padj <= input$de_alpha) %>%
@@ -1344,10 +1409,11 @@ shinyServer(function(input, output, session) {
     validate(
       need(length(s.idx)>0, "Please select one GO-term/KEGG pathway from above.")
     )
-    path.pid <- substr(rownames(go_table)[s.idx], 1, 8)
-    # path.pid <- substr(s.idx, 1, 8)
-    out.suffix <- "nmf"
-    pathview(gene.data=gage.exp.fc(), pathway.id=path.pid, species=pathview.species(), out.suffix=out.suffix)
+    withProgress(message = 'Rendering pathview map', value = NULL, {
+      path.pid <- substr(rownames(go_table)[s.idx], 1, 8)
+      out.suffix <- "nmf"
+      pathview(gene.data=gage.exp.fc(), pathway.id=path.pid, species=pathview.species(), out.suffix=out.suffix)
+    })
 
     filename <- path.pid
     outfile <- paste(filename, out.suffix, 'png', sep=".")
@@ -1360,7 +1426,6 @@ shinyServer(function(input, output, session) {
   }, deleteFile = FALSE)
 
   ### Download NMF ###
-
   output$downloadNMFData <- downloadHandler(
     filename <- function() {
       paste( file_prefix(), "nmf_results.zip", sep=".")
