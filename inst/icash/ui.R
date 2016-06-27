@@ -702,8 +702,8 @@ body <- dashboardBody(
                         column(width=1, numericInput("tsne_perplexity", label = "Perplexity", value=10)),
                         column(width=1, numericInput("tsne_iter", label = "Iterations", value=20))
                       ),
-                      column(width=1, numericInput("plot_point_size", label = "DotSize", value=9)),
-                      column(width=1, numericInput("plot_point_alpha", label = "Alpha", value=0.8, step=0.05)),
+                      column(width=1, numericInput("plot_point_size", label = "DotSize", value=7)),
+                      column(width=1, numericInput("plot_point_alpha", label = "Alpha", value=0.75, step=0.05)),
                       column(width=1, numericInput("plot_label_size", label = "LabelSize", value=9)),
                       column(width=1, checkboxInput('plot_label', 'Add label', FALSE)),
                       column(width=1, checkboxInput('plot_legend', 'Add legend', FALSE))

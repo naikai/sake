@@ -19,6 +19,8 @@ Usoskin
 \description{
 Title: 'Unbiased classification of sensory neuron types
 by large-scale single-cell RNA sequencing'
+}
+\details{
 Abstract:
 The primary sensory system requires the integrated function of multiple cell types,
 although its full complexity remains unclear. We used comprehensive transcriptome

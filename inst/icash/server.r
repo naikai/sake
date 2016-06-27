@@ -399,8 +399,6 @@ shinyServer(function(input, output, session) {
 
     if(input$selectfile == "saved"){
       nmfres <- rda()$nmfres
-      print('here')
-      print(class(nmfres))
     }else{
       ptm <- proc.time()
       withProgress(message = 'Running NMF', value = 0, {
@@ -1130,12 +1128,13 @@ shinyServer(function(input, output, session) {
     )
     updateSelectizeInput(session, 'de_group1',
                          server = TRUE,
-                         choices = as.character(paste0("NMF", 1:input$num_cluster)),
+                         choices = as.character(paste0("NMF", sort(unique(nmf_groups()$nmf_subtypes)))),
                          selected = "NMF1"
     )
     updateSelectizeInput(session, 'de_group2',
                          server = TRUE,
-                         choices = as.character(paste0("NMF", 1:input$num_cluster)),
+                         choices = as.character(paste0("NMF", sort(unique(nmf_groups()$nmf_subtypes)))),
+                         # choices = as.character(paste0("NMF", 1:input$num_cluster)),
                          selected = "NMF2"
     )
   })
@@ -1175,10 +1174,14 @@ shinyServer(function(input, output, session) {
 
   filt_deseq_res <- reactive({
     req(deseq_res())
-    DESeq2::results(deseq_res(), contrast = c("Group", input$de_group1, input$de_group2)) %>%
-      as.data.frame %>%
-      subset(padj <= input$de_alpha) %>%
-      .[order(.$padj), ]
+    withProgress(message = 'Summarizing DESeq2 result', value = NULL, {
+      register(BiocParallel::MulticoreParam(workers = 8))
+      DESeq2::results(deseq_res(), parallel = TRUE,
+                      contrast = c("Group", input$de_group1, input$de_group2)) %>%
+        as.data.frame %>%
+        subset(padj <= input$de_alpha) %>%
+        .[order(.$padj), ]
+    })
   })
 
   output$deseq_table <- DT::renderDataTable({
@@ -1215,19 +1218,21 @@ shinyServer(function(input, output, session) {
     validate(
       need(!is.null(input$deseq_table_rows_selected), "Please select a gene")
     )
-    norm.data <- DESeq2::counts(deseq_res(), normalized=TRUE)
-    gene <- rownames(filt_deseq_res())[input$deseq_table_rows_selected]
-    gene.data <- norm.data[gene, ]
-    gene.data <- data.frame(Sample = names(gene.data),
-                            Expr = gene.data,
-                            NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
-    gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
+    withProgress(message = 'Generating boxplot', value = NULL, {
+      norm.data <- DESeq2::counts(deseq_res(), normalized=TRUE)
+      gene <- rownames(filt_deseq_res())[input$deseq_table_rows_selected]
+      gene.data <- norm.data[gene, ]
+      gene.data <- data.frame(Sample = names(gene.data),
+                              Expr = gene.data,
+                              NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
+      gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
 
-    plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
-            boxpoints = "all", jitter = 0.3, pointpos = 0) %>%
-      layout(xaxis = list(title = "", zeroline=TRUE),
-             yaxis = list(title = "Expression", zeroline=TRUE),
-             showlegend=TRUE)
+      plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
+              boxpoints = "all", jitter = 0.3, pointpos = 0) %>%
+        layout(xaxis = list(title = "", zeroline=TRUE),
+               yaxis = list(title = "Expression", zeroline=TRUE),
+               showlegend=TRUE)
+    })
   })
 
 
@@ -1239,18 +1244,20 @@ shinyServer(function(input, output, session) {
     rawdata <- transform_data()
     rawdata <- rawdata[rowMeans(rawdata) >= input$min_rowMean, ]
     nmf.group <- nmf_groups()$nmf_subtypes
+    num_nmf_subtypes <- nmf_groups()$nmf_subtypes %>% unique %>% sort
+
     if(input$rank_method=="featureScore"){
       print('Do we want to use featureScore, there are only few genes')
     }else if(input$rank_method=="logFC"){
       nmf_feature_rank <- data.frame(matrix(NA_real_, nrow=nrow(rawdata), ncol=input$num_cluster))
 
-      for(i in 1:input$num_cluster){
+      for(i in 1:num_nmf_subtypes){
         idx <- nmf.group==i
         nmf_feature_rank[, i] <- rawdata %>% as.data.frame %>%
                                   dplyr::mutate(logFC = log(rowMeans(.[idx])/rowMeans(.[!idx]))) %>%
                                   dplyr::select(logFC)
       }
-      colnames(nmf_feature_rank) <- paste0("NMF", 1:input$num_cluster)
+      colnames(nmf_feature_rank) <- paste0("NMF", 1:num_nmf_subtypes)
       rownames(nmf_feature_rank) <- rownames(rawdata)
     }
     ### Check whether they are mouse or human, then convert mouse to human if needed ###
@@ -1302,7 +1309,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$runNMF, {
     updateSelectizeInput(session, 'pathway_group',
                          server = TRUE,
-                         choices = as.character(paste0("NMF", 1:input$num_cluster))
+                         choices = as.character(paste0("NMF", sort(unique(nmf_groups()$nmf_subtypes))))
     )
   })
   pathview.species <- reactive({
