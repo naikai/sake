@@ -985,8 +985,13 @@ shinyServer(function(input, output, session) {
   observeEvent(input$runNMF,{
     updateSelectizeInput(session, 'pt_col',
                          server = TRUE,
-                         choices = as.character(c(plot_colopts(), "NMF")),
+                         choices = as.character(c(plot_colopts(), "NMF", "GeneExpr")),
                          selected = 'NMF'
+    )
+    updateSelectizeInput(session, 'pt_gene',
+                         server = TRUE,
+                         choices = as.character(nmf_features()$Gene),
+                         selected = NULL
     )
   })
   point_col <- reactive({
@@ -999,7 +1004,8 @@ shinyServer(function(input, output, session) {
     }else if(input$pt_col == "Filename"){
       col <- ColSideColors()[["color"]][, 1]
     }else if(input$pt_col == "GeneExpr"){
-      col <- create.brewer.color(merged[input$point_col_gene, ])
+      col <- create.brewer.color(as.numeric(transform_data()[input$pt_gene, ]), num = 9, "YlOrRd")
+      print(col)
     }else{
       warning("Wrong point color assigning method!")
     }

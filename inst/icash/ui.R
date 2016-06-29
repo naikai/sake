@@ -692,6 +692,16 @@ body <- dashboardBody(
                                                      ))
                       ),
                       conditionalPanel(
+                        condition = "input.pt_col == 'GeneExpr'",
+                        column(width=2, selectizeInput("pt_gene",
+                                                       label = "Select gene",
+                                                       choices=NULL, multiple=FALSE,
+                                                       options = list(
+                                                         onInitialize = I('function() { this.setValue(""); }')
+                                                       ))
+                        )
+                      ),
+                      conditionalPanel(
                         condition = "input.VisType == 'PCA'",
                         column(width=2, selectInput("pca_x", label="PC on X-axis", choices=seq(1,10), selected = 1)),
                         column(width=2, selectInput("pca_y", label="PC on Y-axis", choices=seq(1,10), selected = 2))
