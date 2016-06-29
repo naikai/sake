@@ -522,9 +522,8 @@ shinyServer(function(input, output, session) {
     validate(
       need(class(nmf_res()) == "NMFfitX1", "Seems like you haven't run NMF 'real' run yet")
     )
-    nmf_res <- nmf_res()
     withProgress(message = 'Extracting Groups info', value = NULL, {
-      nmf_extract_group(nmf_res, matchConseOrder = input$matchOrder, type=input$predict )
+      nmf_extract_group(nmf_res(), type=input$predict)
     })
   })
   output$nmfGroups <- DT::renderDataTable({
@@ -598,7 +597,7 @@ shinyServer(function(input, output, session) {
       stop("Error: color scheme undefined")
     }
     # # default by user selection
-    point_size <- input$plot_point_size - 6
+    point_size <- input$plot_point_size - 5
     if(input$nmf_prob){
       if(input$predict=="consensus"){
         point_size <- point_size + point_size * (1-nmf_groups()$sil_width)
@@ -976,7 +975,7 @@ shinyServer(function(input, output, session) {
   plot_colopts <- reactive({
     c("Default", "Filename")
   })
-  observe({
+  observeEvent(rawdata(), {
     updateSelectizeInput(session, 'pt_col',
                          server = TRUE,
                          choices = as.character(plot_colopts()),
@@ -999,6 +998,8 @@ shinyServer(function(input, output, session) {
       col <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai")
     }else if(input$pt_col == "Filename"){
       col <- ColSideColors()[["color"]][, 1]
+    }else if(input$pt_col == "GeneExpr"){
+      col <- create.brewer.color(merged[input$point_col_gene, ])
     }else{
       warning("Wrong point color assigning method!")
     }
@@ -1008,39 +1009,43 @@ shinyServer(function(input, output, session) {
   #' PCA plot
   output$pcaPlot_2D <- renderPlotly({
     data <- heatmap_data()[['heatmap_data']]
-    pc <- prcomp(t(data))
-    projection <- as.data.frame(pc$x)
-    pca_x <- as.numeric(input$pca_x)
-    pca_y <- as.numeric(input$pca_y)
+    withProgress(message = 'Generating 2d PCA plot', value = NULL, {
+      pc <- prcomp(t(data))
+      projection <- as.data.frame(pc$x)
+      pca_x <- as.numeric(input$pca_x)
+      pca_y <- as.numeric(input$pca_y)
 
-    if(input$plot_label){
-      t <- list( size=input$plot_label_size, color=toRGB("grey50") )
-      p <- plot_ly(x=projection[,pca_x], y=projection[,pca_y], mode="markers+text",
-                   text=rownames(projection), hoverinfo="text", textfont=t, textposition="top middle",
-                   # marker = list(color=toRGB("steelblue"), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
-                   marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
-    }else{
-      p <- plot_ly(x=projection[,pca_x], y=projection[,pca_y], mode="markers",
-                   text=rownames(projection), hoverinfo="text",
-                   # marker = list(color=toRGB("steelblue"), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
-                   marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
-    }
-    p %>% layout(xaxis = list(title = paste0("PC", pca_x), zeroline=FALSE),
-                 yaxis = list(title = paste0("PC", pca_y), zeroline=FALSE))
+      if(input$plot_label){
+        t <- list( size=input$plot_label_size, color=toRGB("grey50") )
+        p <- plot_ly(x=projection[,pca_x], y=projection[,pca_y], mode="markers+text",
+                     text=rownames(projection), hoverinfo="text", textfont=t, textposition="top middle",
+                     # marker = list(color=toRGB("steelblue"), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+      }else{
+        p <- plot_ly(x=projection[,pca_x], y=projection[,pca_y], mode="markers",
+                     text=rownames(projection), hoverinfo="text",
+                     # marker = list(color=toRGB("steelblue"), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+      }
+      p %>% layout(xaxis = list(title = paste0("PC", pca_x), zeroline=FALSE),
+                   yaxis = list(title = paste0("PC", pca_y), zeroline=FALSE))
+    })
   })
   output$pcaPlot_3D <- renderPlotly({
     data <- heatmap_data()[['heatmap_data']]
-    pc <- prcomp(t(data))
-    projection <- as.data.frame(pc$x)
-    N <- nrow(projection)
-    plot_ly(x=projection[,1], y=projection[,2], z=projection[,3], type="scatter3d", mode="markers",
-                 # color=rownames(projection), text=rownames(projection), hoverinfo="text",
-                 color=point_col(), text=rownames(projection), hoverinfo="text",
-                 marker = list(color=point_col(), size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
+    withProgress(message = 'Generating 3d PCA plot', value = NULL, {
+      pc <- prcomp(t(data))
+      projection <- as.data.frame(pc$x)
+      N <- nrow(projection)
+      plot_ly(x=projection[,1], y=projection[,2], z=projection[,3], type="scatter3d", mode="markers",
+              # color=rownames(projection), text=rownames(projection), hoverinfo="text",
+              color=point_col(), text=rownames(projection), hoverinfo="text",
+              marker = list(color=point_col(), size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
         layout( scene = list(
-                 xaxis = list(title = "PC1"),
-                 yaxis = list(title = "PC2"),
-                 zaxis = list(title = "PC3")))
+          xaxis = list(title = "PC1"),
+          yaxis = list(title = "PC2"),
+          zaxis = list(title = "PC3")))
+    })
   })
 
   #' t-SNE plot
@@ -1243,16 +1248,16 @@ shinyServer(function(input, output, session) {
     )
     rawdata <- transform_data()
     rawdata <- rawdata[rowMeans(rawdata) >= input$min_rowMean, ]
-    nmf.group <- nmf_groups()$nmf_subtypes
-    num_nmf_subtypes <- nmf_groups()$nmf_subtypes %>% unique %>% sort
+    nmf_group <- nmf_groups()$nmf_subtypes
+    num_nmf_subtypes <- nmf_group %>% unique %>% length
 
     if(input$rank_method=="featureScore"){
       print('Do we want to use featureScore, there are only few genes')
     }else if(input$rank_method=="logFC"){
-      nmf_feature_rank <- data.frame(matrix(NA_real_, nrow=nrow(rawdata), ncol=input$num_cluster))
+      nmf_feature_rank <- data.frame(matrix(NA_real_, nrow=nrow(rawdata), ncol=num_nmf_subtypes))
 
       for(i in 1:num_nmf_subtypes){
-        idx <- nmf.group==i
+        idx <- nmf_group==i
         nmf_feature_rank[, i] <- rawdata %>% as.data.frame %>%
                                   dplyr::mutate(logFC = log(rowMeans(.[idx])/rowMeans(.[!idx]))) %>%
                                   dplyr::select(logFC)
