@@ -23,8 +23,5 @@ myHeatmap.3(data, color = rev(brewer.pal(8, "RdYlBu")), type = "cor",
 \description{
 This function allows you to express your love of cats.
 }
-\examples{
-myHeatmap.3()
-}
 \keyword{cats}
 

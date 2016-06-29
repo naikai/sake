@@ -4,9 +4,6 @@
 #' @param love Do you love cats? Defaults to TRUE.
 #' @keywords cats
 #' @export
-#' @examples
-#' myHeatmap.3()
-
 myHeatmap.3 <- function (data, color=rev(brewer.pal(8, "RdYlBu")), type="cor", save.image=F,
                                 width=18, height=18, title="", file.prefix="heatmap",
                                 ColSideColors=NULL, ColSideColors.name=NULL, ColSideColorsSize=1,
@@ -19,17 +16,21 @@ myHeatmap.3 <- function (data, color=rev(brewer.pal(8, "RdYlBu")), type="cor", s
                                 notecex=1.4, notecol="black", col.legend=F, row.legend=F,
                                 labRow=T, labCol=T, cexRow=1.1, cexCol=1.1, lhei=c(1.3,7), lwid=c(1,7))
 {
+  print("start")
   if(save.image)
     pdf(paste0(file.prefix, ".pdf"), width=width, height=height)
 
+  print("first")
   # for sample labeling
   label.cex <- assign_label_cex(dim(data)[2])
 
+  print("second")
   # ColSideColors
   if(is.null(ColSideColors)){
     ColSideColors = rep("white", ncol(data))
   }
   ColSideColors <- as.matrix(ColSideColors)
+  print("stop")
 
   if(type=="cor"){
     data <- cor(data, method=cor.method)
@@ -50,6 +51,7 @@ myHeatmap.3 <- function (data, color=rev(brewer.pal(8, "RdYlBu")), type="cor", s
 
   }else if(type=="heatmap"){
     ### This needs to be careful, by default myHeatmap.3 use manual feed in Colv and Rowv, so need to add dendro="auto" when call this functions
+      print("herqewrwhi")
     if(scale.first){
       data <- scale_data(data, scale=scale, method=scale.method)
     }
@@ -97,6 +99,7 @@ myHeatmap.3 <- function (data, color=rev(brewer.pal(8, "RdYlBu")), type="cor", s
       labCol=F
 
     if(!is.null(RowSideColors)){
+      print("hihi")
       heatmap.3(data, main=title, trace='none', key=TRUE, col=color,
                 dendro=dendrogram,
                 Colv=Colv, labCol=labCol, ColSideColors=ColSideColors, ColSideColorsSize=ColSideColorsSize,
@@ -104,6 +107,7 @@ myHeatmap.3 <- function (data, color=rev(brewer.pal(8, "RdYlBu")), type="cor", s
                 scale=scale, lwid=lwid, lhei=lhei, cexCol=cexCol, cexRow=cexRow,
                 margins=c(height, width) )
     }else{
+      print("hoho")
       heatmap.3(data, main=title, trace='none', key=TRUE, col=color,
                 dendro=dendrogram,
                 Colv=Colv, labCol=labCol, ColSideColors=ColSideColors, ColSideColorsSize=ColSideColorsSize,
@@ -113,6 +117,7 @@ myHeatmap.3 <- function (data, color=rev(brewer.pal(8, "RdYlBu")), type="cor", s
     }
 
     if (col.legend){
+      print("collegend")
       if(!is.null(ColSideColors.name)){
         legend.name <- NULL
         legend.color <- NULL
@@ -120,12 +125,12 @@ myHeatmap.3 <- function (data, color=rev(brewer.pal(8, "RdYlBu")), type="cor", s
           legend.name <- c(legend.name, "", unique(unlist(ColSideColors.name[, i])))
           legend.color <- c(legend.color, "white", unique(unlist(ColSideColors[, i])))
         }
-
         legend("topright", legend=legend.name, pch=19, ncol=1, cex=0.8, col=legend.color)
       }
     }
     # Rotate the legend
     if (row.legend){
+      print("rowlegend")
       if(!is.null(RowSideColors.name)){
         g <- grid_legend("bottomleft", labels=unique(RowSideColors.name),
               draw=F, col=unique(as.character(RowSideColors)), pch=19, gp=gpar(cex=0.8),
