@@ -85,7 +85,8 @@ create.brewer.color <- function(data, num=8, name="Set1")
 		return(create.manual.color(data, my_pallete))
 	}else{
 		groupCodes <- as.factor(data)
-		colorCodes <- colorRampPalette(brewer.pal(num, name))(num)
+		uniq_num <- length(levels(groupCodes))
+		colorCodes <- colorRampPalette(brewer.pal(num, name))(uniq_num)
 		color.idx <- match(groupCodes, levels(groupCodes))
 		label.color <- colorCodes[color.idx]
 		return(label.color)
