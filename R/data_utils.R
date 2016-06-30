@@ -8,7 +8,7 @@
 #' cat_function()
 compare_group <- function(group1, group2, file.prefix="Compare.group", title="",
                           plot=T, save.image=F, add.legend=T,
-                          label.size=5, title.size=36, angle=90){
+                          label.size=5, title.size=36, angle=45){
   if (class(group1)=="integer" | class(group1)=="numeric")
   group1 <- paste0("Group", group1)
   if (class(group2)=="integer" | class(group2)=="numeric")

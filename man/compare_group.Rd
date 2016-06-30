@@ -6,7 +6,7 @@
 \usage{
 compare_group(group1, group2, file.prefix = "Compare.group", title = "",
   plot = T, save.image = F, add.legend = T, label.size = 5,
-  title.size = 36, angle = 90)
+  title.size = 36, angle = 45)
 }
 \arguments{
 \item{love}{Do you love cats? Defaults to TRUE.}
