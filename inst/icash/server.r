@@ -70,12 +70,16 @@ shinyServer(function(input, output, session) {
     file_ext(File())
   })
   file_prefix <- reactive({
-    paste( gsub(paste0(".", File_ext()), "", File()),
-           paste0("k", input$num_cluster),
-           paste0(input$top.num,input$algorithm),
-           paste0("nrun", input$nrun),
-           paste0("predict_", input$predict),
-           sep=".")
+    if(input$selectfile == "saved"){
+      gsub(paste0(".", File_ext()), "", File())
+    }else{
+      paste( gsub(paste0(".", File_ext()), "", File()),
+             paste0("k", input$num_cluster),
+             paste0(input$top.num,input$algorithm),
+             paste0("nrun", input$nrun),
+             paste0("predict_", input$predict),
+             sep=".")
+    }
   })
 
   rda <- reactive({
@@ -420,6 +424,45 @@ shinyServer(function(input, output, session) {
     return(nmfres)
   })
 
+  ori_plus_nmfResult <-reactive({
+    rawdata <- rawdata()
+    validate(
+      need(!is.null(nmf_groups()), "Please run NMF and get the result first")
+    )
+    idx <- match(colnames(rawdata), nmf_groups()$Sample_ID)
+    colnames(rawdata) <- paste(paste0("NMF",nmf_groups()$nmf_subtypes[idx]), colnames(rawdata), sep="_")
+    return(rawdata)
+  })
+
+  ### Download NMF ###
+  observeEvent(input$runNMF, {
+    output$dlNMF_UI <- renderUI({
+      tagList(
+        column(width=2, br(), downloadButton("dlNMF", "Download NMF result", class = 'dwnld'))
+      )
+    })
+  })
+
+  output$dlNMF <- downloadHandler(
+    filename <- function() {
+      paste( file_prefix(), "nmf_results.zip", sep=".")
+    },
+    content = function(file) {
+      tmpdir <- tempdir()
+      current_dir <- getwd()
+      setwd(tmpdir)
+      filenames <- sapply(c("nmf_Groups", "nmf_Features", "Original_plus_NMF", "runSummary"),
+                          function(x) paste(file_prefix(), x, "csv", sep="."))
+      write.csv(nmf_groups(), filenames[1], quote=F, row.names=F)
+      write.csv(nmf_features(), filenames[2], quote=F, row.names=F)
+      write.csv(ori_plus_nmfResult(), filenames[3], quote=F)
+      # write.csv(runSummary(), filenames[4], quote=F)
+      zip(zipfile=file, files=filenames)
+      setwd(as.character(current_dir))
+    },
+    contentType = "application/zip"
+  )
+
   ### Estimate K ###
   runSummary <- reactive({
     req(class(nmf_res()) == "NMF.rank")
@@ -493,7 +536,6 @@ shinyServer(function(input, output, session) {
       if(input$mode == "estim"){
         consensusmap(nmf_res)
         print(plot(nmf_res))
-        # nmf_estim_plot(nmf_res)
       }
       dev.off()
     }
@@ -540,20 +582,7 @@ shinyServer(function(input, output, session) {
     }
     DT::datatable(nmf_groups, rownames=FALSE, escape=-1,
                   selection = list(selected = sel_idx),
-                  extensions = 'Buttons',
-                  options = list(dom = 'Bfrtip',
-                                 buttons =
-                                   list('copy', 'print', list(
-                                     extend = 'collection',
-                                     buttons = list(list(extend='csv',
-                                                         filename = filename),
-                                                    list(extend='excel',
-                                                         filename = filename),
-                                                    list(extend='pdf',
-                                                         filename= filename)),
-                                     text = 'Download'
-                                   )),
-                                 scrollX = TRUE,
+                  options = list(scrollX = TRUE,
                                  pageLength = 8,
                                  order=list(list(1,'asc'))
                   )
@@ -580,12 +609,8 @@ shinyServer(function(input, output, session) {
     validate(
       need(input$nmftsne_perplexity*3 < (nsamples-1),
            message = paste("Perpleixty", input$nmftsne_perplexity,
-                           "is too large compared to num of samples", nsamples))
-    )
-    validate(
-      need(input$mode=="real", "This part won't work for 'estim' module\nPlease Try NMF 'Real' run")
-    )
-    validate(
+                           "is too large compared to num of samples", nsamples)) %then%
+      need(input$mode=="real", "This part won't work for 'estim' module\nPlease Try NMF 'Real' run") %then%
       need(!is.null(tsne_2d$data), "Please hit 'Run t-SNE' button")
     )
     color <- NULL
@@ -1118,7 +1143,7 @@ shinyServer(function(input, output, session) {
                             "is too large compared to num of samples", nsamples))
     )
     if(is.null(tsne_3d$data)) return ()
-    projection <- as.data.frame(tsne_3d$data$Y)
+    projection <- isolate(as.data.frame(tsne_3d$data$Y))
     labels <- rownames(projection)
     N <- nrow(projection)
     plot_ly(x=projection[,1], y=projection[,2], z=projection[,3], type="scatter3d", mode="markers",
@@ -1443,28 +1468,6 @@ shinyServer(function(input, output, session) {
          alt = "This is alternate text")
   }, deleteFile = FALSE)
 
-  ### Download NMF ###
-  output$downloadNMFData <- downloadHandler(
-    filename <- function() {
-      paste( file_prefix(), "nmf_results.zip", sep=".")
-    },
-    content = function(file) {
-      tmpdir <- tempdir()
-      current_dir <- getwd()
-      setwd(tmpdir)
-      # print(tempdir())
-      filenames <- sapply(c("nmf_Groups", "nmf_Features", "Original_plus_NMF", "runSummary"),
-                          function(x) paste(file_prefix(), x, "csv", sep="."))
-      write.csv(nmf_groups(), filenames[1], quote=F, row.names=F)
-      write.csv(nmf_features(), filenames[2], quote=F, row.names=F)
-      write.csv(ori_plus_nmfResult(), filenames[3], quote=F)
-      write.csv(runSummary(), filenames[4], quote=F)
-      # print (filenames)
-      zip(zipfile=file, files=filenames)
-      setwd(as.character(current_dir))
-    },
-    contentType = "application/zip"
-  )
 
   output$downloadPathData <- downloadHandler(
     filename <- function() {

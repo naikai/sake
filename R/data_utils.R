@@ -6,11 +6,16 @@
 #' @export
 #' @examples
 #' cat_function()
-compare_groups <- function(group1, group2, file.prefix="Compare.group", title="", plot=T, save.image=F, add.legend=T, label.size=5, title.size=36){
+compare_group <- function(group1, group2, file.prefix="Compare.group", title="",
+                          plot=T, save.image=F, add.legend=T,
+                          label.size=5, title.size=36, angle=90){
   if (class(group1)=="integer" | class(group1)=="numeric")
   group1 <- paste0("Group", group1)
   if (class(group2)=="integer" | class(group2)=="numeric")
   group2 <- paste0("Group", group2)
+
+  group1 <- factor(group1)
+  group2 <- factor(group2)
 
   ### Calculate the percentge first before feed into ggplot2 ###
   ### This is based on group1.
@@ -20,10 +25,15 @@ compare_groups <- function(group1, group2, file.prefix="Compare.group", title=""
   summary.pct <- melt(summary.pct)
 
   ### Stacked Bar using ggplot2
+  colourCount = length(unique(summary.pct$group2))
+  num <- ifelse(colourCount > 9, 9, colourCount)
+  getPalette = colorRampPalette(RColorBrewer::brewer.pal(num, "Set1"))
+
   ray <- ggplot(data=summary.pct, aes(x=group1, y=value, fill=group2)) +
         geom_bar(stat="identity") + labs(y = "Percentage (%)") +
-        scale_fill_brewer(palette="Set1") +
+        scale_fill_manual(values = getPalette(colourCount)) +
         xlab('') + labs(fill="")
+
   ### This part is specific for manually colorign the groups to match pam50 coloring
   # xlab('') + scale_fill_manual(values=c("#E41A1C", "#fccde5", "#2166ac", "#a6cee3", "#33A02C")) # NMFK5-vs.PAM50
   # xlab('') + scale_fill_manual(values=c("#33A02C", "#fccde5", "#a6cee3", "#2166ac", "#E41A1C")) # PAM50-vs-NMFK5
@@ -40,6 +50,7 @@ compare_groups <- function(group1, group2, file.prefix="Compare.group", title=""
   ### Plot again
   ray <- ray + annotate(x = naikai$x, y = naikai$position, label = naikai$label, geom = "text", size=label.size)
   ray <- ray + ggtitle(title) + theme(plot.title=element_text(face="bold", size=title.size))
+  ray <- ray + theme(axis.text.x = element_text(angle = angle, vjust = 1, hjust=1))
 
   # legend
   if (!add.legend){

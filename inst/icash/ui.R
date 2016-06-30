@@ -276,24 +276,31 @@ body <- dashboardBody(
                            bsTooltip("nrun", "Recommend 20-30 for estimate k <br> 50-100 for real run",
                                      "right", options = list(container = "body"))
                     ),
-                    column(width=2,
-                           selectInput("algorithm",
-                                       label = "NMF algorithm",
-                                       choices = c("brunet", "lee", "nsNMF", "KL", "Frobenius"),
-                                       selected = "brunet"),
-                           bsTooltip("algorithm", "Different NMF algorithms",
-                                     "right", options = list(container = "body"))
-                    ),
-                    column(width=2,
-                           selectInput("nmf_seed",
-                                       label = "Random seed",
-                                       choices = c("Yes"=0, "No"=123211),
-                                       selected = 123211),
-                           bsTooltip("nmf_seed", "Whether to use random starting condition for NMF run <br> Default: fixed seed",
-                                     "right", options = list(container = "body"))
-                    ),
                     column(width=2, br(),
-                           actionButton("runNMF", "Run NMF!", icon("play-circle"), class = 'act')
+                           actionButton("runNMF", "Run NMF", icon("play-circle"), class = 'act')
+                    ),
+                    uiOutput("dlNMF_UI"),
+                    column(width=2, checkboxInput('nmf_runmoreopt', 'More Options', FALSE))
+                  ),
+                  fluidRow(
+                    conditionalPanel(
+                      condition = "input.nmf_runmoreopt == true",
+                      column(width=2,
+                             selectInput("algorithm",
+                                         label = "NMF algorithm",
+                                         choices = c("brunet", "lee", "nsNMF", "KL", "Frobenius"),
+                                         selected = "brunet"),
+                             bsTooltip("algorithm", "Different NMF algorithms",
+                                       "right", options = list(container = "body"))
+                      ),
+                      column(width=2,
+                             selectInput("nmf_seed",
+                                         label = "Random seed",
+                                         choices = c("Yes"=0, "No"=123211),
+                                         selected = 123211),
+                             bsTooltip("nmf_seed", "Whether to use random starting condition for NMF run <br> Default: fixed seed",
+                                       "right", options = list(container = "body"))
+                      )
                     )
                   )
               )
@@ -311,7 +318,7 @@ body <- dashboardBody(
                                                   selected = "consensus")
                       ),
                       column(width=3, br(),
-                             downloadButton("dl_nmf_estimplot", "Download", class="dwnld")
+                             downloadButton("dl_nmf_estimplot", "Save plot", class="dwnld")
                       ),
                       fluidRow(
                         column(width=4,
@@ -348,7 +355,7 @@ body <- dashboardBody(
                                                   selected = "samples")
                       ),
                       column(width=3, br(),
-                             downloadButton("dl_nmf_realplot", "Download", class="dwnld")
+                             downloadButton("dl_nmf_realplot", "Save plot", class="dwnld")
                       ),
                       fluidRow(
                         column(width=4,
