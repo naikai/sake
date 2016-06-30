@@ -1218,7 +1218,7 @@ shinyServer(function(input, output, session) {
   })
 
   deseq_res <- eventReactive(input$runDESeq, {
-    if(input$selectfile == "saved"){
+    if(input$selectfile == "saved" & !is.null(rda()$dds)){
       return(rda()$dds)
     }
 
