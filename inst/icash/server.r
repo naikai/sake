@@ -998,6 +998,48 @@ shinyServer(function(input, output, session) {
     )
   })
 
+  plotInput <- function(){
+    heatmap_data <- heatmap_data()[['heatmap_data']]
+    filename <- paste(input$type, input$math, paste0(input$orders, paste0(nrow(merged()), "genes")), sep=".")
+    myHeatmap.3(as.matrix(heatmap_data),
+                type="heatmap",
+                color=color(),
+                RowSideColors = RowSideColors()[["color"]],
+                RowSideColors.name=RowSideColors()[["name"]],
+                ColSideColors = ColSideColors()[["color"]],
+                ColSideColorsSize=input$ColSideColorsSize,
+                ColSideColors.name=ColSideColors()[["name"]],
+                cor.method=input$cor.method,
+                dist.m=input$distance,
+                hclust.m=input$linkage,
+                title=input$title,
+                Colv = Colv(),
+                Rowv = Rowv(),
+                scale="row",
+                scale.method=input$scale_method,
+                scale.first=input$scale_first,
+                dendro.ord="manual",
+                dendrogram="both",
+                cexCol=input$cexCol,
+                cexRow=input$cexRow,
+                col.legend = input$col_legend,
+                row.legend = input$row_legend,
+                file.prefix=filename,
+                save.image=F
+    )
+  }
+
+  output$dl_heatmap<- downloadHandler(
+    filename <- function() {
+      paste(file_prefix(), "pdf", sep=".")
+    },
+    content = function(file) {
+      pdf(file, width= 12, height=12)
+      plotInput()
+      dev.off()
+    }
+  )
+
   plot_colopts <- reactive({
     c("Default", "Filename")
   })
