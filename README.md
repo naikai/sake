@@ -6,7 +6,7 @@
 ### **I**nteractive **C**lustering Tool for **A**ssessing **S**ingle-Cell **H**eterogeneity
 The aim of `icash` is to provide an user-friendly tools for easy analyzing NGS Single-Cell transcriptomic data
 
-### Version 0.2.1.2
+### Version 0.2.1.3
 
 ### Installation Guide
 To install the latest development version from GitHub:
