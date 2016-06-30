@@ -536,6 +536,15 @@ body <- dashboardBody(
                       )
                       )
                     ),
+
+                    conditionalPanel(
+                      condition = "input.VisType == 'Heatmap' ",
+                      column(width = 3, br(),
+                             downloadButton("dl_heatmap", "Download", class = "butt"),
+                             tags$head(tags$style(".butt{background-color:#8E24BF;} .butt{color: white;} .butt{border-color:$9932CC;}"))
+                      )
+                    ),
+
                     column(width=2, checkboxInput('heatmoreopt', 'More Options', FALSE)),
                     conditionalPanel(
                       condition = "input.VisType == 't-SNE' ",
