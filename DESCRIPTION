@@ -55,7 +55,6 @@ Suggests:
     RColorBrewer,
     rmarkdown,
     testthat,
-    vcd,
     WGCNA,
     webshot
 Remotes:
