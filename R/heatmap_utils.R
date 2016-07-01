@@ -123,10 +123,10 @@ myHeatmap.3 <- function (data, color=rev(brewer.pal(8, "RdYlBu")), type="cor", s
     # Rotate the legend
     if (row.legend){
       if(!is.null(RowSideColors.name)){
-        g <- grid_legend("bottomleft", labels=unique(RowSideColors.name),
+        g <- vcd::grid_legend("bottomleft", labels=unique(RowSideColors.name),
               draw=F, col=unique(as.character(RowSideColors)), pch=19, gp=gpar(cex=0.8),
               hgap=unit(0.6, "lines"), vgap=unit(0.3, "lines") )
-        grid.draw(grobTree(g, vp=viewport(x=.1, y=.08, angle=90)))
+        grid::grid.draw(grobTree(g, vp=viewport(x=.1, y=.08, angle=90)))
       }
     }
   }
