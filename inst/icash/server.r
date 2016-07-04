@@ -513,7 +513,7 @@ shinyServer(function(input, output, session) {
       need(class(nmf_res()) == "NMFfitX1", "Seems like you haven't run NMF 'real' run yet\nOr the loaded .rda file is from 'estim run' result")
     )
     nmf_res <- nmf_res()
-    nmf_plot(nmf_res, type=input$plottype, silorder=T,
+    nmf_plot(nmf_res, type=input$plottype, silorder=input$nmfplot_silhouette,
              subsetRow = ifelse(input$select_feature_num>0, as.numeric(input$select_feature_num), TRUE ))
   },height = 777)
 
@@ -1478,8 +1478,20 @@ shinyServer(function(input, output, session) {
   })
 
   output$go_summary <- DT::renderDataTable({
+    filename <- paste(input$EnrichType, input$pathway_group, input$goTerm, sep = "_")
     datatable(go_table(), selection = 'single',
-              options = list(pageLength=6,
+              extensions = 'Buttons',
+              options = list(dom = 'Bfrtip',
+                             buttons =
+                               list('colvis', 'copy', 'print', list(
+                                 extend = 'collection',
+                                 buttons = list(list(extend='csv',
+                                                     filename = filename),
+                                                list(extend='excel',
+                                                     filename = filename)),
+                                 text = 'Download'
+                               )),
+                             pageLength = 6,
                              autoWidth = TRUE,
                              columnDefs = list(list(width = '50px', targets = "_all"))
               )

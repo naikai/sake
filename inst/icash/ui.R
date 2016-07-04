@@ -54,7 +54,7 @@ sidebar <- dashboardSidebar(
                               selectInput("EnrichType",
                                           label = "Which Category?",
                                           choices = c("GO", "KEGG"),
-                                          selected = "KEGG")
+                                          selected = "GO")
              )
   )
 )
@@ -363,6 +363,7 @@ body <- dashboardBody(
                                checkboxInput('dl_nmf_realmoreopt', 'More Options', FALSE),
                                conditionalPanel(
                                  condition = "input.dl_nmf_realmoreopt == true",
+                                 checkboxInput('nmfplot_silhouette', 'Match silhouette order', TRUE),
                                  strong("PDF size (inches):"),
                                  sliderInput(inputId="real_pdf_w", label = "width:", min=3, max=20, value=14, ticks=F),
                                  sliderInput(inputId="real_pdf_h", label = "height:", min=3, max=20, value=14, ticks=F)
