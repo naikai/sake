@@ -430,7 +430,7 @@ body <- dashboardBody(
                     column(width=3,
                            selectInput("select_feature_num",
                                        label = "Number of features from each group",
-                                       choices = c("By default"=0, "10"=10, "20"=20, "30"=30, "50"=50, "100"=100, "200"=200, "500"=500),
+                                       choices = c("By default"=0, "10"=10, "20"=20, "30"=30, "50"=50, "100"=100, "200"=200, "500"=500, "1000"=1000, "1500"=1500, "2000"=2000, "3000"=3000, "5000"=5000),
                                        selected = 0)
                     ),
                     conditionalPanel(
@@ -713,7 +713,17 @@ body <- dashboardBody(
                       ),
                       conditionalPanel(
                         condition = "input.pt_col == 'GeneExpr'",
-                        column(width=2, selectizeInput("pt_gene",
+                        column(width=2, selectizeInput("pt_allgene",
+                                                       label = "Select gene",
+                                                       choices=NULL, multiple=FALSE,
+                                                       options = list(
+                                                         onInitialize = I('function() { this.setValue(""); }')
+                                                       ))
+                        )
+                      ),
+                      conditionalPanel(
+                        condition = "input.pt_col == 'NMF Feature'",
+                        column(width=2, selectizeInput("pt_nmfgene",
                                                        label = "Select gene",
                                                        choices=NULL, multiple=FALSE,
                                                        options = list(

@@ -548,8 +548,8 @@ shinyServer(function(input, output, session) {
       nmf_res <- nmf_res()
       pdf(file, width=input$real_pdf_w, height=input$real_pdf_h)
       if(input$mode == "real"){
-        nmf_plot(nmf_res, type="samples", silorder=T)
-        nmf_plot(nmf_res, type="features", silorder=T,
+        nmf_plot(nmf_res, type="samples", silorder=input$nmfplot_silhouette)
+        nmf_plot(nmf_res, type="features", silorder=input$nmfplot_silhouette,
                  subsetRow = ifelse(input$select_feature_num>0, as.numeric(input$select_feature_num), TRUE ))
         nmf_plot(nmf_res, type="consensus")
         if(!is.null(tsne_2d$data)){
@@ -735,7 +735,8 @@ shinyServer(function(input, output, session) {
 
       plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
               boxpoints = "all", jitter = 0.3, pointpos = 0) %>%
-        layout(xaxis = list(title = "", zeroline=TRUE),
+        layout(title = gene,
+               xaxis = list(title = "", zeroline=TRUE),
                yaxis = list(title = "Expression", zeroline=TRUE),
                showlegend=TRUE)
     })
@@ -1059,7 +1060,7 @@ shinyServer(function(input, output, session) {
   )
 
   plot_colopts <- reactive({
-    c("Default", "Filename")
+    c("Default", "Filename", "GeneExpr")
   })
   observeEvent(rawdata(), {
     updateSelectizeInput(session, 'pt_col',
@@ -1067,30 +1068,39 @@ shinyServer(function(input, output, session) {
                          choices = as.character(plot_colopts()),
                          selected = "Filename"
     )
+    updateSelectizeInput(session, 'pt_allgene',
+                         server = TRUE,
+                         choices = as.character(rownames(transform_data())),
+                         selected = as.character(rownames(transform_data())[1])
+    )
   })
   observeEvent(input$runNMF,{
     updateSelectizeInput(session, 'pt_col',
                          server = TRUE,
-                         choices = as.character(c(plot_colopts(), "NMF", "GeneExpr")),
-                         selected = 'NMF'
+                         choices = as.character(c(plot_colopts(), "NMF Group", "NMF Feature")),
+                         selected = 'NMF Group'
     )
-    updateSelectizeInput(session, 'pt_gene',
+    updateSelectizeInput(session, 'pt_nmfgene',
                          server = TRUE,
                          choices = as.character(nmf_features()$Gene),
-                         selected = as.character(nmf_features()$Gene)[1]
+                         selected = as.character(nmf_features()$Gene[1])
     )
   })
   point_col <- reactive({
     col <- toRGB("steelblue")
     if(input$pt_col == "Default"){
       print("default color")
-    }else if(input$pt_col == "NMF"){
+    }else if(input$pt_col == "NMF Group"){
       nmf_subtypes <- nmf_groups()$nmf_subtypes
       col <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai")
+    }else if(input$pt_col == "NMF Feature"){
+      req(input$pt_nmfgene)
+      col <- create.brewer.color(as.numeric(transform_data()[input$pt_nmfgene, ]), num = 9, name="RdYlBu")
     }else if(input$pt_col == "Filename"){
       col <- ColSideColors()[["color"]][, 1]
     }else if(input$pt_col == "GeneExpr"){
-      col <- create.brewer.color(as.numeric(transform_data()[input$pt_gene, ]), num = 9, name="YlOrRd")
+      req(input$pt_allgene)
+      col <- create.brewer.color(as.numeric(transform_data()[input$pt_allgene, ]), num = 9, name="RdYlBu")
     }else{
       warning("Wrong point color assigning method!")
     }
