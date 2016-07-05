@@ -213,7 +213,7 @@ shinyServer(function(input, output, session) {
                                  order=list(list(2,'desc'))
                   )
     ) %>% formatRound(1:ncol(transform_data), 2)
-  }, server=TRUE)
+  }, server=FALSE)
 
   output$readDistrib = renderPlotly({
     total <- colSums(transform_data())
@@ -1086,25 +1086,35 @@ shinyServer(function(input, output, session) {
                          selected = as.character(nmf_features()$Gene[1])
     )
   })
+
   point_col <- reactive({
     col <- toRGB("steelblue")
+    group <- NULL
     if(input$pt_col == "Default"){
-      print("default color")
+      group <- "Default"
     }else if(input$pt_col == "NMF Group"){
       nmf_subtypes <- nmf_groups()$nmf_subtypes
       col <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai")
+      group <- paste0("NMF", nmf_subtypes)
     }else if(input$pt_col == "NMF Feature"){
       req(input$pt_nmfgene)
-      col <- create.brewer.color(as.numeric(transform_data()[input$pt_nmfgene, ]), num = 9, name="RdYlBu")
+      col <- create.brewer.color(as.numeric(transform_data()[input$pt_nmfgene, ]), num = 9, name="RdYlBu") %>% rev
+      group <- "NMF Feature"
     }else if(input$pt_col == "Filename"){
       col <- ColSideColors()[["color"]][, 1]
+      group <- ColSideColors()[['name']]
     }else if(input$pt_col == "GeneExpr"){
       req(input$pt_allgene)
-      col <- create.brewer.color(as.numeric(transform_data()[input$pt_allgene, ]), num = 9, name="RdYlBu")
+      col <- create.brewer.color(as.numeric(transform_data()[input$pt_allgene, ]), num = 9, name="RdYlBu") %>% rev
+      group <- "GeneExpr"
     }else{
       warning("Wrong point color assigning method!")
     }
-    return(col)
+
+    res <- list()
+    res[['color']] <- col
+    res[['group']] <- group
+    return(res)
   })
 
   #' PCA plot
@@ -1119,16 +1129,17 @@ shinyServer(function(input, output, session) {
       if(input$plot_label){
         t <- list( size=input$plot_label_size, color=toRGB("grey50") )
         p <- plot_ly(x=projection[,pca_x], y=projection[,pca_y], mode="markers+text",
+                     color = point_col()[['group']],
                      text=rownames(projection), hoverinfo="text", textfont=t, textposition="top middle",
-                     # marker = list(color=toRGB("steelblue"), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
-                     marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }else{
         p <- plot_ly(x=projection[,pca_x], y=projection[,pca_y], mode="markers",
                      text=rownames(projection), hoverinfo="text",
-                     # marker = list(color=toRGB("steelblue"), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
-                     marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     color = point_col()[['group']],
+                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }
-      p %>% layout(xaxis = list(title = paste0("PC", pca_x), zeroline=FALSE),
+      p %>% layout(showlegend = input$plot_legend,
+                   xaxis = list(title = paste0("PC", pca_x), zeroline=FALSE),
                    yaxis = list(title = paste0("PC", pca_y), zeroline=FALSE))
     })
   })
@@ -1139,13 +1150,14 @@ shinyServer(function(input, output, session) {
       projection <- as.data.frame(pc$x)
       N <- nrow(projection)
       plot_ly(x=projection[,1], y=projection[,2], z=projection[,3], type="scatter3d", mode="markers",
-              # color=rownames(projection), text=rownames(projection), hoverinfo="text",
-              color=point_col(), text=rownames(projection), hoverinfo="text",
-              marker = list(color=point_col(), size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
-        layout( scene = list(
-          xaxis = list(title = "PC1"),
-          yaxis = list(title = "PC2"),
-          zaxis = list(title = "PC3")))
+              color=point_col()[['group']], text=rownames(projection), hoverinfo="text",
+              marker = list(color=point_col()[['color']], size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
+        layout(showlegend = input$plot_legend,
+               scene = list(
+                 xaxis = list(title = "PC1"),
+                 yaxis = list(title = "PC2"),
+                 zaxis = list(title = "PC3"))
+        )
     })
   })
 
@@ -1191,13 +1203,16 @@ shinyServer(function(input, output, session) {
       if(input$plot_label){
         t <- list( size=input$plot_label_size, color=toRGB("grey50") )
         p <- plot_ly(projection, x=x, y=y, mode="markers+text",
+                     color = point_col()[['group']],
                      text=rownames(projection), hoverinfo="text", textposition="top middle", textfont=t,
-                     marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }else{
         p <- plot_ly(projection, x=x, y=y, mode="markers", text=rownames(projection), hoverinfo="text",
-                     marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     color = point_col()[['group']],
+                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }
-      p %>% layout(title = title,
+      p %>% layout(showlegend = input$plot_legend,
+                   title = title,
                    xaxis = list(title = "Component 1", zeroline=FALSE),
                    yaxis = list(title = "Component 2", zeroline=FALSE))
     })
@@ -1217,13 +1232,14 @@ shinyServer(function(input, output, session) {
     labels <- rownames(projection)
     N <- nrow(projection)
     plot_ly(x=projection[,1], y=projection[,2], z=projection[,3], type="scatter3d", mode="markers",
-                 color=point_col(), text=labels, hoverinfo="text",
-                 # marker = list(size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
-                 marker = list(color=point_col(), size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
-        layout( scene = list(
-                 xaxis = list(title = "Component 1"),
-                 yaxis = list(title = "Component 2"),
-                 zaxis = list(title = "Component 3")))
+                 color=point_col()[['group']], text=labels, hoverinfo="text",
+                 marker = list(color=point_col()[['color']], size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
+      layout(showlegend = input$plot_legend,
+             scene = list(
+               xaxis = list(title = "Component 1"),
+               yaxis = list(title = "Component 2"),
+               zaxis = list(title = "Component 3"))
+      )
   })
 
 
@@ -1240,7 +1256,6 @@ shinyServer(function(input, output, session) {
     updateSelectizeInput(session, 'de_group2',
                          server = TRUE,
                          choices = as.character(paste0("NMF", sort(unique(nmf_groups()$nmf_subtypes)))),
-                         # choices = as.character(paste0("NMF", 1:input$num_cluster)),
                          selected = "NMF2"
     )
   })
