@@ -448,7 +448,10 @@ body <- dashboardBody(
                         )
                     )
                   ),
-                  DT::dataTableOutput('nmfFeatures')
+                  fluidRow(
+                    column(width=8, DT::dataTableOutput('nmfFeatures')),
+                    column(width=4, plotlyOutput('nmf_boxplot', height = "500px"))
+                  )
               )
             )
     ),

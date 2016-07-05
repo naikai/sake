@@ -688,10 +688,8 @@ shinyServer(function(input, output, session) {
       setkey(data, "Gene")
       setkey(ext.func.data, "hgnc_symbol")
       merged <- ext.func.data[data, nomatch=0]
-      # Sort and drop unwanted columns
-      merged <- as.data.frame(merged[order(Group, -featureScore),])
-      # merged$hgnc_symbol <- NULL
-      # merged <- merged[, c(1,4,2,7,6,3,5,8)]
+      merged <- as.data.frame(merged) %>%
+                dplyr::arrange(Group, desc(featureScore))
       merged <- merged[, c(4,2,7,6,8)]
       merged <- unique(merged)
       merged$featureScore <- round(merged$featureScore, 3)
@@ -700,10 +698,9 @@ shinyServer(function(input, output, session) {
     return(merged)
   })
   output$nmfFeatures <- DT::renderDataTable({
-    filename <- file_prefix()
     filename <- "nmf_features"
     DT::datatable(nmf_features_annot(), rownames=FALSE, escape=-1,
-                  extensions = 'Buttons',
+                  extensions = 'Buttons', selection = 'single',
                   options = list(dom = 'Bfrtip',
                                  buttons =
                                    list('copy', 'print', list(
@@ -721,6 +718,28 @@ shinyServer(function(input, output, session) {
                   )
     )
   }, server = FALSE)
+
+  output$nmf_boxplot <- renderPlotly({
+    req(nmf_features_annot())
+    validate(
+      need(!is.null(input$nmfFeatures_rows_selected), "Please select a gene")
+    )
+    withProgress(message = 'Generating boxplot', value = NULL, {
+      gene <- nmf_features_annot()[input$nmfFeatures_rows_selected, "GeneCard"] %>%
+              gsub(".*'>(.*)</a>", "\\1", .)
+      gene.data <- transform_data()[gene, ]
+      gene.data <- data.frame(Sample = colnames(gene.data),
+                              Expr = as.numeric(gene.data),
+                              NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
+      gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
+
+      plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
+              boxpoints = "all", jitter = 0.3, pointpos = 0) %>%
+        layout(xaxis = list(title = "", zeroline=TRUE),
+               yaxis = list(title = "Expression", zeroline=TRUE),
+               showlegend=TRUE)
+    })
+  })
 
   ori_plus_nmfResult <-reactive({
     rawdata <- rawdata()
