@@ -1053,7 +1053,7 @@ shinyServer(function(input, output, session) {
       paste(file_prefix(), "pdf", sep=".")
     },
     content = function(file) {
-      pdf(file, width= 12, height=12)
+      pdf(file, width = input$heat_pdf_wd, height = input$heat_pdf_ht)
       plotInput()
       dev.off()
     }

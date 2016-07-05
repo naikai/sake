@@ -457,7 +457,6 @@ body <- dashboardBody(
     ),
     tabItem("Visualization",
             fluidRow(
-              # box(width=12, title="Parameters", solidHeader = TRUE, status="success",
               box(width=12,
                   fluidRow(
                     column(width=3, selectInput("heatmapGene",
@@ -564,6 +563,7 @@ body <- dashboardBody(
                                          choices = list('Figure adjustment' = c(`Column Side Colors` = 'ColSideColors',
                                                                                 `Row Side Colors` = 'RowSideColors',
                                                                                 `Heatmap Color Scheme` = 'heatcolor',
+                                                                                `PDF Size` = 'pdf',
                                                                                 `Label Size and Apperance` = 'labels'),
                                                         'Clustering' = c(`Cluster Row or Column` = 'cluster',
                                                                          `How to Scale Data` = 'scale',
@@ -620,6 +620,18 @@ body <- dashboardBody(
                       )
                     ),
                     conditionalPanel(
+                      condition = "input.heat_opttype == 'labels'",
+                      fluidRow(
+                        column(width=2, textInput("title", label= "Figure title", value=NULL)),
+                        column(width=2, numericInput("cexRow", label = "Row LabelSize:", value=0.5, step=0.1)),
+                        column(width=2, numericInput("cexCol", label = "Col LabelSize:", value=0.4, step=0.1)),
+                        column(width=3, selectInput('row_legend', label='Show legend for RowSide Colors?',
+                                                    choices = c("Yes" = TRUE, "No" = FALSE))),
+                        column(width=3, selectInput('col_legend', label='Show legend for ColumnSide Colors?',
+                                                      choices = c("Yes" = TRUE, "No" = FALSE)))
+                      )
+                    ),
+                    conditionalPanel(
                       condition = "input.heat_opttype == 'heatcolor'",
                       fluidRow(
                         column(width=3, selectInput("heatColorScheme",
@@ -630,15 +642,10 @@ body <- dashboardBody(
                       )
                     ),
                     conditionalPanel(
-                      condition = "input.heat_opttype == 'labels'",
+                      condition = "input.heat_opttype == 'pdf'",
                       fluidRow(
-                        column(width=2, textInput("title", label= "Figure title", value=NULL)),
-                        column(width=2, numericInput("cexRow", label = "Row LabelSize:", value=0.5, step=0.1)),
-                        column(width=2, numericInput("cexCol", label = "Col LabelSize:", value=0.4, step=0.1)),
-                        column(width=3, selectInput('row_legend', label='Show legend for RowSide Colors?',
-                                                    choices = c("Yes" = TRUE, "No" = FALSE))),
-                        column(width=3, selectInput('col_legend', label='Show legend for ColumnSide Colors?',
-                                                      choices = c("Yes" = TRUE, "No" = FALSE)))
+                        column(width=3, sliderInput("heat_pdf_wd", label = "Width (inch)", value=14, min=5, max=20, ticks=F)),
+                        column(width=3, sliderInput("heat_pdf_ht", label = "Height (inch)", value=12, min=5, max=20, ticks=F))
                       )
                     ),
                     conditionalPanel(
