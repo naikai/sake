@@ -1050,7 +1050,7 @@ shinyServer(function(input, output, session) {
 
   output$dl_heatmap<- downloadHandler(
     filename <- function() {
-      paste(file_prefix(), "pdf", sep=".")
+      paste(file_prefix(), "heatmap.pdf", sep="_")
     },
     content = function(file) {
       pdf(file, width = input$heat_pdf_wd, height = input$heat_pdf_ht)
