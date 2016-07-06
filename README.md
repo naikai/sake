@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/naikai/icash/branch/master/graph/badge.svg?token=WEipAvcFMf)](https://codecov.io/gh/naikai/icash)
 
 ### **I**nteractive **C**lustering Tool for **A**ssessing **S**ingle-Cell **H**eterogeneity
-The aim of `icash` is to provide an user-friendly tools for easy analyzing NGS Single-Cell transcriptomic data
+The aim of `icash` is to provide user-friendly tools for the easy analysis of NGS Single-Cell transcriptomic data
 
 ### Version 0.2.1.4
 
@@ -26,3 +26,6 @@ shiny::runApp(system.file("icash", package="icash"))
 
 ### Copying & Distribution
 Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.
+
+### Analysis pipeline 
+
