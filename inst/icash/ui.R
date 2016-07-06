@@ -54,7 +54,7 @@ sidebar <- dashboardSidebar(
                               selectInput("EnrichType",
                                           label = "Which Category?",
                                           choices = c("GO", "KEGG"),
-                                          selected = "KEGG")
+                                          selected = "GO")
              )
   )
 )
@@ -363,6 +363,7 @@ body <- dashboardBody(
                                checkboxInput('dl_nmf_realmoreopt', 'More Options', FALSE),
                                conditionalPanel(
                                  condition = "input.dl_nmf_realmoreopt == true",
+                                 checkboxInput('nmfplot_silhouette', 'Match silhouette order', TRUE),
                                  strong("PDF size (inches):"),
                                  sliderInput(inputId="real_pdf_w", label = "width:", min=3, max=20, value=14, ticks=F),
                                  sliderInput(inputId="real_pdf_h", label = "height:", min=3, max=20, value=14, ticks=F)
@@ -429,7 +430,7 @@ body <- dashboardBody(
                     column(width=3,
                            selectInput("select_feature_num",
                                        label = "Number of features from each group",
-                                       choices = c("By default"=0, "10"=10, "20"=20, "30"=30, "50"=50, "100"=100, "200"=200, "500"=500),
+                                       choices = c("By default"=0, "10"=10, "20"=20, "30"=30, "50"=50, "100"=100, "200"=200, "500"=500, "1000"=1000, "1500"=1500, "2000"=2000, "3000"=3000, "5000"=5000),
                                        selected = 0)
                     ),
                     conditionalPanel(
@@ -447,13 +448,15 @@ body <- dashboardBody(
                         )
                     )
                   ),
-                  DT::dataTableOutput('nmfFeatures')
+                  fluidRow(
+                    column(width=8, DT::dataTableOutput('nmfFeatures')),
+                    column(width=4, plotlyOutput('nmf_boxplot', height = "500px"))
+                  )
               )
             )
     ),
     tabItem("Visualization",
             fluidRow(
-              # box(width=12, title="Parameters", solidHeader = TRUE, status="success",
               box(width=12,
                   fluidRow(
                     column(width=3, selectInput("heatmapGene",
@@ -486,7 +489,7 @@ body <- dashboardBody(
                       ),
                       column(width=2, selectInput("heat.top.num",
                                                   label = "How many top genes:",
-                                                  choices = c(seq(10,100,10), seq(200, 1000, 100), seq(2000, 10000, 1000)),
+                                                  choices = c(seq(10,100,10), seq(200, 1000, 100), seq(2000, 15000, 1000)),
                                                   selected = 100)
                       )
                     ),
@@ -560,6 +563,7 @@ body <- dashboardBody(
                                          choices = list('Figure adjustment' = c(`Column Side Colors` = 'ColSideColors',
                                                                                 `Row Side Colors` = 'RowSideColors',
                                                                                 `Heatmap Color Scheme` = 'heatcolor',
+                                                                                `PDF Size` = 'pdf',
                                                                                 `Label Size and Apperance` = 'labels'),
                                                         'Clustering' = c(`Cluster Row or Column` = 'cluster',
                                                                          `How to Scale Data` = 'scale',
@@ -616,6 +620,18 @@ body <- dashboardBody(
                       )
                     ),
                     conditionalPanel(
+                      condition = "input.heat_opttype == 'labels'",
+                      fluidRow(
+                        column(width=2, textInput("title", label= "Figure title", value=NULL)),
+                        column(width=2, numericInput("cexRow", label = "Row LabelSize:", value=0.5, step=0.1)),
+                        column(width=2, numericInput("cexCol", label = "Col LabelSize:", value=0.4, step=0.1)),
+                        column(width=3, selectInput('row_legend', label='Show legend for RowSide Colors?',
+                                                    choices = c("Yes" = TRUE, "No" = FALSE))),
+                        column(width=3, selectInput('col_legend', label='Show legend for ColumnSide Colors?',
+                                                      choices = c("Yes" = TRUE, "No" = FALSE)))
+                      )
+                    ),
+                    conditionalPanel(
                       condition = "input.heat_opttype == 'heatcolor'",
                       fluidRow(
                         column(width=3, selectInput("heatColorScheme",
@@ -626,15 +642,10 @@ body <- dashboardBody(
                       )
                     ),
                     conditionalPanel(
-                      condition = "input.heat_opttype == 'labels'",
+                      condition = "input.heat_opttype == 'pdf'",
                       fluidRow(
-                        column(width=2, textInput("title", label= "Figure title", value=NULL)),
-                        column(width=2, numericInput("cexRow", label = "Row LabelSize:", value=0.5, step=0.1)),
-                        column(width=2, numericInput("cexCol", label = "Col LabelSize:", value=0.4, step=0.1)),
-                        column(width=3, selectInput('row_legend', label='Show legend for RowSide Colors?',
-                                                    choices = c("Yes" = TRUE, "No" = FALSE))),
-                        column(width=3, selectInput('col_legend', label='Show legend for ColumnSide Colors?',
-                                                      choices = c("Yes" = TRUE, "No" = FALSE)))
+                        column(width=3, sliderInput("heat_pdf_wd", label = "Width (inch)", value=14, min=5, max=20, ticks=F)),
+                        column(width=3, sliderInput("heat_pdf_ht", label = "Height (inch)", value=12, min=5, max=20, ticks=F))
                       )
                     ),
                     conditionalPanel(
@@ -709,7 +720,17 @@ body <- dashboardBody(
                       ),
                       conditionalPanel(
                         condition = "input.pt_col == 'GeneExpr'",
-                        column(width=2, selectizeInput("pt_gene",
+                        column(width=2, selectizeInput("pt_allgene",
+                                                       label = "Select gene",
+                                                       choices=NULL, multiple=FALSE,
+                                                       options = list(
+                                                         onInitialize = I('function() { this.setValue(""); }')
+                                                       ))
+                        )
+                      ),
+                      conditionalPanel(
+                        condition = "input.pt_col == 'NMF Feature'",
+                        column(width=2, selectizeInput("pt_nmfgene",
                                                        label = "Select gene",
                                                        choices=NULL, multiple=FALSE,
                                                        options = list(
@@ -731,7 +752,7 @@ body <- dashboardBody(
                       column(width=1, numericInput("plot_point_alpha", label = "Alpha", value=0.75, step=0.05)),
                       column(width=1, numericInput("plot_label_size", label = "LabelSize", value=9)),
                       column(width=1, checkboxInput('plot_label', 'Add label', FALSE)),
-                      column(width=1, checkboxInput('plot_legend', 'Add legend', FALSE))
+                      column(width=1, checkboxInput('plot_legend', 'Add legend', TRUE))
                     )
                   )
               ),

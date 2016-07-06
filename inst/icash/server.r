@@ -10,7 +10,6 @@ library(AnnotationHub)
 library(RColorBrewer)
 library(matrixStats)
 library(tools)
-library(vcd)
 library(snowfall)
 library(NMF)
 library(DT)
@@ -214,7 +213,7 @@ shinyServer(function(input, output, session) {
                                  order=list(list(2,'desc'))
                   )
     ) %>% formatRound(1:ncol(transform_data), 2)
-  }, server=TRUE)
+  }, server=FALSE)
 
   output$readDistrib = renderPlotly({
     total <- colSums(transform_data())
@@ -514,7 +513,7 @@ shinyServer(function(input, output, session) {
       need(class(nmf_res()) == "NMFfitX1", "Seems like you haven't run NMF 'real' run yet\nOr the loaded .rda file is from 'estim run' result")
     )
     nmf_res <- nmf_res()
-    nmf_plot(nmf_res, type=input$plottype, silorder=T,
+    nmf_plot(nmf_res, type=input$plottype, silorder=input$nmfplot_silhouette,
              subsetRow = ifelse(input$select_feature_num>0, as.numeric(input$select_feature_num), TRUE ))
   },height = 777)
 
@@ -549,8 +548,8 @@ shinyServer(function(input, output, session) {
       nmf_res <- nmf_res()
       pdf(file, width=input$real_pdf_w, height=input$real_pdf_h)
       if(input$mode == "real"){
-        nmf_plot(nmf_res, type="samples", silorder=T)
-        nmf_plot(nmf_res, type="features", silorder=T,
+        nmf_plot(nmf_res, type="samples", silorder=input$nmfplot_silhouette)
+        nmf_plot(nmf_res, type="features", silorder=input$nmfplot_silhouette,
                  subsetRow = ifelse(input$select_feature_num>0, as.numeric(input$select_feature_num), TRUE ))
         nmf_plot(nmf_res, type="consensus")
         if(!is.null(tsne_2d$data)){
@@ -689,10 +688,8 @@ shinyServer(function(input, output, session) {
       setkey(data, "Gene")
       setkey(ext.func.data, "hgnc_symbol")
       merged <- ext.func.data[data, nomatch=0]
-      # Sort and drop unwanted columns
-      merged <- as.data.frame(merged[order(Group, -featureScore),])
-      # merged$hgnc_symbol <- NULL
-      # merged <- merged[, c(1,4,2,7,6,3,5,8)]
+      merged <- as.data.frame(merged) %>%
+                dplyr::arrange(Group, desc(featureScore))
       merged <- merged[, c(4,2,7,6,8)]
       merged <- unique(merged)
       merged$featureScore <- round(merged$featureScore, 3)
@@ -701,10 +698,9 @@ shinyServer(function(input, output, session) {
     return(merged)
   })
   output$nmfFeatures <- DT::renderDataTable({
-    filename <- file_prefix()
     filename <- "nmf_features"
     DT::datatable(nmf_features_annot(), rownames=FALSE, escape=-1,
-                  extensions = 'Buttons',
+                  extensions = 'Buttons', selection = 'single',
                   options = list(dom = 'Bfrtip',
                                  buttons =
                                    list('copy', 'print', list(
@@ -722,6 +718,29 @@ shinyServer(function(input, output, session) {
                   )
     )
   }, server = FALSE)
+
+  output$nmf_boxplot <- renderPlotly({
+    req(nmf_features_annot())
+    validate(
+      need(!is.null(input$nmfFeatures_rows_selected), "Please select a gene")
+    )
+    withProgress(message = 'Generating boxplot', value = NULL, {
+      gene <- nmf_features_annot()[input$nmfFeatures_rows_selected, "GeneCard"] %>%
+              gsub(".*'>(.*)</a>", "\\1", .)
+      gene.data <- transform_data()[gene, ]
+      gene.data <- data.frame(Sample = colnames(gene.data),
+                              Expr = as.numeric(gene.data),
+                              NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
+      gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
+
+      plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
+              boxpoints = "all", jitter = 0.3, pointpos = 0) %>%
+        layout(title = gene,
+               xaxis = list(title = "", zeroline=TRUE),
+               yaxis = list(title = "Expression", zeroline=TRUE),
+               showlegend=TRUE)
+    })
+  })
 
   ori_plus_nmfResult <-reactive({
     rawdata <- rawdata()
@@ -1031,17 +1050,17 @@ shinyServer(function(input, output, session) {
 
   output$dl_heatmap<- downloadHandler(
     filename <- function() {
-      paste(file_prefix(), "pdf", sep=".")
+      paste(file_prefix(), "heatmap.pdf", sep="_")
     },
     content = function(file) {
-      pdf(file, width= 12, height=12)
+      pdf(file, width = input$heat_pdf_wd, height = input$heat_pdf_ht)
       plotInput()
       dev.off()
     }
   )
 
   plot_colopts <- reactive({
-    c("Default", "Filename")
+    c("Default", "Filename", "GeneExpr")
   })
   observeEvent(rawdata(), {
     updateSelectizeInput(session, 'pt_col',
@@ -1049,34 +1068,53 @@ shinyServer(function(input, output, session) {
                          choices = as.character(plot_colopts()),
                          selected = "Filename"
     )
+    updateSelectizeInput(session, 'pt_allgene',
+                         server = TRUE,
+                         choices = as.character(rownames(transform_data())),
+                         selected = as.character(rownames(transform_data())[1])
+    )
   })
   observeEvent(input$runNMF,{
     updateSelectizeInput(session, 'pt_col',
                          server = TRUE,
-                         choices = as.character(c(plot_colopts(), "NMF", "GeneExpr")),
-                         selected = 'NMF'
+                         choices = as.character(c(plot_colopts(), "NMF Group", "NMF Feature")),
+                         selected = 'NMF Group'
     )
-    updateSelectizeInput(session, 'pt_gene',
+    updateSelectizeInput(session, 'pt_nmfgene',
                          server = TRUE,
                          choices = as.character(nmf_features()$Gene),
-                         selected = as.character(nmf_features()$Gene)[1]
+                         selected = as.character(nmf_features()$Gene[1])
     )
   })
+
   point_col <- reactive({
     col <- toRGB("steelblue")
+    group <- NULL
     if(input$pt_col == "Default"){
-      print("default color")
-    }else if(input$pt_col == "NMF"){
+      group <- "Default"
+    }else if(input$pt_col == "NMF Group"){
       nmf_subtypes <- nmf_groups()$nmf_subtypes
       col <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai")
+      group <- paste0("NMF", nmf_subtypes)
+    }else if(input$pt_col == "NMF Feature"){
+      req(input$pt_nmfgene)
+      col <- create.brewer.color(as.numeric(transform_data()[input$pt_nmfgene, ]), num = 9, name="YlOrRd")
+      group <- input$pt_nmfgene
     }else if(input$pt_col == "Filename"){
       col <- ColSideColors()[["color"]][, 1]
+      group <- ColSideColors()[['name']]
     }else if(input$pt_col == "GeneExpr"){
-      col <- create.brewer.color(as.numeric(transform_data()[input$pt_gene, ]), num = 9, name="YlOrRd")
+      req(input$pt_allgene)
+      col <- create.brewer.color(as.numeric(transform_data()[input$pt_allgene, ]), num = 9, name="YlOrRd")
+      group <- input$pt_allgene
     }else{
       warning("Wrong point color assigning method!")
     }
-    return(col)
+
+    res <- list()
+    res[['color']] <- col
+    res[['group']] <- group
+    return(res)
   })
 
   #' PCA plot
@@ -1091,16 +1129,17 @@ shinyServer(function(input, output, session) {
       if(input$plot_label){
         t <- list( size=input$plot_label_size, color=toRGB("grey50") )
         p <- plot_ly(x=projection[,pca_x], y=projection[,pca_y], mode="markers+text",
+                     color = point_col()[['group']],
                      text=rownames(projection), hoverinfo="text", textfont=t, textposition="top middle",
-                     # marker = list(color=toRGB("steelblue"), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
-                     marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }else{
         p <- plot_ly(x=projection[,pca_x], y=projection[,pca_y], mode="markers",
                      text=rownames(projection), hoverinfo="text",
-                     # marker = list(color=toRGB("steelblue"), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
-                     marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     color = point_col()[['group']],
+                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }
-      p %>% layout(xaxis = list(title = paste0("PC", pca_x), zeroline=FALSE),
+      p %>% layout(showlegend = input$plot_legend,
+                   xaxis = list(title = paste0("PC", pca_x), zeroline=FALSE),
                    yaxis = list(title = paste0("PC", pca_y), zeroline=FALSE))
     })
   })
@@ -1111,13 +1150,14 @@ shinyServer(function(input, output, session) {
       projection <- as.data.frame(pc$x)
       N <- nrow(projection)
       plot_ly(x=projection[,1], y=projection[,2], z=projection[,3], type="scatter3d", mode="markers",
-              # color=rownames(projection), text=rownames(projection), hoverinfo="text",
-              color=point_col(), text=rownames(projection), hoverinfo="text",
-              marker = list(color=point_col(), size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
-        layout( scene = list(
-          xaxis = list(title = "PC1"),
-          yaxis = list(title = "PC2"),
-          zaxis = list(title = "PC3")))
+              color=point_col()[['group']], text=rownames(projection), hoverinfo="text",
+              marker = list(color=point_col()[['color']], size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
+        layout(showlegend = input$plot_legend,
+               scene = list(
+                 xaxis = list(title = "PC1"),
+                 yaxis = list(title = "PC2"),
+                 zaxis = list(title = "PC3"))
+        )
     })
   })
 
@@ -1163,13 +1203,16 @@ shinyServer(function(input, output, session) {
       if(input$plot_label){
         t <- list( size=input$plot_label_size, color=toRGB("grey50") )
         p <- plot_ly(projection, x=x, y=y, mode="markers+text",
+                     color = point_col()[['group']],
                      text=rownames(projection), hoverinfo="text", textposition="top middle", textfont=t,
-                     marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }else{
         p <- plot_ly(projection, x=x, y=y, mode="markers", text=rownames(projection), hoverinfo="text",
-                     marker = list(color=point_col(), size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     color = point_col()[['group']],
+                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }
-      p %>% layout(title = title,
+      p %>% layout(showlegend = input$plot_legend,
+                   title = title,
                    xaxis = list(title = "Component 1", zeroline=FALSE),
                    yaxis = list(title = "Component 2", zeroline=FALSE))
     })
@@ -1189,13 +1232,14 @@ shinyServer(function(input, output, session) {
     labels <- rownames(projection)
     N <- nrow(projection)
     plot_ly(x=projection[,1], y=projection[,2], z=projection[,3], type="scatter3d", mode="markers",
-                 color=point_col(), text=labels, hoverinfo="text",
-                 # marker = list(size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
-                 marker = list(color=point_col(), size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
-        layout( scene = list(
-                 xaxis = list(title = "Component 1"),
-                 yaxis = list(title = "Component 2"),
-                 zaxis = list(title = "Component 3")))
+                 color=point_col()[['group']], text=labels, hoverinfo="text",
+                 marker = list(color=point_col()[['color']], size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
+      layout(showlegend = input$plot_legend,
+             scene = list(
+               xaxis = list(title = "Component 1"),
+               yaxis = list(title = "Component 2"),
+               zaxis = list(title = "Component 3"))
+      )
   })
 
 
@@ -1212,13 +1256,12 @@ shinyServer(function(input, output, session) {
     updateSelectizeInput(session, 'de_group2',
                          server = TRUE,
                          choices = as.character(paste0("NMF", sort(unique(nmf_groups()$nmf_subtypes)))),
-                         # choices = as.character(paste0("NMF", 1:input$num_cluster)),
                          selected = "NMF2"
     )
   })
 
   deseq_res <- eventReactive(input$runDESeq, {
-    if(input$selectfile == "saved"){
+    if(input$selectfile == "saved" & !is.null(rda()$dds)){
       return(rda()$dds)
     }
 
@@ -1479,8 +1522,20 @@ shinyServer(function(input, output, session) {
   })
 
   output$go_summary <- DT::renderDataTable({
+    filename <- paste(input$EnrichType, input$pathway_group, input$goTerm, sep = "_")
     datatable(go_table(), selection = 'single',
-              options = list(pageLength=6,
+              extensions = 'Buttons',
+              options = list(dom = 'Bfrtip',
+                             buttons =
+                               list('colvis', 'copy', 'print', list(
+                                 extend = 'collection',
+                                 buttons = list(list(extend='csv',
+                                                     filename = filename),
+                                                list(extend='excel',
+                                                     filename = filename)),
+                                 text = 'Download'
+                               )),
+                             pageLength = 6,
                              autoWidth = TRUE,
                              columnDefs = list(list(width = '50px', targets = "_all"))
               )

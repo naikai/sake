@@ -57,7 +57,8 @@ Suggests:
     testthat,
     vcd,
     WGCNA,
-    webshot
+    webshot,
+    knitr
 Remotes:
     hadley/devtools,
     bmbolstad/preprocessCore,
