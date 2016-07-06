@@ -13,7 +13,7 @@ vignette: >
 
 After you successfully upload/load the data, 
 
-- Never uses retina figures
+- Toby hi it's Ray
 - Has a smaller default figure size
 - Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
 
