@@ -489,8 +489,8 @@ body <- dashboardBody(
                       ),
                       column(width=2, selectInput("heat.top.num",
                                                   label = "How many top genes:",
-                                                  choices = c(seq(10,100,10), seq(200, 1000, 100), seq(2000, 10000, 1000)),
-                                                  selected = 100)
+                                                  choices = c(seq(10,100,10), seq(200, 1000, 100), seq(2000, 15000, 1000)),
+                                                  selected = 1500)
                       )
                     ),
                     conditionalPanel(

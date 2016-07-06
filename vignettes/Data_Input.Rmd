@@ -21,7 +21,13 @@ There are three different ways you can upload files into `icash` pacakge. It can
 
 The gene count data file is one of the most common types of data format. Each row represents expression value from a gene, and each column represents transcriptome library derived from a single sample. The package requires the first row to be the header, which you can provide information about each sample. The first column is required to be names/ID for each gene/transcript. 
 
-#### Example data sets should look like this: 
+You can also specify the delimiter according to different file type.
+
+- Tab (\\t) - Default setting for `.txt` or `.out` file
+- Comma (,) - Usually used by `.csv` file
+- Semicolon (;) - Not so common, but some use this type
+
+### Example data sets should look like this: 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 library(icash)

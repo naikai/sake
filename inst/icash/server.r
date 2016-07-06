@@ -1098,15 +1098,15 @@ shinyServer(function(input, output, session) {
       group <- paste0("NMF", nmf_subtypes)
     }else if(input$pt_col == "NMF Feature"){
       req(input$pt_nmfgene)
-      col <- create.brewer.color(as.numeric(transform_data()[input$pt_nmfgene, ]), num = 9, name="RdYlBu") %>% rev
-      group <- "NMF Feature"
+      col <- create.brewer.color(as.numeric(transform_data()[input$pt_nmfgene, ]), num = 9, name="YlOrRd")
+      group <- input$pt_nmfgene
     }else if(input$pt_col == "Filename"){
       col <- ColSideColors()[["color"]][, 1]
       group <- ColSideColors()[['name']]
     }else if(input$pt_col == "GeneExpr"){
       req(input$pt_allgene)
-      col <- create.brewer.color(as.numeric(transform_data()[input$pt_allgene, ]), num = 9, name="RdYlBu") %>% rev
-      group <- "GeneExpr"
+      col <- create.brewer.color(as.numeric(transform_data()[input$pt_allgene, ]), num = 9, name="YlOrRd")
+      group <- input$pt_allgene
     }else{
       warning("Wrong point color assigning method!")
     }
