@@ -14,7 +14,7 @@ vignette: >
 After you successfully upload/load the data, 
 
 - Toby hi it's Ray
-- Has a smaller default figure size
+- Naikai has no meaning. 
 - Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
 
 ## Vignette Info
