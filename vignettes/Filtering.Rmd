@@ -1,0 +1,44 @@
+---
+title: "Data Filtering"
+author: "Yu-Jui Ho and Toby Aicher"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Data Filtering}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+One of the steps we can do before we move on to the next step is to filter out genes with variations due to biological noises [cite], as those genes tend to generate more noise that hinder the real signal than provide useful information about the underlying grouping structure.
+
+- Whole transcriptome
+- Rank from data 
+- Upload gene list
+
+## Whole transcriptome
+
+If you want to use all the genes presented in your data for downstream analysis. 
+
+## Rank from data
+
+User can rank and filter genes based on simple statistics calculated across each genes. There are currently 4 different ways of filtering 
+
+- Mean 
+- Median 
+- Median Absolute Deviation (MAD) 
+- Variance 
+
+In our experience, we find using `Median Absolute Deviation (MAD)` often give us accurate and reproducible results. However, you need to specify the number of top genes to be selected. In general, we suggest using Top 1500 - 3000 MAD genes for `bulk RNA-Seq` data; Top 5000 - 8000 MAD genes for `single-cell RNA-Seq` data. 
+
+## Upload gene list
+
+You also have the option to upload a text file which contains your gene of interest. This is typically done when you have a list of marker genes for specific hypothesis and want to see how samples cluster accordingly. 
+
+An example gene list file should look like this 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(icash)
+dat <- data.frame(Gene = head(rownames(Usoskin), n=15))
+dat
+```
+The first row should be a character string 'Gene'. The following rows should be the names/IDs of your gene of interest. 
