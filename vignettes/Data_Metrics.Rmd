@@ -11,9 +11,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-where do changes go?
-
-donde?
 
 You can normalize or transform your raw data after succesfully uploading it. We provide two simple data metrics to help identify samples that deviate from the majority of samples, which may indicate potential low-quality samples that can be removed before downstream analysis.
 
