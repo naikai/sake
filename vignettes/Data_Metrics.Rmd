@@ -12,31 +12,32 @@ vignette: >
 ---
 
 
-After you successfully upload the data, you will be able to normalize or transform the raw data
+You can normalize or transform your raw data after succesfully uploading it. We provide two simple data metrics to help identify samples that deviate from the majority of samples, which may indicate potential low-quality samples that can be removed before downstream analysis.
 
 ## Normalization 
 
-- Reads per millions (RPM) normalization 
-- DESeq-like normalization 
+Normalization allows you to compare read counts between samples and detect differentially expressed genes by accounting for technical variability between samples and adjusting for their sequencing depth (library size). Two methods to normalize scRNA-seq data are provided.
+
+- Reads per millions (RPM) normalization: normalize the gene count from each sample according to their total read count. 
+
+- DESeq-like normalization: noramlize the gene count using a method introduced in the [DESeq](http://bioconductor.org/packages/release/bioc/html/DESeq.html) package.
 
 ## Transformation 
 
-- Variance stablization transformation (VST)
-- Log transformation 
+Transformation allows you to take into account the presence of extreme values in scRNA-seq data and to adjust for mean variance dependency (the observation that genes with higher expression often have larger variances across samples). Two methods to transform scRNA-Seq data are provided. 
 
-After you select the normalization or transformation methods you want to apply to the raw data, you will be able to see how it affects the data. We provide two simple data metrics to help identify samples that deviates from the majority of samples, which may indicate potential problematic samples and can be removed for downstream analysis. 
+- Log transformation: transform the gene count using a log scale.
+
+- Variance stablizing transformation (VST): transform the gene count using a method intoduced in the DEseq package.
+
 
 ## Read distribution
 
-It will summerize the total number of read counts for each sample. This is how we control for the bias introduced during sequencing by adjusting the raw count according to their sequencing depth (library size). The read count distribution should be as uniform as possible, and the normalization method you choose will affect the result. 
+Read distribution summerizes the total number of read counts for each sample. The read count distribution should be as uniform as possible, and the normalization method you choose will affect the result. Distinctively low read counts may indicate RNA degradation or low sequencing efficiency.
 
-For RPM normalization, we normalize gene count from each sample according to their total reads (library size). 
-
-For DESeq-like normalization, we use the method introduced from [DESeq](http://bioconductor.org/packages/release/bioc/html/DESeq.html) package. 
-
-A example of how normalization affects the read distribution will look like this 
+An example of how normalization affects the read distribution will look like this:
 
 ## Gene coverage
 
-One of the metrics we used to assess the quality of the single-cell library is the `gene drop out rate`. Since the library preparation starts with a small amout of input material, the amplification step is expected to introduced noise based on the reverse transcription and amplification efficiency. Therefore, we summerize the number of gene/transcript that have at least one read covered as a way to evaluate how many genes are being expressed in each sample. This number should be relatively stable across libraries. However, the number of expressed genes may be altered based on the difference between cell types, experimental conditions or sequencing protocals, and intrinsic heterogeneity among cell population, etc. User should be aware of these factors and decide how to treat those outlier samples for downstream analysis.
+Gene coverage summarizes the total number of genes with at least one read in each sample. This number should be relatively stable across libraries. Low gene coverage in a sample can indicate poor quality of a single-cell library. However, the number of expressed genes may be altered based on the difference between cell types, experimental conditions or sequencing protocals, intrinsic heterogeneity among cell population, among other reasons. User should be aware of these factors and decide how to treat outlier samples for downstream analysis.
 
