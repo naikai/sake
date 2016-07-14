@@ -1,0 +1,52 @@
+---
+title: "Non-negative Matrix Factorization"
+author: "Yu-Jui Ho and Toby Aicher"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Non-negative Matrix Factorization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The central part of the package is to utilize non-negative matrix factorization (NMF) method to decompose a gene expression matrix V into two nonnegative matrices, W and H, via a multiplicative updates algorithm. NMF was originally developed to be used in image analysis and language processing[cite]. More recently, it has been sucessfully applied to computational biology field as an unsupervised clustering method that help classify samples/patients into functional groups in an unbiased manner [cite].
+
+For running NMF
+
+- Require input matrix to be non-negative
+- Need to specify the number of clusters 
+
+
+## Estimate Number of Clusters
+
+The first step of running NMF is to decide the number of clusters (K) presented in the data. In order to do so, we can run NMF on a series number of differnt K and pick one which best fit the underlying structure. Accoding to [NMF](http://renozao.github.io/NMF/devel/index.html) package, we can select K based on where the cophenatic value starts to drop. We also suggest investigating the distribution of the silhouette index and consider K as the one with the highest value. 
+
+## Run NMF 
+
+After you specify **K**, you can also adjust the number of runs and initial seed number.
+
+* **Number of runs** - [NMF](http://renozao.github.io/NMF/devel/index.html) package suggests using `20-30` runs for estimating the number of K; and using at least `50-100` runs for real NMF run. 
+* **Initial seed number** - You can specify a seed number if you want to get reproducible NMF run result. Otherwise, random seed will be generated for each NMF run and thus the results might be slightly different. The default is set to seed number `123211`. 
+
+## Sample Clustering
+
+NMF group information for each sample is displayed on the left; while the [t-SNE](https://lvdmaaten.github.io/tsne/) plot on the right. In t-SNE plot, each dot represents a sample and is colored based on NMF assigned groups. The size of the dot can be adjusted proportional to the probability of that sample being assigned to the most appropriate NMF group. From the loadings of that sample being assigned to all groups (K), the probability is calculated as the largest loading divide by the sum of the total loadings for each sample. Higher probability represents higher confidence about the sample being assigned  
+
+Most of the time, samples from each NMF group form tight clusters on the t-SNE plot. This indicates high agreement between two different methods and the robustness of the result. Often times, NMF will separate samples into different groups that seem all closely connected but occupy distinct area in the t-SNE plot, such as the 111 and 222 samples in xxx study. From the t-SNE plot alone, we will not be able to classify these samples if we were to separate them based on the distance metrics from the first few componets.  
+
+In some other cases, samples displayed as two different tight clusters in the t-SNE plot may be assigned into the same NMF group. This happens when NMF is trying to factorize the expression matrix into the specify rank number (K) ,and the differences between these small sub-clusters are less than the other larger ones (show examples).
+
+Therefore, we encourge the user to explore the clustering result and repeat the process for subsets of the data if necessary. This process will be automated in the next version of the package. 
+
+- NMF groups and t-SNE plot are complementary to each other and can thus improve the classification result 
+
+## Feature Clustering
+
+The `feature` tab includes the enriched features in each group. For each gene, a `featureScore` will first be calculated according to formula xxx. Then based on `Lee's` feature selection method, only the feature with featureScores that are outside of 3 median absolute deviation (MAD) of all featureScore will be selected for each group. 
+
+Genes are rank by its featureScore in each group. Users can click on the name for the gene of interest, and it will link to the `GeneCards`^[GeneCards: http://www.genecards.org] page with more detailed information.  
+
+## More Information
+
+Users are encouraged to read more about the theory behinds [NMF](http://renozao.github.io/NMF/devel/index.html). 
+

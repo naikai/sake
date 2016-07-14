@@ -42,3 +42,8 @@ dat <- data.frame(Gene = head(rownames(Usoskin), n=15))
 dat
 ```
 The first row should be a character string 'Gene'. The following rows should be the names/IDs of your gene of interest. 
+
+## Weighted Gene Co-expression Network Analysis (WGCNA)
+
+The rationale is to identify gene modules that are co-expressed across samples using a statistical metric to identify cohesive groups. This will preferentially select for genes whose deviation across samples is due to differential expression rather than simply high variance levels. Importantly, this method also automatically selects for input gene sets that are close to the optimal MAD sets. 
+
