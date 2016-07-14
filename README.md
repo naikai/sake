@@ -3,8 +3,8 @@
 [![Build Status](https://travis-ci.com/naikai/icash.svg?token=qigAqQi4xmKjKDqnm97n&branch=master)](https://travis-ci.com/naikai/icash)
 [![codecov](https://codecov.io/gh/naikai/icash/branch/master/graph/badge.svg?token=WEipAvcFMf)](https://codecov.io/gh/naikai/icash)
 
-### **I**nteractive **C**lustering Tool for **A**ssessing **S**ingle-Cell **H**eterogeneity
-The aim of `icash` is to provide user-friendly tools for the easy analysis of NGS Single-Cell transcriptomic data
+### **S**ingle-cell RNA-Seq **A**nalysis and **K**lustering **E**valuation
+The aim of `sake` is to provide a user-friendly tool for easy analysis of NGS Single-Cell transcriptomic data
 
 ### Version 0.2.1.4
 
@@ -15,13 +15,13 @@ source("http://bioconductor.org/biocLite.R")
 biocLite(c("annotate", "AnnotationHub", "biomaRt", "DESeq2", "gage", "gageData", "GO.db", "pathview"))
 
 install.packages("devtools")
-devtools::install_github("naikai/icash", auth_token = "438a6ba6acec1e0a0b3550986f83f42d88b941f9")
+devtools::install_github("naikai/sake", auth_token = "438a6ba6acec1e0a0b3550986f83f42d88b941f9")
 ```
 
 ### Usage 
 ```R
-library(icash)
-shiny::runApp(system.file("icash", package="icash"))
+library(sake)
+shiny::runApp(system.file("sake", package="sake"))
 ```
 
 ### Copying & Distribution
