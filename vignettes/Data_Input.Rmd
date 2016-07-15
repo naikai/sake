@@ -44,7 +44,13 @@ User has the option to utlize [yabi](https://demo.bsr.tools/yabi/login/?next=/ya
 
 Example saved data can be downloaded [here](https://)
 
-##
+## Loaded Data 
+
+A successfully loaded data will look like this  
+
+<img src="File.png" width="800px" height="500px" />
+
+***
 
 > "*If you are thinking without writing, you only think your're thinking* - Leslie Lamport"
 ([via](https://www.youtube.com/watch?v=-4Yp3j_jk8Q))

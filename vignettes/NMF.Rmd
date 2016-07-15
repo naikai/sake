@@ -21,6 +21,11 @@ For running NMF
 
 The first step of running NMF is to decide the number of clusters (K) presented in the data. In order to do so, we can run NMF on a series number of differnt K and pick one which best fit the underlying structure. Accoding to [NMF](http://renozao.github.io/NMF/devel/index.html) package, we can select K based on where the cophenatic value starts to drop. We also suggest investigating the distribution of the silhouette index and consider K as the one with the highest value. 
 
+An example result of the consensus plot running for different rank (K) using published data^[Treutlein *et al*, Dissecting direct reprogramming from fibroblast to neuron using single-cell RNA-seq, Nature, 2016] is displayed below. In this case, the estimated number of clusters presented in the data in **3**. 
+
+<img src="NMF_Treutlein_d0d5_EstimK.pdf" width="800px" height="600px" />
+<img src="NMF_Treutlein_d0d5_EstimK_2.pdf" width="800px" height="600px" />
+
 ## Run NMF 
 
 After you specify **K**, you can also adjust the number of runs and initial seed number.
@@ -34,6 +39,9 @@ NMF group information for each sample is displayed on the left; while the [t-SNE
 
 Most of the time, samples from each NMF group form tight clusters on the t-SNE plot. This indicates high agreement between two different methods and the robustness of the result. Often times, NMF will separate samples into different groups that seem all closely connected but occupy distinct area in the t-SNE plot, such as the 111 and 222 samples in xxx study. From the t-SNE plot alone, we will not be able to classify these samples if we were to separate them based on the distance metrics from the first few componets.  
 
+<img src="NMF_Treutlein_d0d5_K3_Group.png" width="800px" height="500px" />  
+
+####
 In some other cases, samples displayed as two different tight clusters in the t-SNE plot may be assigned into the same NMF group. This happens when NMF is trying to factorize the expression matrix into the specify rank number (K) ,and the differences between these small sub-clusters are less than the other larger ones (show examples).
 
 Therefore, we encourge the user to explore the clustering result and repeat the process for subsets of the data if necessary. This process will be automated in the next version of the package. 
@@ -44,7 +52,9 @@ Therefore, we encourge the user to explore the clustering result and repeat the 
 
 The `feature` tab includes the enriched features in each group. For each gene, a `featureScore` will first be calculated according to formula xxx. Then based on `Lee's` feature selection method, only the feature with featureScores that are outside of 3 median absolute deviation (MAD) of all featureScore will be selected for each group. 
 
-Genes are rank by its featureScore in each group. Users can click on the name for the gene of interest, and it will link to the `GeneCards`^[GeneCards: http://www.genecards.org] page with more detailed information.  
+Genes are rank by its featureScore in each group. Users can either click on the name for the gene of interest, and it will link to the `GeneCards`^[GeneCards: http://www.genecards.org] page with more detailed information. Users can also click on the gene (as highlighted in the figure below), the gene expression value for samples in each NMF group will be displayed on the right. As in this example, `X1500015O10Rik` is the enriched feature identified in `NMF group1`, therefore its expression value is expected to be high in `NMF group1`. 
+
+<img src="NMF_Treutlein_d0d5_K3_Feature.png" width="800px" height="500px" />  
 
 ## More Information
 

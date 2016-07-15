@@ -14,6 +14,7 @@ One of the steps we can do before we move on to the next step is to filter out g
 - Whole transcriptome
 - Rank from data 
 - Upload gene list
+- Weighted Gene Co-Expression Network Analysis (WGCNA)
 
 ## Whole transcriptome
 
@@ -28,7 +29,7 @@ User can rank and filter genes based on simple statistics calculated across each
 - Median Absolute Deviation (MAD) 
 - Variance 
 
-In our experience, we find using `Median Absolute Deviation (MAD)` often give us accurate and reproducible results. However, you need to specify the number of top genes to be selected. In general, we suggest using Top 1500 - 3000 MAD genes for `bulk RNA-Seq` data; Top 5000 - 8000 MAD genes for `single-cell RNA-Seq` data. 
+In our experience, we find using `Median Absolute Deviation (MAD)` often give us accurate and reproducible results. However, you need to specify the number of top genes to be selected. In general, we suggest using Top **1500 - 3000** MAD genes for `bulk RNA-Seq` data; Top **5000 - 8000** MAD genes for `single-cell RNA-Seq` data. 
 
 ## Upload gene list
 
@@ -41,7 +42,7 @@ library(icash)
 dat <- data.frame(Gene = head(rownames(Usoskin), n=15))
 dat
 ```
-The first row should be a character string 'Gene'. The following rows should be the names/IDs of your gene of interest. 
+The first row should be a character string `Gene`. The following rows should be the names/IDs of your gene of interest. 
 
 ## Weighted Gene Co-expression Network Analysis (WGCNA)
 
