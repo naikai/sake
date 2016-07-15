@@ -577,6 +577,7 @@ body <- dashboardBody(
                         column(width=3,
                                selectInput("OrdCol", "Cluster column?",
                                            choices = list("Default ordering" = "default",
+                                                          "NMF group" = "nmf",
                                                           "Hierarchical" = "hier",
                                                           "Group info" = "group",
                                                           "Gene Expression" = "gene"),
@@ -595,9 +596,20 @@ body <- dashboardBody(
                         ),
                         column(width=3, selectInput("OrdRow", "Cluster row?",
                                                     choices = list("Default ordering" = "default",
+                                                                   "NMF group" = "nmf",
                                                                    "Hierarchical" = "hier"),
-                                                    selected = "hier"))
+                                                    selected = "hier")),
+
+                        column(width=3, selectInput("ColClr", "Cluster color?",
+                                                    choices = list("NMF group" = "nmf",
+                                                                   "Group info" = "group"),
+                                                    selected = "group")
+                        )
+
+
                       )
+
+
                     ),
                     conditionalPanel(
                       condition = "input.heat_opttype == 'scale'",
