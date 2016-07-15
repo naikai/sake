@@ -854,52 +854,64 @@ shinyServer(function(input, output, session) {
     return(res)
   })
 
+
+  OrdColopts <- reactive({
+    c("Default", "Hierarchical", "Filename", "GeneExpr")
+  })
+  ColClrByopts <- reactive({
+    c("Filename")
+  })
+  observeEvent(rawdata(), {
+    updateSelectizeInput(session, 'OrdCol',
+                         server = TRUE,
+                         choices = as.character(OrdColopts()),
+                         selected = "Hierarchical"
+    )
+    updateSelectizeInput(session, 'ColClrBy',
+                         server = TRUE,
+                         choices = as.character(ColClrByopts()),
+                         selected = "Filename"
+    )
+  })
+  observeEvent(input$runNMF, {
+    updateSelectizeInput(session, 'OrdCol',
+                         server = TRUE,
+                         choices = as.character(c(OrdColopts(), "NMF Group")),
+                         selected = "NMF Group"
+    )
+    updateSelectizeInput(session, 'ColClrBy',
+                         server = TRUE,
+                         choices = as.character(c(ColClrByopts(), "NMF Group")),
+                         selected = "NMF Group"
+    )
+  })
+
   heatmap_data <- reactive({
     rawdata <- transform_data()
     genelist <- geneListInfo()[['list']]
     gene.groups <- geneListInfo()[['group']]
 
-#     if(!is.null(input$selected_samples) && sum(input$selected_samples %in% colnames(rawdata))==length(input$selected_samples)){
-#       rawdata <- rawdata[, input$selected_samples]
-#     }
-#     if(input$minExp>0){
-#       if(input$minType=='Mean'){
-#         rawdata <- rawdata[rowMeans(rawdata) >= input$minExp, ]
-#       }else if(input$minType=="Median"){
-#         rawdata <- rawdata[rowMedians(rawdata) >= input$minExp, ]
-#       }else if (input$minType=="Sds"){
-#         rawdata <- rawdata[rowSds(rawdata) >= input$minExp, ]
-#       }else if (input$minType=="Min"){
-#         rawdata <- rawdata[rowMin(rawdata) >= input$minExp, ]
-#       }else if (input$minType=="Max"){
-#         rawdata <- rawdata[rowMax(rawdata) >= input$minExp, ]
-#       }
-#     }
-
     # only select unique gene name on rawdata
     idx <- match(genelist, rownames(rawdata))
     heatmap_data <- rawdata[idx,]
 
-    if(input$OrdCol == 'group'){    # Add options to sort by column groups
+    if(input$OrdCol == 'Filename'){    # Add options to sort by column groups
       column.names <- strsplit(colnames(heatmap_data), split="\\_")
       validate(
         need(input$sortcolumn_num <= length(column.names[[1]]), "Group num is too big, select a smaller number!")
       )
       idx <- order(sapply(column.names, function(x) x[[input$sortcolumn_num]]))
       heatmap_data <- heatmap_data[, idx]
-    }else if(input$OrdCol == 'gene'){       # Add options to sort by expression value of specific gene
+    }else if(input$OrdCol == 'GeneExpr'){ # Add options to sort by expression value of specific gene
       validate(
         need(input$sortgene_by!="", "Please select a gene!")
       )
       idx <- order(subset(heatmap_data, rownames(heatmap_data)==input$sortgene_by))
       heatmap_data <- heatmap_data[, idx]
     }
-
-    else if(input$OrdCol == 'nmf') {#Add options to sort by nmf groups
-      nmf_subtypes <- nmf_groups()$nmf_subtypes
-      idx <- order(sapply(nmf_subtypes, function(x) x[[input$sortcolumn_num]]))
+    else if(input$OrdCol == 'NMF Group') { # Add options to sort by nmf groups
+      idx <- nmf_groups()$nmf_subtypes %>% order
       heatmap_data <- heatmap_data[, idx]
-
     }
 
     res <- list()
@@ -926,28 +938,21 @@ shinyServer(function(input, output, session) {
   })
 
   ColSideColors <- reactive({
-
-    #     heatmap_data <- heatmap_data()[['heatmap_data']]
-    #    res <- name_to_color(colnames(heatmap_data), split_pattern ="\\_",
-    #                          num_color = input$ColSideColorsNum,
-    #                           ColScheme = ColScheme()[1:input$ColSideColorsNum] )
-    #      return(res)
-
-    if(input$ColClr=='nmf'){
-      heatmap_data <- heatmap_data()[['heatmap_data']]
-      nmf_subtypes <- nmf_groups()$nmf_subtypes
-      res <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai")
-      return(res)
-    }
-
-    else if(input$ColClr == 'group'){
-      heatmap_data <- heatmap_data()[['heatmap_data']]
+    heatmap_data <- heatmap_data()[['heatmap_data']]
+    res <- list()
+    if(input$ColClrBy=='NMF Group'){
+      req(nmf_groups)
+      # rematch the sample order to the sorted order based on selection from input$OrdCol
+      idx <- match(colnames(heatmap_data), nmf_groups()$Sample_ID)
+      nmf_subtypes <- nmf_groups()$nmf_subtypes[idx]
+      res[['color']] <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai") %>% as.matrix
+      res[['name']] <- paste0("NMF", nmf_subtypes) %>% as.matrix
+    }else if(input$ColClrBy == 'Filename'){
       res <- name_to_color(colnames(heatmap_data), split_pattern ="\\_",
                            num_color = input$ColSideColorsNum,
                            ColScheme = ColScheme()[1:input$ColSideColorsNum] )
-      return(res)
     }
-
+    return(res)
   })
 
   RowSideColors <- reactive({
@@ -970,7 +975,7 @@ shinyServer(function(input, output, session) {
     validate(
       need(nrow(heatmap_data()[['heatmap_data']] > 2), "Did not get enough genes that overlapped with your data\nPlease try another gene list or use rank from data set")
     )
-    if(input$OrdCol=="hier"){
+    if(input$OrdCol=="Hierarchical"){
       Colv <- heatmap_data()[['heatmap_data']] %>% t %>% dist(method=input$distance) %>% hclust(method=input$linkage) %>% as.dendrogram
       ColMean <- colMeans(heatmap_data()[['heatmap_data']], na.rm=T)
       Colv <- reorderfun(Colv, ColMean)
@@ -1085,7 +1090,7 @@ shinyServer(function(input, output, session) {
   )
 
   plot_colopts <- reactive({
-    c("Default", "Filename", "GeneExpr","NMF")
+    c("Default", "Filename", "GeneExpr")
   })
   observeEvent(rawdata(), {
     updateSelectizeInput(session, 'pt_col',

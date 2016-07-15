@@ -41,7 +41,7 @@ sidebar <- dashboardSidebar(
                               selectInput("VisType",
                                           label = "What kind of plot?",
                                           choices = c("Heatmap", "PCA", "t-SNE"),
-                                          selected = "t-SNE")
+                                          selected = "Heatmap")
              ),
     menuItem("Differential analysis", tabName="DE", icon = icon('tasks', lib="glyphicon"),
              menuSubItem("DESeq2", tabName="DESeq2")
@@ -575,19 +575,16 @@ body <- dashboardBody(
                       condition = "input.heat_opttype == 'cluster'",
                       fluidRow(
                         column(width=3,
-                               selectInput("OrdCol", "Cluster column?",
-                                           choices = list("Default ordering" = "default",
-                                                          "NMF group" = "nmf",
-                                                          "Hierarchical" = "hier",
-                                                          "Group info" = "group",
-                                                          "Gene Expression" = "gene"),
-                                           selected = "hier"),
+                               selectizeInput("OrdCol",
+                                              label = "Cluster column?",
+                                              choices=NULL, multiple=FALSE,
+                                              options = list(placeholder='Hierarchical')),
                                conditionalPanel(
-                                 condition = "input.OrdCol == 'group'",
+                                 condition = "input.OrdCol == 'Filename'",
                                  numericInput("sortcolumn_num", label = "Sort by which group:", value = 1)
                                ),
                                conditionalPanel(
-                                 condition = "input.OrdCol == 'gene'",
+                                 condition = "input.OrdCol == 'GeneExpr'",
                                  selectizeInput("sortgene_by",
                                                 label = "Select a gene to sort on",
                                                 choices=NULL, multiple=FALSE,
@@ -596,17 +593,8 @@ body <- dashboardBody(
                         ),
                         column(width=3, selectInput("OrdRow", "Cluster row?",
                                                     choices = list("Default ordering" = "default",
-                                                                   "NMF group" = "nmf",
                                                                    "Hierarchical" = "hier"),
-                                                    selected = "hier")),
-
-                        column(width=3, selectInput("ColClr", "Cluster color?",
-                                                    choices = list("NMF group" = "nmf",
-                                                                   "Group info" = "group"),
-                                                    selected = "group")
-                        )
-
-
+                                                    selected = "hier"))
                       )
 
 
@@ -673,50 +661,51 @@ body <- dashboardBody(
                     conditionalPanel(
                       condition = "input.heat_opttype == 'ColSideColors'",
                       fluidRow(
-                        column(width=3, sliderInput("ColSideColorsNum", label = "Num of Column Color:", min=1, max=4, value=1, ticks = F)),
-                        column(width=3, numericInput("ColSideColorsSize", label = "Column Color Size:", value=1.5, step=0.1)),
+                        column(width=2, selectizeInput("ColClrBy",
+                                       label = "Color sample by?",
+                                       choices=NULL, multiple=FALSE,
+                                       options = list(placeholder='Hierarchical'))
+                        ),
+                        # column(width=2, selectInput("ColClrBy", "Color sample by?",
+                        #                             choices = list("NMF group" = "nmf",
+                        #                                            "Filename" = "filename"),
+                        #                             selected = "filename")
+                        # ),
+                        column(width=2, sliderInput("ColSideColorsNum", label = "Num of Column Color:", min=1, max=4, value=1, ticks = F)),
+                        column(width=2, numericInput("ColSideColorsSize", label = "Column Color Size:", value=1.5, step=0.1)),
                         # Need to fix this later
                         conditionalPanel(
                           condition = "input.ColSideColorsNum == 1",
-                            column(width=3, selectInput("ColScheme1",
+                            column(width=2, selectInput("ColScheme1",
                                                         label = "Column Color 1:",
                                                         choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
                                                         selected = "naikai")),
-                            column(width=3, numericInput("ColScheme1.num", label = "Num of colors:", value = 5))
+                            column(width=2, numericInput("ColScheme1.num", label = "Num of colors:", value = 5))
                         ),
                         conditionalPanel(
                           condition = "input.ColSideColorsNum == 2",
-                            column(width=3, selectInput("ColScheme2",
+                            column(width=2, selectInput("ColScheme2",
                                                         label = "Column Color 2:",
                                                         choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
                                                         selected = "Paired")),
-                            column(width=3, numericInput("ColScheme2.num", label = "Num of colors:", value = 10))
+                            column(width=2, numericInput("ColScheme2.num", label = "Num of colors:", value = 10))
                         ),
                         conditionalPanel(
                           condition = "input.ColSideColorsNum == 3",
-                            column(width=3, selectInput("ColScheme3",
+                            column(width=2, selectInput("ColScheme3",
                                                         label = "Column Color 3:",
                                                         choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
                                                         selected = "Greys")),
-                            column(width=3, numericInput("ColScheme3.num", label = "Num of colors:", value = 10))
+                            column(width=2, numericInput("ColScheme3.num", label = "Num of colors:", value = 10))
                         ),
                         conditionalPanel(
                           condition = "input.ColSideColorsNum == 4",
-                            column(width=3, selectInput("ColScheme4",
+                            column(width=2, selectInput("ColScheme4",
                                                         label = "Column Color 4:",
                                                         choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
                                                         selected = "YlOrRd")),
-                            column(width=3, numericInput("ColScheme4.num", label = "Num of colors:", value = 10))
+                            column(width=2, numericInput("ColScheme4.num", label = "Num of colors:", value = 10))
                         )
-                      )
-                    ),
-                    conditionalPanel(
-                      condition = "input.heat_opttype == 'ColxSideColors'",
-                      fluidRow(
-                        column(width=3, selectInput("Coli22Scheme4",
-                                                    label = "Column Color 4:",
-                                                    choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
-                                                    selected = "YlOrRd"))
                       )
                     )
                   ),
