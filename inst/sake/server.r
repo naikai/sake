@@ -895,6 +895,13 @@ shinyServer(function(input, output, session) {
       heatmap_data <- heatmap_data[, idx]
     }
 
+    else if(input$OrdCol == 'nmf') {#Add options to sort by nmf groups
+      nmf_subtypes <- nmf_groups()$nmf_subtypes
+      idx <- order(sapply(nmf_subtypes, function(x) x[[input$sortcolumn_num]]))
+      heatmap_data <- heatmap_data[, idx]
+
+    }
+
     res <- list()
     res[["heatmap_data"]] <- heatmap_data
     res[["genelist"]] <- genelist
@@ -919,11 +926,28 @@ shinyServer(function(input, output, session) {
   })
 
   ColSideColors <- reactive({
-    heatmap_data <- heatmap_data()[['heatmap_data']]
-    res <- name_to_color(colnames(heatmap_data), split_pattern ="\\_",
-                         num_color = input$ColSideColorsNum,
-                         ColScheme = ColScheme()[1:input$ColSideColorsNum] )
-    return(res)
+
+    #     heatmap_data <- heatmap_data()[['heatmap_data']]
+    #    res <- name_to_color(colnames(heatmap_data), split_pattern ="\\_",
+    #                          num_color = input$ColSideColorsNum,
+    #                           ColScheme = ColScheme()[1:input$ColSideColorsNum] )
+    #      return(res)
+
+    if(input$ColClr=='nmf'){
+      heatmap_data <- heatmap_data()[['heatmap_data']]
+      nmf_subtypes <- nmf_groups()$nmf_subtypes
+      res <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai")
+      return(res)
+    }
+
+    else if(input$ColClr == 'group'){
+      heatmap_data <- heatmap_data()[['heatmap_data']]
+      res <- name_to_color(colnames(heatmap_data), split_pattern ="\\_",
+                           num_color = input$ColSideColorsNum,
+                           ColScheme = ColScheme()[1:input$ColSideColorsNum] )
+      return(res)
+    }
+
   })
 
   RowSideColors <- reactive({
@@ -1061,7 +1085,7 @@ shinyServer(function(input, output, session) {
   )
 
   plot_colopts <- reactive({
-    c("Default", "Filename", "GeneExpr")
+    c("Default", "Filename", "GeneExpr","NMF")
   })
   observeEvent(rawdata(), {
     updateSelectizeInput(session, 'pt_col',
