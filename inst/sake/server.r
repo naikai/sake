@@ -447,7 +447,8 @@ shinyServer(function(input, output, session) {
       paste( file_prefix(), "nmf_results.zip", sep=".")
     },
     content = function(file) {
-      tmpdir <- tempdir()
+      # tmpdir <- tempdir()
+      tmpdir <- "/mnt/sake-uploads/"
       current_dir <- getwd()
       setwd(tmpdir)
       filenames <- sapply(c("nmf_Groups", "nmf_Features", "Original_plus_NMF", "runSummary"),
@@ -1261,8 +1262,12 @@ shinyServer(function(input, output, session) {
   })
 
   deseq_res <- eventReactive(input$runDESeq, {
-    if(input$selectfile == "saved" & !is.null(rda()$dds)){
-      return(rda()$dds)
+    if(input$selectfile == "saved"){
+      print("hihi")
+      if(!is.null(rda()$dds)){
+      print("hihi")
+        return(rda()$dds)
+      }
     }
 
     rawdata <- rawdata()
@@ -1571,7 +1576,8 @@ shinyServer(function(input, output, session) {
       paste( file_prefix(), "pathway.zip", sep=".")
     },
     content = function(file) {
-      tmpdir <- tempdir()
+      # tmpdir <- tempdir()
+      tmpdir <- "/mnt/sake-uploads/"
       current_dir <- getwd()
       setwd(tempdir())
       ### modify it to save one file for each rank ###

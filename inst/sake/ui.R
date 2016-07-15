@@ -19,7 +19,7 @@ tg <- attachDependencies(
 )
 
 header <- dashboardHeader(
-  title = "Single-Cell NMF"
+  title = "SAKE"
 )
 
 sidebar <- dashboardSidebar(

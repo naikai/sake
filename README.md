@@ -1,12 +1,12 @@
-# icash 
+# sake 
 
-[![Build Status](https://travis-ci.com/naikai/icash.svg?token=qigAqQi4xmKjKDqnm97n&branch=master)](https://travis-ci.com/naikai/icash)
-[![codecov](https://codecov.io/gh/naikai/icash/branch/master/graph/badge.svg?token=WEipAvcFMf)](https://codecov.io/gh/naikai/icash)
+[![Build Status](https://travis-ci.com/naikai/sake.svg?token=qigAqQi4xmKjKDqnm97n&branch=master)](https://travis-ci.com/naikai/sake)
+[![codecov](https://codecov.io/gh/naikai/sake/branch/master/graph/badge.svg?token=WEipAvcFMf)](https://codecov.io/gh/naikai/sake)
 
 ### **S**ingle-cell RNA-Seq **A**nalysis and **K**lustering **E**valuation
 The aim of `sake` is to provide a user-friendly tool for easy analysis of NGS Single-Cell transcriptomic data
 
-### Version 0.2.1.4
+### Version 0.3.1.0
 
 ### Installation Guide
 To install the latest development version from GitHub:
