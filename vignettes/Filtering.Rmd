@@ -9,42 +9,47 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-One of the steps we can do before we move on to the next step is to filter out genes with variations due to biological noises [cite], as those genes tend to generate more noise that hinder the real signal than provide useful information about the underlying grouping structure.
+One of the steps we can do before clustering is to filter genes with variations due to biological noises [cite], as those genes tend to generate more noise that hinder the real signal than provide useful information about the underlying grouping structure. In this tab we also provide preliminary correlation analysis between all samples, a tool to visualize genetic networks in the data, and a scatter plot comparison of genes in two different samples. 
 
-- Whole transcriptome
-- Rank from data 
-- Upload gene list
-- Weighted Gene Co-Expression Network Analysis (WGCNA)
 
-## Whole transcriptome
+#Filtering
 
-If you want to use all the genes presented in your data for downstream analysis. 
+We provide four different methods to filter genes from your dataset before downstream analysis. 
 
-## Rank from data
+Whole transcriptome: select whole transcriptome if you want to use all the genes present in your data for downstream analysis. 
 
-User can rank and filter genes based on simple statistics calculated across each genes. There are currently 4 different ways of filtering 
 
-- Mean 
-- Median 
-- Median Absolute Deviation (MAD) 
-- Variance 
+Rank from data: you can rank and filter genes based on simple statistics calculated across each gene. There are currently four ways of ranking genes: mean, median,                      median absolute deviation (MAD), and variance. In our experience, we find using `Median Absolute Deviation (MAD)` often give us accurate and reproducible                 results. However, you need to specify the number of top genes to be selected. In general, we suggest using Top **1500 - 3000** MAD genes for `bulk                       RNA-Seq` data; Top **5000 - 8000** MAD genes for `single-cell RNA-Seq` data. 
 
-In our experience, we find using `Median Absolute Deviation (MAD)` often give us accurate and reproducible results. However, you need to specify the number of top genes to be selected. In general, we suggest using Top **1500 - 3000** MAD genes for `bulk RNA-Seq` data; Top **5000 - 8000** MAD genes for `single-cell RNA-Seq` data. 
+Upload gene list: You also have the option to upload a text file which contains your gene of interest. This is typically done when you have a list of marker genes for                     specific hypothesis and want to see how samples cluster accordingly. 
 
-## Upload gene list
+                  An example gene list file should look like this:
+                  
+                  ```{r, echo=FALSE, message=FALSE, warning=FALSE}
+                     library(icash)
+                     dat <- data.frame(Gene = head(rownames(Usoskin), n=15))
+                     dat
+                     ```        
+                     
+                The first row should be a character string `Gene`. The following rows should be the names/IDs of your gene of interest. 
+                
+                
+Weight Gene Co-expression Network Analysis (WGCNA): The rationale is to identify gene modules that are co-expressed across samples using a statistical metric to identify                                                     cohesive groups. This will preferentially select for genes whose deviation across samples is due to differential                                                         expression rather than simply high variance levels. Importantly, this method also automatically selects for input                                                        gene sets that are close to the optimal MAD sets. 
 
-You also have the option to upload a text file which contains your gene of interest. This is typically done when you have a list of marker genes for specific hypothesis and want to see how samples cluster accordingly. 
 
-An example gene list file should look like this 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-library(icash)
-dat <- data.frame(Gene = head(rownames(Usoskin), n=15))
-dat
-```
-The first row should be a character string `Gene`. The following rows should be the names/IDs of your gene of interest. 
+#Sample Correlation and Gene Networks
 
-## Weighted Gene Co-expression Network Analysis (WGCNA)
+We provide two tools to visualize correlations in your data and observe how filtering effects your data. 
 
-The rationale is to identify gene modules that are co-expressed across samples using a statistical metric to identify cohesive groups. This will preferentially select for genes whose deviation across samples is due to differential expression rather than simply high variance levels. Importantly, this method also automatically selects for input gene sets that are close to the optimal MAD sets. 
+Sample Correlation: creates a matrix with your samples as the rows and columns. The tool calculates the pearson correlation between each of your samples using the genes                     you selected to filter. More similar samples are red, while dissimilar samples are blue. Large groupings of red indicate clusters of samples. 
+                    
+Gene Network: This tool analyzes genes whose expression is correlated with one another and creates a visual network to view these associations. Large hubs of genes                    indicate genes that are expressed together. 
+
+#Sample scatter plot
+
+You can compare the expression levels of specific genes between two samples with a scatter plot. Genes that lie above the reference line are more highly expressed in the sample on the Y-axis, while genes that lie below the reference line are more highly expressed in the sample in the X-axis. Users can choose to log transform their gene counts, display R^2 coefficent of determination, or show a two-fold change line to assess genes that have large changes in expression between the two samples. 
+
+
+
 
