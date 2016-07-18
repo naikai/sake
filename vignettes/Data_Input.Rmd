@@ -48,7 +48,7 @@ Example saved data can be downloaded [here](https://)
 
 A successfully loaded data will look like this  
 
-<img src="File.png" width="800px" height="500px" />
+<img src="Figures/File.png" width="800px" height="500px" />
 
 ***
 
