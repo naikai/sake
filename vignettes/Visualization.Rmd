@@ -25,7 +25,7 @@ Under more options, the user can further modify t-SNE:
 
 As mentioned in the earlier section on NMF, concordance of NMF groups and t-SNE clusters indicate the robustness of the results. It's important to use NMF clustering in addition to t-SNE dimensional reduction because NMF can help assign data points to clusters otherwise difficult to group because they are between two distinct but closely connected t-SNE groupings.
 
-Sometimes samples that appear to be grouped into two distinct clusters in t-SNE will be assigned to a single NMF group. This can happen because large differences between clusters can overshadow smaller, but biologically meangingful, differences between subgroups. It's therefore important to cross-reference t-SNE clustering with NMF results, and repeat NMF clustering on NMF groups if there appears to be distinct t-SNE subgroups in a single NMF group to uncover further clusters of samples. In future versions, this iterative process will be automated, and the program will run NMF on NMF clusters that are likely to contain further subgroups. 
+Sometimes samples that appear to be grouped into two distinct clusters in t-SNE will be assigned to a single NMF group. This can happen because large differences between clusters can overshadow smaller, but biologically meangingful, differences between subgroups. It's therefore important to cross-reference t-SNE clustering with NMF results, and repeat NMF clustering on subsets of data if there appears to be distinct t-SNE subgroups in a single NMF group. In future versions, this iterative process will be automated, and the program will run NMF on NMF clusters that are likely to contain further subgroups. 
 
 <img src="Figures/non_malignant_NMF.png" width="600px" height="400px" />
 
