@@ -1,7 +1,5 @@
 # sake 
 
-![Alt text](/relative/path/to/img.jpg?raw=true "Optional Title")
-
 [![Build Status](https://travis-ci.com/naikai/sake.svg?token=qigAqQi4xmKjKDqnm97n&branch=master)](https://travis-ci.com/naikai/sake)
 [![codecov](https://codecov.io/gh/naikai/sake/branch/master/graph/badge.svg?token=WEipAvcFMf)](https://codecov.io/gh/naikai/sake)
 

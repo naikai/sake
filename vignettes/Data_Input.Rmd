@@ -11,7 +11,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-There are three different ways you can upload files into `icash` pacakge. It can either be 
+There are three different ways you can upload files into `sake` pacakge. It can either be 
 
 - Rawdata file 
 - Preloaded data
@@ -30,7 +30,7 @@ You can also specify the delimiter according to different file type.
 ### Example data sets should look like this: 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
-library(icash)
+library(sake)
 knitr::kable(Usoskin[1:10, 1:8])
 ```
 
@@ -40,7 +40,7 @@ There are several preloaded gene expression data from published single-cell stud
 
 ## Saved run result
 
-User has the option to utlize [yabi](https://demo.bsr.tools/yabi/login/?next=/yabi/) to run clustering analysis through its user-friendlly web interface. This is especially useful when the sample sizes of the single-cell study becomes larger and larger. The previous run results can be saved in [.rda](https://stat.ethz.ch/R-manual/R-devel/library/base/html/load.html) format and then loaded back to `icash` package. Once the analysis is done, it will include data analysis of NMF, t-SNE, and DESeq2 (if specified). 
+User has the option to utlize [yabi](https://demo.bsr.tools/yabi/login/?next=/yabi/) to run clustering analysis through its user-friendlly web interface. This is especially useful when the sample sizes of the single-cell study becomes larger and larger. The previous run results can be saved in [.rda](https://stat.ethz.ch/R-manual/R-devel/library/base/html/load.html) format and then loaded back to `sake` package. Once the analysis is done, it will include data analysis of NMF, t-SNE, and DESeq2 (if specified). 
 
 Example saved data can be downloaded [here](https://)
 

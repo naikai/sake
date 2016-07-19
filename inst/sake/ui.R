@@ -229,7 +229,6 @@ body <- dashboardBody(
                      featureUI("sample", title = "Sample Correlation")
               ),
               column(width=6,
-                     # featureUI("gene", title = "Gene Network")
                      networkUI("gene", title = "Gene Network")
               )
             )
