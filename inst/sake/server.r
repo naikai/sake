@@ -407,7 +407,8 @@ shinyServer(function(input, output, session) {
       # Run NMF through YABI
       data_path <- "/mnt/sake-uploads"
       write.table(merged, file.path(data_path, "yabi.txt"), sep="\t", quote=F)
-      system2("yabish --backend 'Black and Blue Dev 1' run-NMF.sh -d 1_Islam-Full-counts.txt -c 8 -t 3000 -m estim -n FALSE -k 10 -a brunet -q FALSE")
+      system2("yabish --backend 'EC2 NMF' run-NMF.sh -d 1_Islam-Full-counts.txt -c 8 -t 3000 -m estim -n FALSE -k 10 -a brunet -q FALSE")
+      try(system("ls fizzlipuzzli", intern = TRUE, ignore.stderr = TRUE))
 
       # Run NMF on local server
       ptm <- proc.time()

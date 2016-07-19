@@ -27,12 +27,12 @@ As mentioned in the earlier section on NMF, concordance of NMF groups and t-SNE 
 
 Sometimes samples that appear to be grouped into two distinct clusters in t-SNE will be assigned to a single NMF group. This can happen because large differences between clusters can overshadow smaller, but biologically meangingful, differences between subgroups. It's therefore important to cross-reference t-SNE clustering with NMF results, and repeat NMF clustering on NMF groups if there appears to be distinct t-SNE subgroups in a single NMF group to uncover further clusters of samples. In future versions, this iterative process will be automated, and the program will run NMF on NMF clusters that are likely to contain further subgroups. 
 
-<img src="Figures/non_malignant_NMF.png" width="600px" height="400px" />
+<img src="Figures/non_malignant_NMF.png" width="600px" height="500px" />
 
 In this figure, the NMF1 cluster (red) appears to contain three distinct t-SNE groupings. We ran NMF on the samples from the NMF1 group
 
 
-<img src="Figures/NMF1_subclusters.png" width="600px" height="400px" />
+<img src="Figures/NMF1_subclusters.png" width="600px" height="500px" />
 
 When NMF was run on the NMF1 group, it uncovered three distinct subgroup and verified the results from the earlier t-SNE that NMF1 contains three further subclusters. 
 
@@ -59,16 +59,19 @@ There are five options for selecting sets of genes to analyze:
 
 - **Manually select genes:** the user can genes from a dropdown menu of annotated human or mice genes. 
 
-- **From NMF features:** the user can select genes that are found to be uniquely enriched in a particular NMF group. NMF enriched genes will be highly expressed in their NMF groups and poorly    
-                         expressed in the other samples. 
- 
+- **From NMF features:** the user can select genes that are found to be uniquely enriched in a particular NMF group. NMF enriched genes will be highly expressed in their NMF groups and poorly expressed in the other samples. 
+
+An example heatmap using genes from NMF features will look this. The color bar on the top of the heatmap indicates which NMF group each sample is assigned to.  
+
+<img src="Figures/heatmap_NMF.pdf" width="700px" height="550px" />
+
 - **Upload gene list:** the user can upload their own gene list. 
 
 An example gene list file should look like this:
                   
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-library(sake)
-data.frame(Gene = head(rownames(Usoskin), n=15))
+# library(sake)
+# data.frame(Gene = head(rownames(Usoskin), n=15))
 ```        
                      
 The first row should be a character string `Gene`. The following rows should be the names/IDs of your gene of interest. 
