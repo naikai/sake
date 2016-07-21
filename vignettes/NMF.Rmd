@@ -48,13 +48,13 @@ In some other cases, samples displayed as two different tight clusters in the t-
 ####
 
 
-<img src="Figures/non_malignant_NMF.png" width="600px" height="400px" />
+<img src="Figures/non_malignant_NMF.png" width="600px" height="500px" />
 
 In this figure, the NMF1 cluster (red) appears to contain three distinct t-SNE groupings. We ran NMF on the samples from the NMF1 group  
 
 ####
 
-<img src="Figures/NMF1_subclusters.png" width="600px" height="400px" />
+<img src="Figures/NMF1_subclusters.png" width="600px" height="500px" />
 
 When NMF was run on the NMF1 group, it uncovered three distinct subgroup and verified the results from the earlier t-SNE that NMF1 contains three further subclusters. 
 

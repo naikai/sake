@@ -76,7 +76,7 @@ body <- dashboardBody(
                                            choices = list("Select from preloaded data"='preload',
                                                           "Upload rawdata"='upload',
                                                           "Upload saved NMF run"='saved'),
-                                           selected = "saved"),
+                                           selected = "preload"),
                                conditionalPanel(
                                  condition = "input.selectfile == 'upload'",
                                  fileInput('file1', 'Choose text File',
@@ -275,11 +275,12 @@ body <- dashboardBody(
                            bsTooltip("nrun", "Recommend 20-30 for estimate k <br> 50-100 for real run",
                                      "right", options = list(container = "body"))
                     ),
-                    column(width=2, br(),
-                           actionButton("runNMF", "Run NMF", icon("play-circle"), class = 'act')
+                    column(width=2,
+                           actionButton("runNMF", "Run NMF", icon("play-circle"), class = 'act'),
+                           checkboxInput('nmf_runmoreopt', 'More Options', FALSE)
                     ),
                     uiOutput("dlNMF_UI"),
-                    column(width=2, checkboxInput('nmf_runmoreopt', 'More Options', FALSE))
+                    column(width=6, bsAlert("NMFAlert"))
                   ),
                   fluidRow(
                     conditionalPanel(

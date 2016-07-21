@@ -404,11 +404,25 @@ shinyServer(function(input, output, session) {
     if(input$selectfile == "saved"){
       nmfres <- rda()$nmfres
     }else{
-      # Run NMF through YABI
-      data_path <- "/mnt/sake-uploads"
-      write.table(merged, file.path(data_path, "yabi.txt"), sep="\t", quote=F)
-      system2("yabish --backend 'EC2 NMF' run-NMF.sh -d 1_Islam-Full-counts.txt -c 8 -t 3000 -m estim -n FALSE -k 10 -a brunet -q FALSE")
-      try(system("ls fizzlipuzzli", intern = TRUE, ignore.stderr = TRUE))
+      if(ncol(merged) >= 100){
+        # Run NMF through YABI
+        test_yabi <- try(system("yabish login yabi buffalo! backends"))
+        if(test_yabi == 0){
+          data_path <- "/mnt/sake-uploads"
+          output <- file.path(data_path, "yabi.txt")
+          write.table(merged, output, sep="\t", quote=F)
+          command <- paste("sh yabi_submission_email.sh -d", output ,
+                           "-c 8 -t 1000 -m real -n FALSE -k 4 -a brunet -q FALSE")
+          t1 <- try(system(command, intern = TRUE))
+          # send email to the user and stop sake
+          stop(t1)
+        }else{
+          print("here")
+          createAlert(session, "NMFAlert", "NMFAlert1", title = "WARNING", style = "warning",
+                      content = paste0("Sample size is ", ncol(merged), ". This might take long to run. <br>"),
+                      append = FALSE)
+        }
+      }
 
       # Run NMF on local server
       ptm <- proc.time()
@@ -426,7 +440,6 @@ shinyServer(function(input, output, session) {
         print(b)
       })
     }
-
     return(nmfres)
   })
 
