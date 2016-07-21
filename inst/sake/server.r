@@ -624,7 +624,7 @@ shinyServer(function(input, output, session) {
                        append = FALSE)
     }
     else{
-      closeAlert(session, "perplexityAlert")
+      closeAlert(session, "perplexityAlert1")
 
 
     withProgress(message = 'Running t-SNE', value = NULL, {
@@ -1243,7 +1243,7 @@ shinyServer(function(input, output, session) {
     }
 
     else {
-  ##closeAlert(session, visualperplexityAlert)
+  closeAlert(session, "visualperplexityAlert1")
 
     heatmap_data <- heatmap_data()[['heatmap_data']]
     withProgress(message = 'Running t-SNE', value = NULL, {
