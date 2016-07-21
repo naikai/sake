@@ -1208,6 +1208,13 @@ shinyServer(function(input, output, session) {
 
   observeEvent(input$runtSNE, {
     heatmap_data <- heatmap_data()[['heatmap_data']]
+    nsamples <- ncol(heatmap_data()[['heatmap_data']])
+    validate(
+          need(input$tsne_perplexity*3 < (nsamples-1),
+               message = paste("Perpleixty", input$tsne_perplexity,
+                                "is too large compared to num of samples", nsamples))
+          # need(!is.null(tsne_2d$data), "Please click 'Run t-SNE' button")
+        )
     withProgress(message = 'Running t-SNE', value = NULL, {
       incProgress(1/3, detail = "For t-SNE 2D")
       tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
@@ -1220,9 +1227,9 @@ shinyServer(function(input, output, session) {
   plot_tsne_2d <- reactive({
     nsamples <- ncol(heatmap_data()[['heatmap_data']])
     validate(
-      need(input$tsne_perplexity*3 < (nsamples-1),
-           message = paste("Perpleixty", input$tsne_perplexity,
-                            "is too large compared to num of samples", nsamples)) %then%
+#       need(input$tsne_perplexity*3 < (nsamples-1),
+#            message = paste("Perpleixty", input$tsne_perplexity,
+#                             "is too large compared to num of samples", nsamples)) %then%
       need(!is.null(tsne_2d$data), "Please click 'Run t-SNE' button")
     )
     tsne_out <- isolate(tsne_2d$data)
@@ -1258,11 +1265,11 @@ shinyServer(function(input, output, session) {
   })
   output$tsneplot_3d <- renderPlotly({
     nsamples <- ncol(heatmap_data()[['heatmap_data']])
-    validate(
-      need(input$tsne_perplexity*3 < (nsamples-1),
-           message = paste("Perpleixty", input$tsne_perplexity,
-                            "is too large compared to num of samples", nsamples))
-    )
+#     validate(
+#       need(input$tsne_perplexity*3 < (nsamples-1),
+#            message = paste("Perpleixty", input$tsne_perplexity,
+#                             "is too large compared to num of samples", nsamples))
+#     )
     if(is.null(tsne_3d$data)) return ()
     projection <- isolate(as.data.frame(tsne_3d$data$Y))
     labels <- rownames(projection)
