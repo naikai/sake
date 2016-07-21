@@ -408,6 +408,10 @@ shinyServer(function(input, output, session) {
         # Run NMF through YABI
         test_yabi <- try(system("yabish login yabi buffalo! backends"))
         if(test_yabi == 0){
+          createAlert(session, "YabiAlert", "YabiAlert1", title = "Running on Cloud", style = "success",
+                      content = paste0("Sample size is ", ncol(merged),
+                                       ". We are running this job on the cloud and will notify you when the results are ready.<br>"),
+                      append = FALSE)
           data_path <- "/mnt/sake-uploads"
           output <- file.path(data_path, "yabi.txt")
           write.table(merged, output, sep="\t", quote=F)
@@ -417,7 +421,6 @@ shinyServer(function(input, output, session) {
           # send email to the user and stop sake
           stop(t1)
         }else{
-          print("here")
           createAlert(session, "NMFAlert", "NMFAlert1", title = "WARNING", style = "warning",
                       content = paste0("Sample size is ", ncol(merged), ". This might take long to run. <br>"),
                       append = FALSE)
@@ -439,6 +442,8 @@ shinyServer(function(input, output, session) {
         print("### Time to run NMF ### ")
         print(b)
       })
+
+      closeAlert(session, "NMFAlert1")
     }
     return(nmfres)
   })
@@ -467,8 +472,7 @@ shinyServer(function(input, output, session) {
       paste( file_prefix(), "nmf_results.zip", sep=".")
     },
     content = function(file) {
-      # tmpdir <- tempdir()
-      tmpdir <- "/mnt/sake-uploads/"
+      tmpdir <- tempdir()
       current_dir <- getwd()
       setwd(tmpdir)
       filenames <- sapply(c("nmf_Groups", "nmf_Features", "Original_plus_NMF", "runSummary"),
@@ -1224,11 +1228,10 @@ shinyServer(function(input, output, session) {
     heatmap_data <- heatmap_data()[['heatmap_data']]
     nsamples <- ncol(heatmap_data()[['heatmap_data']])
     validate(
-          need(input$tsne_perplexity*3 < (nsamples-1),
-               message = paste("Perpleixty", input$tsne_perplexity,
-                                "is too large compared to num of samples", nsamples))
-          # need(!is.null(tsne_2d$data), "Please click 'Run t-SNE' button")
-        )
+      need(input$tsne_perplexity*3 < (nsamples-1),
+           message = paste("Perpleixty", input$tsne_perplexity,
+                           "is too large compared to num of samples", nsamples))
+    )
     withProgress(message = 'Running t-SNE', value = NULL, {
       incProgress(1/3, detail = "For t-SNE 2D")
       tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
@@ -1241,9 +1244,6 @@ shinyServer(function(input, output, session) {
   plot_tsne_2d <- reactive({
     nsamples <- ncol(heatmap_data()[['heatmap_data']])
     validate(
-#       need(input$tsne_perplexity*3 < (nsamples-1),
-#            message = paste("Perpleixty", input$tsne_perplexity,
-#                             "is too large compared to num of samples", nsamples)) %then%
       need(!is.null(tsne_2d$data), "Please click 'Run t-SNE' button")
     )
     tsne_out <- isolate(tsne_2d$data)
@@ -1279,11 +1279,6 @@ shinyServer(function(input, output, session) {
   })
   output$tsneplot_3d <- renderPlotly({
     nsamples <- ncol(heatmap_data()[['heatmap_data']])
-#     validate(
-#       need(input$tsne_perplexity*3 < (nsamples-1),
-#            message = paste("Perpleixty", input$tsne_perplexity,
-#                             "is too large compared to num of samples", nsamples))
-#     )
     if(is.null(tsne_3d$data)) return ()
     projection <- isolate(as.data.frame(tsne_3d$data$Y))
     labels <- rownames(projection)
@@ -1319,9 +1314,7 @@ shinyServer(function(input, output, session) {
 
   deseq_res <- eventReactive(input$runDESeq, {
     if(input$selectfile == "saved"){
-      print("hihi")
       if(!is.null(rda()$dds)){
-      print("hihi")
         return(rda()$dds)
       }
     }
@@ -1632,8 +1625,8 @@ shinyServer(function(input, output, session) {
       paste( file_prefix(), "pathway.zip", sep=".")
     },
     content = function(file) {
-      # tmpdir <- tempdir()
-      tmpdir <- "/mnt/sake-uploads/"
+      tmpdir <- tempdir()
+      # tmpdir <- "/mnt/sake-uploads/"
       current_dir <- getwd()
       setwd(tempdir())
       ### modify it to save one file for each rank ###
