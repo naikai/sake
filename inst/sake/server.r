@@ -616,6 +616,17 @@ shinyServer(function(input, output, session) {
   # Add t-SNE plot next to NMF group
   observeEvent(input$run_nmftSNE, {
     heatmap_data <- heatmap_data()[['heatmap_data']]
+    nsamples <- ncol(heatmap_data()[['heatmap_data']])
+    if(input$nmftsne_perplexity*3 > (nsamples-1)) {
+           createAlert(session, "perplexityAlert", "perplexityAlert1", title = "WARNING", style = "warning",
+                       content = paste("Perpleixty", input$nmftsne_perplexity,
+                                       "is too large compared to num of samples", nsamples),
+                       append = FALSE)
+    }
+    else{
+      closeAlert(session, "perplexityAlert")
+
+
     withProgress(message = 'Running t-SNE', value = NULL, {
       incProgress(1/3, detail = "For t-SNE 2D")
       try(
@@ -626,14 +637,12 @@ shinyServer(function(input, output, session) {
       tsne_3d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=3,
                                perplexity=input$nmftsne_perplexity, cores=cores())
     })
+    }
   })
 
   nmfplottsne <- reactive({
     nsamples <- ncol(heatmap_data()[['heatmap_data']])
     validate(
-      need(input$nmftsne_perplexity*3 < (nsamples-1),
-           message = paste("Perpleixty", input$nmftsne_perplexity,
-                           "is too large compared to num of samples", nsamples)) %then%
       need(input$mode=="real", "This part won't work for 'estim' module\nPlease Try NMF 'Real' run") %then%
       need(!is.null(tsne_2d$data), "Please hit 'Run t-SNE' button")
     )
@@ -1225,13 +1234,18 @@ shinyServer(function(input, output, session) {
   tsne_3d <- reactiveValues(data=NULL)
 
   observeEvent(input$runtSNE, {
-    heatmap_data <- heatmap_data()[['heatmap_data']]
     nsamples <- ncol(heatmap_data()[['heatmap_data']])
-    validate(
-      need(input$tsne_perplexity*3 < (nsamples-1),
-           message = paste("Perpleixty", input$tsne_perplexity,
-                           "is too large compared to num of samples", nsamples))
-    )
+    if(input$tsne_perplexity*3 > (nsamples-1)) {
+      createAlert(session, "visualperplexityAlert", "visualperplexityAlert1", title = "WARNING", style = "warning",
+                  content = paste("Perpleixty", input$tsne_perplexity,
+                                  "is too large compared to num of samples", nsamples),
+                  append = FALSE)
+    }
+
+    else {
+  ##closeAlert(session, visualperplexityAlert)
+
+    heatmap_data <- heatmap_data()[['heatmap_data']]
     withProgress(message = 'Running t-SNE', value = NULL, {
       incProgress(1/3, detail = "For t-SNE 2D")
       tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
@@ -1240,6 +1254,7 @@ shinyServer(function(input, output, session) {
       tsne_3d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=3,
                                perplexity=input$tsne_perplexity, cores=cores())
     })
+}
   })
   plot_tsne_2d <- reactive({
     nsamples <- ncol(heatmap_data()[['heatmap_data']])

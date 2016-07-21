@@ -404,6 +404,8 @@ body <- dashboardBody(
                            column(width=2, br(),
                                   actionButton("run_nmftSNE", "Run t-SNE!", icon("play-circle"), class = "act")
                            ),
+                           uiOutput("dlperplexity_UI"),
+                           column(width=6, bsAlert("perplexityAlert")),
                            column(width=12,
                                   plotlyOutput('nmftsneplot', height=600, width=600)
                            )
@@ -753,7 +755,9 @@ body <- dashboardBody(
                       column(width=1, numericInput("plot_point_alpha", label = "Alpha", value=0.75, step=0.05)),
                       column(width=1, numericInput("plot_label_size", label = "LabelSize", value=9)),
                       column(width=1, checkboxInput('plot_label', 'Add label', FALSE)),
-                      column(width=1, checkboxInput('plot_legend', 'Add legend', TRUE))
+                      column(width=1, checkboxInput('plot_legend', 'Add legend', TRUE)),
+                      uiOutput("visualperplexity_UI"),
+                      column(width=6, bsAlert("visualperplexityAlert"))
                     )
                   )
               ),
