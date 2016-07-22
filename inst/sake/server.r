@@ -416,7 +416,7 @@ shinyServer(function(input, output, session) {
           data_path <- "/mnt/sake-uploads"
           output <- file.path(data_path, "yabi.txt")
           write.table(merged, output, sep="\t", quote=F)
-          command <- paste("sh /home/centos/yabi_NMF_email.sh",
+          command <- paste("sh /home/centos/yabish_NMF_email.sh",
                            "-d", output,
                            "-t", nrow(merged),
                            "-k", input$num_cluster,
