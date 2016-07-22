@@ -433,9 +433,13 @@ shinyServer(function(input, output, session) {
           t1 <- try(system(command, intern = TRUE))
           if(t1 == 0){
             Sys.sleep(5)
+            closeAlert(session, "YabiAlert1")
             stopApp(11)
           }else{
-            stop(paste("command creates erros:", command))
+            createAlert(session, "YabiAlert", "YabiAlert2", title = "Error message from running Yabi", style = "Danger",
+                        content = t1,
+                        append = FALSE)
+            # stop(paste("command creates erros:", command))
           }
         }else{
           createAlert(session, "NMFAlert", "NMFAlert1", title = "WARNING", style = "warning",

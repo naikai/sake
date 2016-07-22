@@ -280,7 +280,8 @@ body <- dashboardBody(
                            checkboxInput('nmf_runmoreopt', 'More Options', FALSE)
                     ),
                     uiOutput("dlNMF_UI"),
-                    column(width=6, bsAlert("NMFAlert"))
+                    column(width=6, bsAlert("NMFAlert")),
+                    column(width=6, bsAlert("YabiAlert"))
                   ),
                   fluidRow(
                     conditionalPanel(
