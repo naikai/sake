@@ -430,7 +430,7 @@ shinyServer(function(input, output, session) {
                            "-f", 0,
                            "-q", "FALSE")
           # send email to the user and stop sake
-          t1 <- try(system(command, wait=FALSE))
+          t1 <- try(shell(command, intern = TRUE))
           if(t1 == 0){
             Sys.sleep(5)
             closeAlert(session, "YabiAlert1")
@@ -439,7 +439,8 @@ shinyServer(function(input, output, session) {
             createAlert(session, "YabiAlert", "YabiAlert2", title = "Error message from running Yabi", style = "danger",
                         content = t1,
                         append = FALSE)
-            # stop(paste("command creates erros:", command))
+            Sys.sleep(5)
+            stop(paste("command creates erros:", command))
           }
         }else{
           createAlert(session, "NMFAlert", "NMFAlert1", title = "WARNING", style = "warning",
