@@ -430,7 +430,7 @@ shinyServer(function(input, output, session) {
                            "-f", 0,
                            "-q", "FALSE")
           # send email to the user and stop sake
-          t1 <- try(system(command, intern = TRUE))
+          t1 <- try(system(command, wait=FALSE))
           if(t1 == 0){
             Sys.sleep(5)
             closeAlert(session, "YabiAlert1")
