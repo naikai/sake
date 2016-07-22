@@ -416,7 +416,7 @@ shinyServer(function(input, output, session) {
           data_path <- "/mnt/sake-uploads"
           output <- file.path(data_path, "yabi.txt")
           write.table(merged, output, sep="\t", quote=F)
-          command <- paste("sudo -u centos sh /home/centos/yabish_NMF_email.sh",
+          command <- paste("su - centos -c '/home/centos/yabish_NMF_email.sh",
                            "-d", output,
                            "-t", nrow(merged),
                            "-k", input$num_cluster,
@@ -428,9 +428,9 @@ shinyServer(function(input, output, session) {
                            "-c", 8,
                            "-x", "FALSE",
                            "-f", 0,
-                           "-q", "FALSE")
+                           "-q", "FALSE'")
           # send email to the user and stop sake
-          t1 <- try(shell(command, intern = TRUE))
+          t1 <- try(system(command, intern = TRUE))
           if(t1 == 0){
             Sys.sleep(5)
             closeAlert(session, "YabiAlert1")
