@@ -436,7 +436,7 @@ shinyServer(function(input, output, session) {
             closeAlert(session, "YabiAlert1")
             stopApp(11)
           }else{
-            createAlert(session, "YabiAlert", "YabiAlert2", title = "Error message from running Yabi", style = "Danger",
+            createAlert(session, "YabiAlert", "YabiAlert2", title = "Error message from running Yabi", style = "danger",
                         content = t1,
                         append = FALSE)
             # stop(paste("command creates erros:", command))
@@ -465,6 +465,7 @@ shinyServer(function(input, output, session) {
       })
 
       closeAlert(session, "NMFAlert1")
+      closeAlert(session, "YabiAlert2")
     }
     return(nmfres)
   })
