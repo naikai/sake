@@ -404,22 +404,39 @@ shinyServer(function(input, output, session) {
     if(input$selectfile == "saved"){
       nmfres <- rda()$nmfres
     }else{
-      if(ncol(merged) >= 100){
+      if(ncol(merged) >= 10){
         # Run NMF through YABI
         test_yabi <- try(system("yabish login yabi buffalo! backends"))
         if(test_yabi == 0){
-          createAlert(session, "YabiAlert", "YabiAlert1", title = "Running on Cloud", style = "success",
+          createAlert(session, "YabiAlert", "YabiAlert1", title = "Running NMF on Amazon Cloud", style = "success",
                       content = paste0("Sample size is ", ncol(merged),
                                        ". We are running this job on the cloud and will notify you when the results are ready.<br>"),
                       append = FALSE)
+          # pop up window asking for email
           data_path <- "/mnt/sake-uploads"
           output <- file.path(data_path, "yabi.txt")
           write.table(merged, output, sep="\t", quote=F)
-          command <- paste("sh yabi_submission_email.sh -d", output ,
-                           "-c 8 -t 1000 -m real -n FALSE -k 4 -a brunet -q FALSE")
-          t1 <- try(system(command, intern = TRUE))
+          command <- paste("sh /home/centos/yabi_NMF_email.sh",
+                           "-d", output,
+                           "-t", nrow(merged),
+                           "-k", input$num_cluster,
+                           "-r", input$nrun,
+                           "-m", input$mode,
+                           "-n", "FALSE",
+                           "-a", input$algorithm,
+                           "-s", input$nmf_seed,
+                           "-c", 8,
+                           "-x", "FALSE",
+                           "-f", 0,
+                           "-q", "FALSE")
           # send email to the user and stop sake
-          stop(t1)
+          t1 <- try(system(command, intern = TRUE))
+          if(t1 == 0){
+            Sys.sleep(5)
+            stopApp(11)
+          }else{
+            stop(paste("command creates erros:", command))
+          }
         }else{
           createAlert(session, "NMFAlert", "NMFAlert1", title = "WARNING", style = "warning",
                       content = paste0("Sample size is ", ncol(merged), ". This might take long to run. <br>"),
