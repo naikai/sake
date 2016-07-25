@@ -41,7 +41,7 @@ sidebar <- dashboardSidebar(
                               selectInput("VisType",
                                           label = "What kind of plot?",
                                           choices = c("Heatmap", "PCA", "t-SNE"),
-                                          selected = "Heatmap")
+                                          selected = "PCA")
              ),
     menuItem("Differential analysis", tabName="DE", icon = icon('tasks', lib="glyphicon"),
              menuSubItem("DESeq2", tabName="DESeq2")
@@ -205,7 +205,7 @@ body <- dashboardBody(
                                                   selected = "mad")),
                       column(width=4, sliderInput("top.num",
                                                   label = "How many genes to select", ticks = FALSE,
-                                                  min=20, max=5000, value=500, step = 20)
+                                                  min=20, max=5000, value=1500, step = 20)
                       )
                     ),
                     conditionalPanel(
@@ -447,7 +447,7 @@ body <- dashboardBody(
                         column(width=3,
                                numericInput("select_FScutoff",
                                             label = "FeatureScore cutoff",
-                                            min=0.5, max=1, value=0.85, step = 0.01)
+                                            min=0.5, max=1, value=0.86, step = 0.01)
                         )
                     )
                   ),
@@ -493,7 +493,7 @@ body <- dashboardBody(
                       column(width=2, selectInput("heat.top.num",
                                                   label = "How many top genes:",
                                                   choices = c(seq(10,100,10), seq(200, 1000, 100), seq(2000, 15000, 1000)),
-                                                  selected = 100)
+                                                  selected = 1500)
                       )
                     ),
                     conditionalPanel(

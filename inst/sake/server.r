@@ -404,7 +404,7 @@ shinyServer(function(input, output, session) {
     if(input$selectfile == "saved"){
       nmfres <- rda()$nmfres
     }else{
-      if(ncol(merged) >= 10){
+      if(ncol(merged) >= 200){
         # Run NMF through YABI
         test_yabi <- try(system("yabish login yabi buffalo! backends"))
         if(test_yabi == 0){
