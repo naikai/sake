@@ -785,7 +785,7 @@ shinyServer(function(input, output, session) {
       gene <- nmf_features_annot()[input$nmfFeatures_rows_selected, "GeneCard"] %>%
               gsub(".*'>(.*)</a>", "\\1", .)
       gene.data <- transform_data()[gene, ]
-      gene.data <- data.frame(Sample = colnames(gene.data),
+      gene.data <- data.frame(Sample = names(gene.data),
                               Expr = as.numeric(gene.data),
                               NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
       gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
