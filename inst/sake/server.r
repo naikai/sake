@@ -430,8 +430,10 @@ shinyServer(function(input, output, session) {
                            "-f", 0,
                            "-q", "FALSE'")
           # send email to the user and stop sake
-          t1 <- isolate(try(system(command, intern = TRUE)))
-          # t1 <- try(system(command, wait = FALSE))
+          # t1 <- isolate(try(system(command, intern = TRUE)))
+          print("Sending command to yabi")
+          t1 <- try(system(command, wait = FALSE))
+          print(paste0("Command sent:", command))
           if(t1 == 0){
             Sys.sleep(5)
             closeAlert(session, "YabiAlert1")
