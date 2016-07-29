@@ -282,6 +282,11 @@ body <- dashboardBody(
                     uiOutput("dlNMF_UI"),
                     column(width=6, bsAlert("NMFAlert")),
                     column(width=6, bsAlert("YabiAlert"))
+                    # bsModal("nmfModal1", "Warning!\nYour gene size is above 1000, it will take longer than usual.\nAre you sure you want to continue?",
+                    #         trigger = "", size = "small",
+                    #         actionButton("nmf_yabi_yes", 'Yes'),
+                    #         actionButton("nmf_yabi_no", 'No')
+                    # )
                   ),
                   fluidRow(
                     conditionalPanel(

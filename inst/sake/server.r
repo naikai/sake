@@ -405,16 +405,20 @@ shinyServer(function(input, output, session) {
       nmfres <- rda()$nmfres
     }else{
       if(ncol(merged) >= 200){
+        toggleModal(session, "nmfModal1", toggle = "open")
+
         # Run NMF through YABI
         test_yabi <- try(system("yabish login yabi buffalo! backends"))
+        # test_yabi <- try(system("ls"))
         if(test_yabi == 0){
           createAlert(session, "YabiAlert", "YabiAlert1", title = "Running NMF on Amazon Cloud", style = "success",
                       content = paste0("Sample size is ", ncol(merged),
                                        ". We are running this job on the cloud and will notify you when the results are ready.<br>"),
                       append = FALSE)
           # pop up window asking for email
-          data_path <- "/mnt/sake-uploads"
-          output <- file.path(data_path, "yabi.txt")
+          # data_path <- "/mnt/sake-uploads"
+          data_path <- "~/Desktop/sake-uploads"
+          output <- file.path(data_path, file_prefix())
           write.table(merged, output, sep="\t", quote=F)
           command <- paste("su - centos -c '/home/centos/yabish_NMF_email.sh",
                            "-d", output,
@@ -454,6 +458,7 @@ shinyServer(function(input, output, session) {
                       append = FALSE)
         }
       }
+      Sys.sleep(20)
 
       # Run NMF on local server
       ptm <- proc.time()
@@ -670,7 +675,8 @@ shinyServer(function(input, output, session) {
   })
 
   nmfplottsne <- reactive({
-    nsamples <- ncol(heatmap_data()[['heatmap_data']])
+    heatmap_data <- heatmap_data()[['heatmap_data']]
+    nsamples <- ncol(heatmap_data)
     validate(
       need(input$mode=="real", "This part won't work for 'estim' module\nPlease Try NMF 'Real' run") %then%
       need(!is.null(tsne_2d$data), "Please hit 'Run t-SNE' button")
@@ -678,7 +684,10 @@ shinyServer(function(input, output, session) {
     color <- NULL
     # Will add an option to select by default column names from samples
     if(length(nmf_groups()$nmf_subtypes)>0){
-      color <- nmf_groups()$nmf_subtypes
+      idx <- match(colnames(heatmap_data), nmf_groups()$Sample_ID)
+      nmf_subtypes <- nmf_groups()$nmf_subtypes[idx]
+      # color <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai")
+      color <- nmf_subtypes
     }else if(length(ColSideColors()[['name']][,1])>0){
       color <- ColSideColors()[['name']][,1]
     }else{
@@ -1181,23 +1190,32 @@ shinyServer(function(input, output, session) {
 
   point_col <- reactive({
     col <- toRGB("steelblue")
+    heatmap_data <- heatmap_data()[['heatmap_data']]
     group <- NULL
     if(input$pt_col == "Default"){
       group <- "Default"
     }else if(input$pt_col == "NMF Group"){
-      nmf_subtypes <- nmf_groups()$nmf_subtypes
+      req(nmf_groups)
+      idx <- match(colnames(heatmap_data), nmf_groups()$Sample_ID)
+      nmf_subtypes <- nmf_groups()$nmf_subtypes[idx]
       col <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai")
       group <- paste0("NMF", nmf_subtypes)
     }else if(input$pt_col == "NMF Feature"){
       req(input$pt_nmfgene)
-      col <- create.brewer.color(as.numeric(transform_data()[input$pt_nmfgene, ]), num = 9, name="YlOrRd")
+      idx <- match(colnames(heatmap_data), colnames(transform_data()))
+      gene_data <- transform_data()[input$pt_nmfgene, idx] %>% as.numeric
+      col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
       group <- input$pt_nmfgene
     }else if(input$pt_col == "Filename"){
-      col <- ColSideColors()[["color"]][, 1]
-      group <- ColSideColors()[['name']]
+      col <- create.brewer.color(colnames(heatmap_data), length(unique(colnames(heatmap_data))), "naikai") %>% as.matrix
+      group <- heatmap_data %>% colnames %>% unique %>% as.matrix
+      # col <- ColSideColors()[["color"]][, 1]
+      # group <- ColSideColors()[['name']]
     }else if(input$pt_col == "GeneExpr"){
       req(input$pt_allgene)
-      col <- create.brewer.color(as.numeric(transform_data()[input$pt_allgene, ]), num = 9, name="YlOrRd")
+      idx <- match(colnames(heatmap_data), colnames(transform_data()))
+      gene_data <- transform_data()[input$pt_allgene, idx] %>% as.numeric
+      col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
       group <- input$pt_allgene
     }else{
       warning("Wrong point color assigning method!")
@@ -1269,22 +1287,21 @@ shinyServer(function(input, output, session) {
                   content = paste("Perpleixty", input$tsne_perplexity,
                                   "is too large compared to num of samples", nsamples),
                   append = FALSE)
+    }else {
+      closeAlert(session, "visualperplexityAlert1")
+
+      heatmap_data <- heatmap_data()[['heatmap_data']]
+      withProgress(message = 'Running t-SNE', value = NULL, {
+        incProgress(1/3, detail = "For t-SNE 2D")
+        tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
+                                 perplexity=input$tsne_perplexity, cores=cores())
+        incProgress(2/3, detail = "For t-SNE 3D")
+        tsne_3d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=3,
+                                 perplexity=input$tsne_perplexity, cores=cores())
+      })
     }
-
-    else {
-  closeAlert(session, "visualperplexityAlert1")
-
-    heatmap_data <- heatmap_data()[['heatmap_data']]
-    withProgress(message = 'Running t-SNE', value = NULL, {
-      incProgress(1/3, detail = "For t-SNE 2D")
-      tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
-                               perplexity=input$tsne_perplexity, cores=cores())
-      incProgress(2/3, detail = "For t-SNE 3D")
-      tsne_3d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=3,
-                               perplexity=input$tsne_perplexity, cores=cores())
-    })
-}
   })
+
   plot_tsne_2d <- reactive({
     nsamples <- ncol(heatmap_data()[['heatmap_data']])
     validate(
