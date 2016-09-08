@@ -213,7 +213,7 @@ shinyServer(function(input, output, session) {
                                  order=list(list(2,'desc'))
                   )
     ) %>% formatRound(1:ncol(transform_data), 2)
-  }, server=FALSE)
+  }, server=TRUE)
 
   output$readDistrib = renderPlotly({
     total <- colSums(transform_data())
@@ -458,7 +458,6 @@ shinyServer(function(input, output, session) {
                       append = FALSE)
         }
       }
-      Sys.sleep(20)
 
       # Run NMF on local server
       ptm <- proc.time()
@@ -656,21 +655,21 @@ shinyServer(function(input, output, session) {
                        content = paste("Perpleixty", input$nmftsne_perplexity,
                                        "is too large compared to num of samples", nsamples),
                        append = FALSE)
-    }
-    else{
+    }else{
       closeAlert(session, "perplexityAlert1")
 
-
-    withProgress(message = 'Running t-SNE', value = NULL, {
-      incProgress(1/3, detail = "For t-SNE 2D")
-      try(
-      tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
-                               perplexity=input$nmftsne_perplexity, cores=cores())
-      )
-      incProgress(2/3, detail = "For t-SNE 3D")
-      tsne_3d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=3,
-                               perplexity=input$nmftsne_perplexity, cores=cores())
-    })
+      withProgress(message = 'Running t-SNE', value = NULL, {
+        incProgress(1/3, detail = "For t-SNE 2D")
+        try(
+          tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
+                                   perplexity=input$nmftsne_perplexity, cores=cores())
+        )
+        incProgress(2/3, detail = "For t-SNE 3D")
+        try(
+          tsne_3d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=3,
+                                   perplexity=input$nmftsne_perplexity, cores=cores())
+        )
+      })
     }
   })
 
@@ -972,18 +971,16 @@ shinyServer(function(input, output, session) {
         need(input$sortcolumn_num <= length(column.names[[1]]), "Group num is too big, select a smaller number!")
       )
       idx <- order(sapply(column.names, function(x) x[[input$sortcolumn_num]]))
-      heatmap_data <- heatmap_data[, idx]
     }else if(input$OrdCol == 'GeneExpr'){ # Add options to sort by expression value of specific gene
       validate(
         need(input$sortgene_by!="", "Please select a gene!")
       )
       idx <- order(subset(heatmap_data, rownames(heatmap_data)==input$sortgene_by))
-      heatmap_data <- heatmap_data[, idx]
     }
     else if(input$OrdCol == 'NMF Group') { # Add options to sort by nmf groups
       idx <- nmf_groups()$nmf_subtypes %>% order
-      heatmap_data <- heatmap_data[, idx]
     }
+    heatmap_data <- heatmap_data[, idx]
 
     res <- list()
     res[["heatmap_data"]] <- heatmap_data
@@ -1067,6 +1064,18 @@ shinyServer(function(input, output, session) {
     return(Rowv)
   })
 
+  dendrogram <- reactive({
+    if(is.null(Rowv()) & is.null(Colv())){
+      return("none")
+    }else if(is.null(Rowv()) & !is.null(Colv())){
+      return("column")
+    }else if(!is.null(Rowv()) & is.null(Colv())){
+      return("row")
+    }else if(!is.null(Rowv()) & !is.null(Colv())){
+      return("both")
+    }
+  })
+
   ### Observe and update input selection ###
   observe({
     transform_data <- transform_data()
@@ -1112,7 +1121,7 @@ shinyServer(function(input, output, session) {
       cexRow=input$cexCol,
       na.rm = T,
       show_grid = FALSE,
-      dendrogram = "both",
+      dendrogram = dendrogram(),
       dendro.ord = "manual",
       anim_duration = 0
     )
@@ -1139,7 +1148,7 @@ shinyServer(function(input, output, session) {
                 scale.method=input$scale_method,
                 scale.first=input$scale_first,
                 dendro.ord="manual",
-                dendrogram="both",
+                dendrogram=dendrogram(),
                 cexCol=input$cexCol,
                 cexRow=input$cexRow,
                 col.legend = input$col_legend,
