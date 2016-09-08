@@ -76,7 +76,7 @@ body <- dashboardBody(
                                            choices = list("Select from preloaded data"='preload',
                                                           "Upload rawdata"='upload',
                                                           "Upload saved NMF run"='saved'),
-                                           selected = "upload"),
+                                           selected = "preload"),
                                conditionalPanel(
                                  condition = "input.selectfile == 'upload'",
                                  fileInput('file1', 'Choose text File',
@@ -148,34 +148,43 @@ body <- dashboardBody(
             fluidRow(
               box(title="Datatable", width=12, solidHeader=TRUE, status="success",
                   fluidRow(
-                    column(width=6,
+                    column(width=3,
                            selectInput("normdata", label = "Normalization",
                                        choices = list("RPM normalization" = "takeRPM",
                                                       "DESeq size factor normalization" = "takesizeNorm",
                                                       "None" = "none"),
                                        selected = "none")
                     ),
-                    column(width=6,
+                    column(width=3,
                            selectInput("transformdata", label = "Transformation",
-                                       choices = list("Variance Stablizing Transformation (VST)" = "takevst",
+                                       choices = list("Variance Stablizing Transformation" = "takevst",
                                                       "Log transformation" = "takelog",
                                                       "None" = "none"),
                                        selected = "none")
-                    )
-                  ),
-                  fluidRow(
-                    box(width=12,
-                        DT::dataTableOutput('transdatatbl')
-                    )
-                  ),
-                  fluidRow(
-                    box(title="Read Distribution", width=6, solidHeader=TRUE, status="info",
-                        plotlyOutput("readDistrib")
                     ),
-                    box(title="Gene Coverage", width=6, solidHeader=TRUE, status="info",
-                        plotlyOutput("geneCoverage")
+                    column(width=2, br(),
+                           actionButton("run_transf", "Run Transform", icon("play-circle"), class = 'act')
+                    ),
+                    column(width=2, br(),
+                           downloadButton("dl_transformdata", "Download Data", class="dwnld")
                     )
                   )
+              )
+            ),
+            fluidRow(
+              column(width=6,
+                     box(title="Read Distribution", width=NULL, solidHeader=TRUE, status="info", height="570px",
+                         plotlyOutput("readDistrib")
+                     )
+              ),
+              column(width=6,
+                box(title="Samples", width=NULL, solidHeader=TRUE, status="info", height="350px",
+                    DT::dataTableOutput("selsamp_tb")
+                ),
+                box(title="Filter", width=NULL, solidHeader=TRUE, status="info", height="200px",
+                    verbatimTextOutput("selsamp_txt"),
+                    actionButton("run_filtsamp", "Submit", icon("play-circle"), class = 'act')
+                )
               )
             )
     ),

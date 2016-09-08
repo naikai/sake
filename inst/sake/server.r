@@ -165,8 +165,14 @@ shinyServer(function(input, output, session) {
     )
   })
 
-  transform_data <- reactive({
-    rawdata <- rawdata()
+  # transform_data <- reactiveValues(data=NULL, rawdata=NULL)
+  # transform_data <- reactiveValues(data=data.frame(a=1:5, b=1:5),
+  #                                  rawdata=data.frame(a=1:5, b=1:5))
+  transform_data <- reactiveValues(data=data.frame(a=NULL, b=NULL),
+                                   rawdata=data.frame(a=NULL, b=NULL))
+  run_selsamp <- reactiveValues(go=FALSE)
+
+  run_trans <- function(rawdata){
     transdata <- rmv_constant_0(rawdata, pct=0.9, minimum=0)
 
     n <- 2
@@ -190,44 +196,107 @@ shinyServer(function(input, output, session) {
       }
     })
     return(transdata)
+  }
+
+  observeEvent(rawdata(), {
+    transdata <- run_trans(rawdata())
+    transform_data$data <- transdata
+    transform_data$rawdata <- rawdata()
+  })
+  observeEvent(input$run_transf, {
+    transdata <- run_trans(rawdata())
+    transform_data$data <- transdata
+    transform_data$rawdata <- rawdata()
   })
 
-  output$transdatatbl = DT::renderDataTable({
-    transform_data <- transform_data()
-    filename <- fileinfo()[['name']]
-    DT::datatable(transform_data, rownames= TRUE,
-                  extensions = 'Buttons',
-                  options = list(dom = 'Bfrtip',
-                                 buttons =
-                                   list('colvis', 'copy', 'print', list(
-                                     extend = 'collection',
-                                     buttons = list(list(extend='csv',
-                                                         filename = filename),
-                                                    list(extend='excel',
-                                                         filename = filename)),
-                                     text = 'Download'
-                                   )),
-                                 scrollX = TRUE,
+  output$dl_transformdata <- downloadHandler(
+    filename <- function() {
+      paste(file_prefix(), "filtered.txt", sep=".")
+    },
+    content = function(file) {
+      write.table(transform_data$data, file = file, quote=F, row.names=F, sep="\t")
+      dev.off()
+    }
+  )
+
+  output$readDistrib <- renderPlotly({
+    validate(
+      need(dim(transform_data$data)[1] > 1, "Did you upload your file or select preloaded data yet?")
+    )
+    total <- colSums(transform_data$data)
+    genecov <- colSums(transform_data$rawdata > 0)
+    run_selsamp$go <- TRUE
+    textlab <- paste(names(total),
+                     paste("Total:", signif(total/1000000,3), "Million"),
+                     paste("Gene Cov:", genecov),
+                     sep="<br>")
+    plot_ly(x=genecov, y=total, text=textlab, source="readdist", #type="scattergl",
+            mode="markers", hoverinfo="text",
+            themes="Catherine", marker = list(size=10, opacity=0.65)) %>%
+            layout(yaxis = list(title = "Total transcripts counts", zeroline=TRUE),
+                   xaxis = list(title = "Gene Coverage", zeroline=TRUE),
+                   dragmode = "select",
+                   showlegend=FALSE)
+  })
+
+  sel_samp <- reactive({
+    # Get subset based on selection
+    event.data <- event_data("plotly_selected", source="readdist")
+
+    # If NULL dont do anything
+    if(is.null(event.data) == T) return(NULL)
+    if(length(event.data$curveNumber) == 0) return(NULL)
+
+    # Get selected samples
+    sel_idx <- subset(event.data, curveNumber == 0)$pointNumber + 1
+    non_sel_idx <- subset(event.data, curveNumber == 0)$pointNumber + 1
+    if(max(sel_idx) > ncol(transform_data$data)) return(NULL)
+
+    res <- data.frame("Total_Reads"=colSums(transform_data$data)[sel_idx],
+                      "Gene_Coverage"=colSums(transform_data$rawdata>0)[sel_idx])
+    return(res)
+  })
+
+  output$selsamp_tb <- DT::renderDataTable({
+    DT::datatable(sel_samp(),
+                  rownames= TRUE,
+                  options = list(scrollX = TRUE,
                                  scrollY = TRUE,
-                                 pageLength = 8,
-                                 order=list(list(2,'desc'))
+                                 dom = 'tipr',
+                                 pageLength = 5
                   )
-    ) %>% formatRound(1:ncol(transform_data), 2)
+    )
   }, server=TRUE)
 
-  output$readDistrib = renderPlotly({
-    total <- colSums(transform_data())
-    samples <- names(total)
-    plot_ly(x=samples, y=total, type = "bar", marker = list(color = toRGB("gray65")))
+  output$selsamp_txt <- renderPrint({
+    cat("Selected samples\n\n")
+    idx <- input$selsamp_tb_rows_selected
+    if(length(idx) > 0){
+      cat(paste(rownames(sel_samp())[idx], sep = ', '))
+    }else{
+      cat(NULL)
+    }
   })
-  output$geneCoverage = renderPlotly({
-    genecnt <- apply(transform_data(), 2, function(x) sum(x>0))
-    samples <- names(genecnt)
-    plot_ly(x=samples, y=genecnt, type = "bar", marker = list(color = toRGB("gray65")))
+
+  ### Filter selected samples from user
+  observeEvent(input$run_filtsamp, {
+    idx <- input$selsamp_tb_rows_selected
+    filtsamp <- rownames(sel_samp())[idx]
+    if(!is.null(filtsamp)){
+      idx <- match(filtsamp, colnames(transform_data$data))
+      if(length(idx) > 0){
+        temp <- transform_data$data[, -idx]
+        transform_data$data <- temp
+        temp <- transform_data$rawdata[, -idx]
+        transform_data$rawdata <- temp
+      }else{
+        warning("Can not find selected sample names in transform_data")
+      }
+    }
   })
 
   merged <- reactive({
-    rawdata <- transform_data()
+    rawdata <- transform_data$data
     genelist <- NULL
 
     if(!is.null(input$selected_samples) && sum(input$selected_samples %in% colnames(rawdata))==length(input$selected_samples)){
@@ -285,13 +354,12 @@ shinyServer(function(input, output, session) {
 
 
   callModule(feature, "sample", reactive({ merged() }))
-  # callModule(feature, "gene", reactive({ t(merged()) }))
   callModule(network, "gene", reactive({ merged() }))
 
 
   #' Scatter plot
-  observeEvent(transform_data(), {
-    transform_data <- transform_data()
+  observeEvent(transform_data$data, {
+    transform_data <- transform_data$data
     updateSelectizeInput(session, 'cor_sample1',
                          server = TRUE,
                          choices = sort(as.character(colnames(transform_data))),
@@ -304,7 +372,7 @@ shinyServer(function(input, output, session) {
     )
   })
   scatterData <- reactive({
-    transform_data <- transform_data()
+    transform_data <- transform_data$data
     validate(
       need(input$cor_sample1 != "", "Please select one sample for X axis"),
       need(input$cor_sample2 != "", "Please select one sample for Y axis")
@@ -323,7 +391,7 @@ shinyServer(function(input, output, session) {
     return(res)
   })
   output$scatterPlot <- renderPlotly({
-    transform_data <- transform_data()
+    transform_data <- transform_data$data
     x <- scatterData()$x
     y <- scatterData()$y
     reg = lm(y ~ x)
@@ -370,7 +438,7 @@ shinyServer(function(input, output, session) {
       logFC = log2((x+esp)/(y+esp))
     }
     GeneCard <- paste0("<a href='http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
-                              rownames(transform_data()), "'>", rownames(transform_data()), "</a>")
+                              rownames(transform_data$data), "'>", rownames(transform_data$data), "</a>")
     scatter_data <- data.frame(Gene=GeneCard,
                                X = x,
                                Y = y,
@@ -798,7 +866,7 @@ shinyServer(function(input, output, session) {
     withProgress(message = 'Generating boxplot', value = NULL, {
       gene <- nmf_features_annot()[input$nmfFeatures_rows_selected, "GeneCard"] %>%
               gsub(".*'>(.*)</a>", "\\1", .)
-      gene.data <- transform_data()[gene, ]
+      gene.data <- transform_data$data[gene, ]
       gene.data <- data.frame(Sample = names(gene.data),
                               Expr = as.numeric(gene.data),
                               NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
@@ -842,7 +910,7 @@ shinyServer(function(input, output, session) {
 
   #' Heatmap setting
   geneListInfo <- reactive({
-    rawdata <- transform_data()
+    rawdata <- transform_data$data
     gene.list <- NULL
     gene.groups <- NULL
 
@@ -957,7 +1025,7 @@ shinyServer(function(input, output, session) {
   })
 
   heatmap_data <- reactive({
-    rawdata <- transform_data()
+    rawdata <- transform_data$data
     genelist <- geneListInfo()[['list']]
     gene.groups <- geneListInfo()[['group']]
 
@@ -1080,7 +1148,7 @@ shinyServer(function(input, output, session) {
 
   ### Observe and update input selection ###
   observe({
-    transform_data <- transform_data()
+    transform_data <- transform_data$data
     if(!is.null(transform_data)){
       if (length(rownames(transform_data)) > 1){
         # update the render function for selectize - update manual if user choose to select its own markers
@@ -1182,8 +1250,8 @@ shinyServer(function(input, output, session) {
     )
     updateSelectizeInput(session, 'pt_allgene',
                          server = TRUE,
-                         choices = as.character(rownames(transform_data())),
-                         selected = as.character(rownames(transform_data())[1])
+                         choices = as.character(rownames(transform_data$data)),
+                         selected = as.character(rownames(transform_data$data)[1])
     )
   })
   observeEvent(input$runNMF,{
@@ -1213,8 +1281,8 @@ shinyServer(function(input, output, session) {
       group <- paste0("NMF", nmf_subtypes)
     }else if(input$pt_col == "NMF Feature"){
       req(input$pt_nmfgene)
-      idx <- match(colnames(heatmap_data), colnames(transform_data()))
-      gene_data <- transform_data()[input$pt_nmfgene, idx] %>% as.numeric
+      idx <- match(colnames(heatmap_data), colnames(transform_data$data))
+      gene_data <- transform_data$data[input$pt_nmfgene, idx] %>% as.numeric
       col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
       group <- input$pt_nmfgene
     }else if(input$pt_col == "Filename"){
@@ -1224,8 +1292,8 @@ shinyServer(function(input, output, session) {
       # group <- ColSideColors()[['name']]
     }else if(input$pt_col == "GeneExpr"){
       req(input$pt_allgene)
-      idx <- match(colnames(heatmap_data), colnames(transform_data()))
-      gene_data <- transform_data()[input$pt_allgene, idx] %>% as.numeric
+      idx <- match(colnames(heatmap_data), colnames(transform_data$data))
+      gene_data <- transform_data$data[input$pt_allgene, idx] %>% as.numeric
       col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
       group <- input$pt_allgene
     }else{
@@ -1488,7 +1556,7 @@ shinyServer(function(input, output, session) {
     validate(
       need(is.numeric(input$num_cluster), "num of cluster is not a numeric value")
     )
-    rawdata <- transform_data()
+    rawdata <- transform_data$data
     rawdata <- rawdata[rowMeans(rawdata) >= input$min_rowMean, ]
     nmf_group <- nmf_groups()$nmf_subtypes
     num_nmf_subtypes <- nmf_group %>% unique %>% length
