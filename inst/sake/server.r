@@ -979,6 +979,8 @@ shinyServer(function(input, output, session) {
     }
     else if(input$OrdCol == 'NMF Group') { # Add options to sort by nmf groups
       idx <- nmf_groups()$nmf_subtypes %>% order
+    }else{
+      idx <- colnames(heatmap_data)
     }
     heatmap_data <- heatmap_data[, idx]
 
