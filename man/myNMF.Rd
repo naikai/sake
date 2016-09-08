@@ -5,7 +5,8 @@
 \title{Function to run NMF with different options}
 \usage{
 myNMF(data, prefix = "NMF", cluster = 3, top = 1500, nrun = 100,
-  norm = F, algorithm = "brunet", mode = "real", seed = 123211)
+  norm = F, ncores = 8, algorithm = "brunet", mode = "real",
+  seed = 123211)
 }
 \arguments{
 \item{data}{Input data sets}

@@ -535,6 +535,7 @@ shinyServer(function(input, output, session) {
                         mode=input$mode,
                         cluster=input$num_cluster,
                         nrun=input$nrun,
+                        ncores = cores(),
                         algorithm = input$algorithm,
                         seed = nmf_seed()
         )
@@ -1352,9 +1353,14 @@ shinyServer(function(input, output, session) {
 
   #' t-SNE plot
   cores <- reactive({
-    cpus <- c(16,8,6,4,2,1)
-    # cpus[min(which(sapply(cpus, function(x) input$nPerm%%x)==0))]
-    return(8)
+    avail_cores <- parallel::detectCores()
+    if(avail_cores==1){
+      return(1)
+    }else if(input$ncores <= avail_cores){
+      return(as.numeric(input$ncores))
+    }else{
+      return(avail_cores)
+    }
   })
   tsne_2d <- reactiveValues(data=NULL)
   tsne_3d <- reactiveValues(data=NULL)
@@ -1473,8 +1479,7 @@ shinyServer(function(input, output, session) {
       closeAlert(session, "exampleAlert")
     }
 
-    cores <- parallel::detectCores()
-    register(BiocParallel::MulticoreParam(workers = cores))
+    register(BiocParallel::MulticoreParam(workers = cores()))
     colData <- data.frame(Group = paste0("NMF", nmf_groups()$nmf_subtypes))
     ddsfeatureCounts <- DESeq2::DESeqDataSetFromMatrix(countData = rawdata,
                                                        colData = colData,

@@ -116,13 +116,10 @@ body <- dashboardBody(
                                                     '.RData'))
                                )
                       ),
-                      tabPanel("Simple stats",
-                               checkboxInput('chooseSamples', 'Manually select samples?', FALSE),
-                               conditionalPanel(
-                                 condition = "input.chooseSamples == true",
-                                 checkboxGroupInput('selected_samples', 'Samples in your data to show:',
-                                                    choices = NULL, selected = NULL)
-                               )
+                      tabPanel("System setup",
+                               selectInput("ncores", label = "Specify number of cores to run analysis",
+                                           choices = c(1,2,4,8,16),
+                                           selected = 4)
                       )
               ),
               column(width = 7,
@@ -150,7 +147,7 @@ body <- dashboardBody(
                   fluidRow(
                     column(width=3,
                            selectInput("normdata", label = "Normalization",
-                                       choices = list("RPM normalization" = "takeRPM",
+                                         choices = list("RPM normalization" = "takeRPM",
                                                       "DESeq size factor normalization" = "takesizeNorm",
                                                       "None" = "none"),
                                        selected = "none")

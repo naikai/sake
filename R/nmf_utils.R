@@ -23,19 +23,20 @@
 #' @export
 #' @examples
 #' myNMF(data, mode="estim", cluster=3, nrun=20)
-myNMF <- function(data, prefix="NMF", cluster=3, top=1500, nrun=100, norm=F, algorithm="brunet", mode="real", seed=123211){
+myNMF <- function(data, prefix="NMF", cluster=3, top=1500, nrun=100, norm=F, ncores=8, algorithm="brunet", mode="real", seed=123211){
+
    if(mode=="estim"){
       r <- 2:cluster
-      estim.r <- nmf(data, r, algorithm, .opt="vp24", nrun=nrun, seed=seed, maxIter=5000)
+      estim.r <- nmf(data, r, algorithm, .opt=paste0("vp", ncores), nrun=nrun, seed=seed, maxIter=5000)
       res <- estim.r
    }else if(mode=="compare"){
-      res.multi.method <- nmf(data, cluster, list("brunet", "lee", "ns"), nrun=nrun, .opt="vtp24", seed=seed)
+      res.multi.method <- nmf(data, cluster, list("brunet", "lee", "ns"), nrun=nrun, .opt=paste0("vtp", ncores), seed=seed)
       # compare(res.multi.method)
       # print(compare(res.multi.method))
       res <- res.multi.method
    }else if(mode=="real"){
       # option 't' will toggle error track function
-      res <- nmf(data, cluster, algorithm, .opt="vtp24", nrun=nrun, seed=seed, maxIter=5000)
+      res <- nmf(data, cluster, algorithm, .opt=paste0("vtp", ncores), nrun=nrun, seed=seed, maxIter=5000)
    }
 
    return(res)
