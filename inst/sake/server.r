@@ -486,7 +486,7 @@ shinyServer(function(input, output, session) {
           # pop up window asking for email
           data_path <- "/mnt/sake-uploads"
           # data_path <- "~/Desktop/sake-uploads"
-          output <- file.path(data_path, file_prefix())
+          output <- file.path(data_path, paste0(file_prefix(), ".txt"))
           write.table(merged, output, sep="\t", quote=F)
           command <- paste("su - centos -c '/home/centos/yabish_NMF_email.sh",
                            "-d", output,
