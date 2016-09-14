@@ -472,7 +472,7 @@ shinyServer(function(input, output, session) {
     if(input$selectfile == "saved"){
       nmfres <- rda()$nmfres
     }else{
-      if(ncol(merged) >= 200){
+      if(ncol(merged) >= 300){
         toggleModal(session, "nmfModal1", toggle = "open")
 
         # Run NMF through YABI
@@ -484,8 +484,8 @@ shinyServer(function(input, output, session) {
                                        ". We are running this job on the cloud and will notify you when the results are ready.<br>"),
                       append = FALSE)
           # pop up window asking for email
-          # data_path <- "/mnt/sake-uploads"
-          data_path <- "~/Desktop/sake-uploads"
+          data_path <- "/mnt/sake-uploads"
+          # data_path <- "~/Desktop/sake-uploads"
           output <- file.path(data_path, file_prefix())
           write.table(merged, output, sep="\t", quote=F)
           command <- paste("su - centos -c '/home/centos/yabish_NMF_email.sh",
@@ -708,7 +708,8 @@ shinyServer(function(input, output, session) {
     }
     DT::datatable(nmf_groups, rownames=FALSE, escape=-1,
                   selection = list(selected = sel_idx),
-                  options = list(scrollX = TRUE,
+                  options = list(dom = 'rtip',
+                                 scrollX = TRUE,
                                  pageLength = 8,
                                  order=list(list(1,'asc'))
                   )
