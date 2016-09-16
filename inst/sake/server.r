@@ -1250,12 +1250,24 @@ shinyServer(function(input, output, session) {
                          choices = as.character(plot_colopts()),
                          selected = "Filename"
     )
+    # updateSelectizeInput(session, 'pt_allgene',
+    #                      server = TRUE,
+    #                      # choices = as.character(rownames(transform_data$data)),
+    #                      # selected = as.character(rownames(transform_data$data)[1])
+    #                      choices = as.character(rownames(heatmap_data$data)),
+    #                      selected = as.character(rownames(transform_data$data)[1])
+    # )
+  })
+
+  observeEvent(transform_data$data, {
     updateSelectizeInput(session, 'pt_allgene',
                          server = TRUE,
                          choices = as.character(rownames(transform_data$data)),
                          selected = as.character(rownames(transform_data$data)[1])
     )
+
   })
+
   observeEvent(input$runNMF,{
     updateSelectizeInput(session, 'pt_col',
                          server = TRUE,
@@ -1288,10 +1300,10 @@ shinyServer(function(input, output, session) {
       col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
       group <- input$pt_nmfgene
     }else if(input$pt_col == "Filename"){
-      col <- create.brewer.color(colnames(heatmap_data), length(unique(colnames(heatmap_data))), "naikai") %>% as.matrix
-      group <- heatmap_data %>% colnames %>% unique %>% as.matrix
-      # col <- ColSideColors()[["color"]][, 1]
-      # group <- ColSideColors()[['name']]
+      filename <- colnames(heatmap_data)
+      filename <- sapply(strsplit(filename, "_"), function(x) paste0(x[c(1)], collapse = "_"))
+      col <- create.brewer.color(filename, length(unique(filename)), "naikai") %>% as.matrix
+      group <- filename %>% as.matrix
     }else if(input$pt_col == "GeneExpr"){
       req(input$pt_allgene)
       idx <- match(colnames(heatmap_data), colnames(transform_data$data))
@@ -1357,7 +1369,7 @@ shinyServer(function(input, output, session) {
     avail_cores <- parallel::detectCores()
     if(avail_cores==1){
       return(1)
-    }else if(input$ncores <= avail_cores){
+    }else if(as.numeric(input$ncores) <= avail_cores){
       return(as.numeric(input$ncores))
     }else{
       return(avail_cores)
@@ -1401,7 +1413,7 @@ shinyServer(function(input, output, session) {
       projection <- parse_tsne_res(tsne_out)
       projection$color <- color
       min.cost <- signif(tsne_out$itercosts[length(tsne_out$itercosts)], 2)
-      title <- paste("min.cost=", min.cost)
+      # title <- paste("min.cost=", min.cost)
       colors <- create.brewer.color(projection$color, length(unique(color)), "naikai")
 
       if(input$plot_label){

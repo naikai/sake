@@ -91,7 +91,8 @@ plot_tsne <- function(tsne_out, color=NULL, alpha=1, title="tSNE", brewer="naika
 	data$color <- color
 	filename <- title
 	min.cost <- signif(tsne_out$itercosts[length(tsne_out$itercosts)], digits=2)
-	title <- paste(title, "\nmin.cost=", min.cost)
+	# title <- paste(title, "\nmin.cost=", min.cost)
+   title <- paste(title)
 	# add manual color scheme
 	colors <- create.brewer.color(data$color, length(unique(color)), brewer)
 	# add plot centroid function

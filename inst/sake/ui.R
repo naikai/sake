@@ -171,7 +171,7 @@ body <- dashboardBody(
             fluidRow(
               column(width=6,
                      box(title="Read Distribution", width=NULL, solidHeader=TRUE, status="info", height="570px",
-                         plotlyOutput("readDistrib")
+                         plotlyOutput("readDistrib", height=500)
                      )
               ),
               column(width=6,
