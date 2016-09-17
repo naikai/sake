@@ -876,12 +876,6 @@ shinyServer(function(input, output, session) {
       gene.data <- data.frame(Sample = names(gene.data),
                               Expr = as.numeric(gene.data),
                               NMF = factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
-      # gene.data <- mtcars
-      # gene.data$NMF <- gene.data$cyl
-      # gene.data$Expr <- gene.data$mpg
-      # gene.data$Sample <- rownames(gene.data)
-      # gene.data$NMF <- factor(paste0("NMF", gene.data$NMF))
-      # gene <- "Naikai"
 
       # match the coloring from PCA, t-SNE, and heatmap
       num_clus <- gene.data$NMF %>% levels %>% length
