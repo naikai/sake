@@ -76,7 +76,7 @@ body <- dashboardBody(
                                            choices = list("Select from preloaded data"='preload',
                                                           "Upload rawdata"='upload',
                                                           "Upload saved NMF run"='saved'),
-                                           selected = "preload"),
+                                           selected = "saved"),
                                conditionalPanel(
                                  condition = "input.selectfile == 'upload'",
                                  fileInput('file1', 'Choose text File',
@@ -119,7 +119,7 @@ body <- dashboardBody(
                       tabPanel("System setup",
                                selectInput("ncores", label = "Specify number of cores to run analysis",
                                            choices = c(1,2,4,8,16),
-                                           selected = 4)
+                                           selected = 8)
                       )
               ),
               column(width = 7,
@@ -270,7 +270,7 @@ body <- dashboardBody(
                     column(width=2,
                            numericInput("num_cluster",
                                         label = "Estimate clusters",
-                                        min=2, max=10, value=2, step=1),
+                                        min=2, max=10, value=3, step=1),
                            bsTooltip("num_cluster", "For Estimate number of k, it will run NMF from 2 to k clusters <br><br> For Real run, it will run NMF for that specific k cluster",
                                      "right", options = list(container = "body"))
                     ),
@@ -438,17 +438,19 @@ body <- dashboardBody(
                     column(width=3,
                            selectInput("select_method",
                                        label = "Feature selection method",
-                                       choices = c("By default"="default", "rank"="rank"),
+                                       choices = c("Total"="total", "By default"="default", "rank"="rank"),
                                        selected = "default")
                     ),
-                    column(width=3,
-                           selectInput("select_feature_num",
-                                       label = "Number of features from each group",
-                                       choices = c("By default"=0, "10"=10, "20"=20, "30"=30, "50"=50, "100"=100, "200"=200, "500"=500, "1000"=1000, "1500"=1500, "2000"=2000, "3000"=3000, "5000"=5000),
-                                       selected = 0)
-                    ),
                     conditionalPanel(
-                      condition = "input.select_method == 'rank'",
+                      condition = "input.select_method == 'default' | input.select_method == 'rank'",
+                      column(width=3,
+                             selectInput("select_feature_num",
+                                         label = "Number of features from each group",
+                                         choices = c("By default"=0, "10"=10, "20"=20, "30"=30, "50"=50, "100"=100, "200"=200, "500"=500, "1000"=1000, "1500"=1500, "2000"=2000, "3000"=3000, "5000"=5000),
+                                         selected = 0)
+                      ),
+                      conditionalPanel(
+                        condition = "input.select_method == 'rank'",
                         column(width=3,
                                selectInput("select_math",
                                            label = "Rank based on:",
@@ -460,6 +462,7 @@ body <- dashboardBody(
                                             label = "FeatureScore cutoff",
                                             min=0.5, max=1, value=0.86, step = 0.01)
                         )
+                      )
                     )
                   ),
                   fluidRow(

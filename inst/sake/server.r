@@ -803,14 +803,18 @@ shinyServer(function(input, output, session) {
     nmf_res <- nmf_res()
     # add more options to select features here. then compare with ClaNC
     # Add rank by MAD expression
-    if(input$select_method=="default"){
-      res <- nmf_extract_feature(nmf_res, method=input$select_method, manual.num = as.numeric(input$select_feature_num))
+    if(input$select_method=="total"){
+      res <- nmf_extract_feature(nmf_res, method="total") %>% unique
+    }
+    else if(input$select_method=="default"){
+      res <- nmf_extract_feature(nmf_res, method=input$select_method, manual.num = as.numeric(input$select_feature_num)) %>%  unique
       validate(
+        need(nrow(res)!=1 & !is.na(res$Gene), "None of the features passed through default NMF filtering criteria, please manually specify number of genes from each group or use 'select features by Rank'") %then%
         need(nrow(res)>1, "Not enought features are selected by default! \nMaybe try with more input features or try select features by Rank")
       )
     }else if(input$select_method=="rank"){
       res <- nmf_extract_feature(nmf_res, rawdata = merged(), method=input$select_method, manual.num = as.numeric(input$select_feature_num),
-                          FScutoff=input$select_FScutoff, math=input$select_math)
+                          FScutoff=input$select_FScutoff, math=input$select_math) %>% unique
       validate(
         need(nrow(res)>1, "Not enought features! \nMaybe try lower the FeatureScore cutoff")
       )
@@ -828,7 +832,7 @@ shinyServer(function(input, output, session) {
       ext.func.data <- ext_gene_function(data$Gene, ensembl = ensembl())
       setkey(data, "Gene")
       setkey(ext.func.data, "hgnc_symbol")
-      merged <- ext.func.data[data, nomatch=0]
+      merged <- ext.func.data[data, nomatch=0, allow.cartesian = TRUE]
       merged <- as.data.frame(merged) %>%
                 dplyr::arrange(Group, desc(featureScore))
       merged <- merged[, c(4,2,7,6,8)]
@@ -871,15 +875,34 @@ shinyServer(function(input, output, session) {
       gene.data <- transform_data$data[gene, ]
       gene.data <- data.frame(Sample = names(gene.data),
                               Expr = as.numeric(gene.data),
-                              NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
-      gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
+                              NMF = factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
+      # gene.data <- mtcars
+      # gene.data$NMF <- gene.data$cyl
+      # gene.data$Expr <- gene.data$mpg
+      # gene.data$Sample <- rownames(gene.data)
+      # gene.data$NMF <- factor(paste0("NMF", gene.data$NMF))
+      # gene <- "Naikai"
 
-      plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
-              boxpoints = "all", jitter = 0.3, pointpos = 0) %>%
-        layout(title = gene,
-               xaxis = list(title = "", zeroline=TRUE),
-               yaxis = list(title = "Expression", zeroline=TRUE),
-               showlegend=TRUE)
+      # match the coloring from PCA, t-SNE, and heatmap
+      num_clus <- gene.data$NMF %>% levels %>% length
+      mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
+      a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
+            geom_boxplot(aes(color = NMF)) +
+            geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
+            theme_bw() +
+            xlab("") + ylab("Expression") +
+            scale_colour_manual(values = mycolor) +
+            labs(title=gene, x="", y="Expression",
+                 colour="")
+      p <- plotly_build(a)
+      # remove outliers for plotly boxplot
+      p$data <- lapply(p$data, FUN = function(x){
+        if(x$type == "box"){
+          x$marker = list(opacity = 0)
+        }
+        return(x)
+      })
+      p
     })
   })
 
