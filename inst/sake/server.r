@@ -214,8 +214,9 @@ shinyServer(function(input, output, session) {
       paste(file_prefix(), "filtered.txt", sep=".")
     },
     content = function(file) {
-      write.table(transform_data$data, file = file, quote=F, row.names=F, sep="\t")
-      dev.off()
+      data <- transform_data$data
+      colnames(data) <- gsub("\\.", "_", colnames(data))
+      write.table(data, file = file, quote=F, row.names=T, sep="\t")
     }
   )
 
@@ -924,7 +925,8 @@ shinyServer(function(input, output, session) {
   ensembl <- reactive({
     # Need to add a testing here when the BioMart is down
     # Or find offline annotation db
-    ensembl = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="grch37.ensembl.org", path="/biomart/martservice" ,dataset="hsapiens_gene_ensembl")
+    # ensembl = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="grch37.ensembl.org", path="/biomart/martservice" ,dataset="hsapiens_gene_ensembl")
+    ensembl = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="jul2016.archive.ensembl.org", path="/biomart/martservice" ,dataset="hsapiens_gene_ensembl")
   })
 
   #' Heatmap setting
