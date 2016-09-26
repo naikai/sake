@@ -15,7 +15,7 @@ source("http://bioconductor.org/biocLite.R")
 biocLite(c("annotate", "AnnotationHub", "biomaRt", "DESeq2", "gage", "gageData", "GO.db", "pathview"))
 
 install.packages("devtools")
-devtools::install_github("naikai/sake", auth_token = "438a6ba6acec1e0a0b3550986f83f42d88b941f9")
+devtools::install_github("naikai/sake")
 ```
 
 ### Usage 

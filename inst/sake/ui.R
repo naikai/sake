@@ -34,6 +34,7 @@ sidebar <- dashboardSidebar(
              menuSubItem("NMF Run", tabName="nmfRun"),
              menuSubItem("Identify Groups", tabName="nmfGroups"),
              menuSubItem("Extract features", tabName="nmfFeatures")
+             # menuSubItem("Distribution", tabName="nmfDistrib")
     ),
     menuItem("Visualization", tabName="Visualization", icon = icon('calendar', lib = "glyphicon")
     ),
@@ -76,7 +77,7 @@ body <- dashboardBody(
                                            choices = list("Select from preloaded data"='preload',
                                                           "Upload rawdata"='upload',
                                                           "Upload saved NMF run"='saved'),
-                                           selected = "saved"),
+                                           selected = "upload"),
                                conditionalPanel(
                                  condition = "input.selectfile == 'upload'",
                                  fileInput('file1', 'Choose text File',
@@ -472,6 +473,22 @@ body <- dashboardBody(
               )
             )
     ),
+    # tabItem("nmfDistrib",
+    #         fluidRow(
+    #           box(title="Extract Features", width=12, solidHeader=TRUE, status="success",
+    #               fluidRow(
+    #                 selectInput("sect_method",
+    #                             label = "Feature selection method",
+    #                             choices = c("Total"="total", "By default"="default", "rank"="rank"),
+    #                             selected = "default")
+    #               ),
+    #               fluidRow(
+    #                 column(width=8, DT::dataTableOutput('nmfatures')),
+    #                 column(width=4, plotlyOutput('nmf_bplot', height = "500px"))
+    #               )
+    #           )
+    #         )
+    # ),
     tabItem("Visualization",
             fluidRow(
               box(width=12,
