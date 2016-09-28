@@ -1557,10 +1557,9 @@ shinyServer(function(input, output, session) {
       incProgress(2/3, detail = "Usually takes 15~20 seconds")
       color <- "steelblue"
 
-      projection <- parse_tsne_res(tsne_out)
+      projection <- parse_tsne_res(tsne_out) %>% data.frame
       projection$color <- color
       min.cost <- signif(tsne_out$itercosts[length(tsne_out$itercosts)], 2)
-      # title <- paste("min.cost=", min.cost)
       colors <- create.brewer.color(projection$color, length(unique(color)), "naikai")
 
       if(input$plot_label){
