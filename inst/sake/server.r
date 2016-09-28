@@ -179,6 +179,15 @@ shinyServer(function(input, output, session) {
     withProgress(message = 'Transforming data', value = 0, {
       incProgress(1/n, detail = "Takes around 5~10 seconds")
 
+      if(input$normdata=="takeRPM"){
+        transdata <- rpm(transdata, colSums(transdata))
+      }else if(input$normdata=="takesizeNorm"){
+        sf <- norm_factors(transdata)
+        transdata <- t(t(transdata)/sf)
+      }else if(input$normdata=="takeuq"){
+        transdata <- uq(transdata)
+      }
+
       if(input$transformdata=="takevst"){
         transdata <- vst(round(transdata))
       }else if(input$transformdata=="takelog"){
@@ -186,13 +195,6 @@ shinyServer(function(input, output, session) {
           need(!any(transdata<0), "Please make sure all the numbers in the data are positive values")
         )
         transdata <- log2(transdata + 1)
-      }
-
-      if(input$normdata=="takeRPM"){
-        transdata <- rpm(transdata, colSums(transdata))
-      }else if(input$normdata=="takesizeNorm"){
-        sf <- norm_factors(transdata)
-        transdata <- t(t(transdata)/sf)
       }
     })
     return(transdata)
@@ -796,6 +798,133 @@ shinyServer(function(input, output, session) {
   })
 
 
+  output$nmfgrp_var <- renderPlotly({
+    nmf_groups <- nmf_groups()
+    heatmap_data <- heatmap_data()[['heatmap_data']]
+    idx <- match(colnames(heatmap_data), nmf_groups$Sample_ID)
+
+    colnames(heatmap_data) <- paste0("NMF", nmf_groups$nmf_subtypes[idx])
+    dd <- heatmap_data %>% t %>% reshape2::melt(.) %>% group_by(Var2, Var1) %>% summarise(var=var(value))
+    dd <- dd[order(dd$Var1), ]
+
+    num_clus <- dd$Var1 %>% levels %>% length
+    mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
+
+    a <- ggplot(dd, aes(var, fill=Var1, colour=Var1)) +
+          geom_density(alpha=input$cl_alpha) + scale_x_log10() +
+          scale_colour_manual(values = mycolor) +
+          scale_fill_manual(values = mycolor) +
+          labs(x="Log (variance)", y="Density", colour="", fill="") +
+          theme_bw()
+    p <- plotly_build(a)
+
+    # remove duplicated name
+    p$data <- lapply(p$data, FUN = function(x){
+      x$name <-  sub("\\((\\S+\\d),.*", "\\1", x$name, perl=TRUE)
+      x$line$width <- 1.2
+      return(x)
+    })
+    p$layout$legend$font$size <- as.numeric(input$cl_lgsize)
+    p$layout$xaxis$tickfont$size <- input$cl_tickfont
+    p$layout$xaxis$titlefont$size <- input$cl_axisfont
+    p$layout$xaxis$titlefont$family <- "Arial"
+    p$layout$yaxis$tickfont$size <- input$cl_tickfont
+    p$layout$yaxis$titlefont$size <- input$cl_axisfont
+    p$layout$yaxis$titlefont$family <- "Arial"
+
+    p
+  })
+
+  output$nmfgrp_expgene <- renderPlotly({
+    rawdata <- rawdata()
+    nmf_groups <- nmf_groups()
+    idx <- match(colnames(rawdata), nmf_groups$Sample_ID)
+    rawdata <- rawdata[, !is.na(idx)]
+    colnames(rawdata) <- paste0("NMF", nmf_groups$nmf_subtypes[idx[!is.na(idx)]])
+    dd <- data.frame(Group=colnames(rawdata), Genes=colSums(rawdata>0))
+
+    num_clus <- dd$Group %>% levels %>% length
+    mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
+
+    a <- ggplot(dd, aes(Genes, fill=Group, colour=Group)) +
+          geom_density(alpha=input$cl_alpha) +
+          scale_fill_manual(values = mycolor, guide="none") +
+          scale_color_manual(values = mycolor) +
+          labs(x="No. of expressed genes", y="Density", colour="", fill="") +
+          theme_bw()
+    p <- plotly_build(a)
+
+    # remove duplicated name
+    p$data <- lapply(p$data, FUN = function(x){
+      x$name <-  sub("\\((\\S+\\d),.*", "\\1", x$name, perl=TRUE)
+      x$line$width <- 1.2
+      return(x)
+    })
+    p$layout$legend$font$size <- as.numeric(input$cl_lgsize)
+    p$layout$xaxis$tickfont$size <- input$cl_tickfont
+    p$layout$xaxis$titlefont$size <- input$cl_axisfont
+    p$layout$xaxis$titlefont$family <- "Arial"
+    p$layout$yaxis$tickfont$size <- input$cl_tickfont
+    p$layout$yaxis$titlefont$size <- input$cl_axisfont
+    p$layout$yaxis$titlefont$family <- "Arial"
+
+    p
+  })
+
+  output$nmfgrp_coef <- renderPlotly({
+    nmf_groups <- nmf_groups()
+    heatmap_data <- heatmap_data()[['heatmap_data']]
+    idx <- match(colnames(heatmap_data), nmf_groups$Sample_ID)
+    nmf_groups <- nmf_groups[idx, ]
+
+    colnames(heatmap_data) <- paste0("NMF", nmf_groups$nmf_subtypes)
+    pair_cor <- function(x) {
+      res <- WGCNA::cor(x, nThreads = 4)
+      return(res[lower.tri(res)])
+    }
+
+    num_clus <- nmf_groups$nmf_subtypes %>% unique %>% length
+    mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
+    num_poss_cor <- nmf_groups$nmf_subtypes %>% table %>% apply(., 1, function(x) x * (x-1)) %>% sum
+    group_cor <- data.frame(matrix(NA_real_, nrow=num_poss_cor, ncol=2))
+
+    j <- 1
+    for(i in 1:num_clus){
+      idx <- nmf_groups$nmf_subtypes == i
+      res <- pair_cor(heatmap_data[, idx])
+      group_cor[j:(j+length(res)-1), ] <- cbind(paste0("NMF", i), res)
+      j <- j + length(res)
+    }
+    colnames(group_cor) <- c("NMF", "Cor")
+    group_cor$Cor <- as.numeric(group_cor$Cor)
+
+    a <- ggplot(data=group_cor, aes(x=NMF, y=Cor, color=NMF)) +
+      geom_boxplot(aes(color = NMF)) +
+      stat_summary(fun.y=mean, shape=19, col='black', geom='point') +
+      theme_bw() +
+      scale_colour_manual(values = mycolor) +
+      labs(x="", y="Cor", colour="")
+    # ggplotly(a)
+
+    p <- plotly_build(a)
+    # remove outliers for plotly boxplot
+    p$data <- lapply(p$data, FUN = function(x){
+      if(x$type == "box"){
+        x$marker = list(opacity = 0)
+      }
+      return(x)
+    })
+    p$layout$legend$font$size <- as.numeric(input$cl_lgsize)
+    p$layout$xaxis$tickfont$size <- input$cl_tickfont
+    p$layout$xaxis$titlefont$size <- input$cl_axisfont
+    p$layout$xaxis$titlefont$family <- "Arial"
+    p$layout$yaxis$tickfont$size <- input$cl_tickfont
+    p$layout$yaxis$titlefont$size <- input$cl_axisfont
+    p$layout$yaxis$titlefont$family <- "Arial"
+
+    p
+  })
+
   nmf_features <- reactive({
     validate(
       need(input$mode=="real", "This part won't work for eastimating k\nPlease Try NMF 'Realrun'") %then%
@@ -887,8 +1016,7 @@ shinyServer(function(input, output, session) {
             theme_bw() +
             xlab("") + ylab("Expression") +
             scale_colour_manual(values = mycolor) +
-            labs(title=gene, x="", y="Expression",
-                 colour="")
+            labs(title=gene, x="", y="Expression", colour="")
       p <- plotly_build(a)
       # remove outliers for plotly boxplot
       p$data <- lapply(p$data, FUN = function(x){
@@ -1576,14 +1704,29 @@ shinyServer(function(input, output, session) {
       gene.data <- norm.data[gene, ]
       gene.data <- data.frame(Sample = names(gene.data),
                               Expr = gene.data,
-                              NMF = as.factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
-      gene.data$NMF <- factor(gene.data$NMF, levels = rev(levels(gene.data$NMF)))
+                              NMF = factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
 
-      plot_ly(data = gene.data, x=NMF, y=Expr, type = "box", color = NMF,
-              boxpoints = "all", jitter = 0.3, pointpos = 0) %>%
-        layout(xaxis = list(title = "", zeroline=TRUE),
-               yaxis = list(title = "Expression", zeroline=TRUE),
-               showlegend=TRUE)
+      # match the coloring from PCA, t-SNE, and heatmap
+      num_clus <- gene.data$NMF %>% levels %>% length
+      mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
+
+      a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
+        geom_boxplot(aes(color = NMF)) +
+        geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
+        theme_bw() +
+        xlab("") + ylab("Expression") +
+        scale_colour_manual(values = mycolor) +
+        labs(title=gene, x="", y="Expression",
+             colour="")
+      p <- plotly_build(a)
+      # remove outliers for plotly boxplot
+      p$data <- lapply(p$data, FUN = function(x){
+        if(x$type == "box"){
+          x$marker = list(opacity = 0)
+        }
+        return(x)
+      })
+      p
     })
   })
 
@@ -1771,7 +1914,7 @@ shinyServer(function(input, output, session) {
                              columnDefs = list(list(width = '50px', targets = "_all"))
               )
     ) %>% formatRound(1:ncol(go_table()), 3)
-  }, server = TRUE)
+  }, server = FALSE)
 
 
   output$pathviewImg <- renderImage({

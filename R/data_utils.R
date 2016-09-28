@@ -406,7 +406,7 @@ uq <- function(data, remove.zero=T){
                   t %>%
                   divide_by(upper_quartile) %>%
                   t %>%
-                  multiply_by(1000)
+                  multiply_by(100)
   return(data.upperQ)
 }
 

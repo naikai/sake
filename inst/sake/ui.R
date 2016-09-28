@@ -34,15 +34,14 @@ sidebar <- dashboardSidebar(
              menuSubItem("NMF Run", tabName="nmfRun"),
              menuSubItem("Identify Groups", tabName="nmfGroups"),
              menuSubItem("Extract features", tabName="nmfFeatures")
-             # menuSubItem("Distribution", tabName="nmfDistrib")
     ),
     menuItem("Visualization", tabName="Visualization", icon = icon('calendar', lib = "glyphicon")
     ),
              conditionalPanel("input.sidebarmenu === 'Visualization'",
                               selectInput("VisType",
                                           label = "What kind of plot?",
-                                          choices = c("Heatmap", "PCA", "t-SNE"),
-                                          selected = "PCA")
+                                          choices = c("Heatmap", "PCA", "t-SNE", "Cluster Distribution"),
+                                          selected = "Cluster Distribution")
              ),
     menuItem("Differential analysis", tabName="DE", icon = icon('tasks', lib="glyphicon"),
              menuSubItem("DESeq2", tabName="DESeq2")
@@ -77,7 +76,7 @@ body <- dashboardBody(
                                            choices = list("Select from preloaded data"='preload',
                                                           "Upload rawdata"='upload',
                                                           "Upload saved NMF run"='saved'),
-                                           selected = "upload"),
+                                           selected = "saved"),
                                conditionalPanel(
                                  condition = "input.selectfile == 'upload'",
                                  fileInput('file1', 'Choose text File',
@@ -150,6 +149,7 @@ body <- dashboardBody(
                            selectInput("normdata", label = "Normalization",
                                          choices = list("RPM normalization" = "takeRPM",
                                                       "DESeq size factor normalization" = "takesizeNorm",
+                                                      "Upper Quartile normalization" = "takeuq",
                                                       "None" = "none"),
                                        selected = "none")
                     ),
@@ -422,12 +422,6 @@ body <- dashboardBody(
                            column(width=12,
                                   plotlyOutput('nmftsneplot', height=600, width=600)
                            )
-                  ),
-                  tabPanel("3D",
-                           tags$blockquote("Under Construction ..")
-                           # column(width=12,
-                           #        plotlyOutput('nmftsneplot2', height=600, width=600)
-                           # )
                   )
               )
             )
@@ -473,22 +467,6 @@ body <- dashboardBody(
               )
             )
     ),
-    # tabItem("nmfDistrib",
-    #         fluidRow(
-    #           box(title="Extract Features", width=12, solidHeader=TRUE, status="success",
-    #               fluidRow(
-    #                 selectInput("sect_method",
-    #                             label = "Feature selection method",
-    #                             choices = c("Total"="total", "By default"="default", "rank"="rank"),
-    #                             selected = "default")
-    #               ),
-    #               fluidRow(
-    #                 column(width=8, DT::dataTableOutput('nmfatures')),
-    #                 column(width=4, plotlyOutput('nmf_bplot', height = "500px"))
-    #               )
-    #           )
-    #         )
-    # ),
     tabItem("Visualization",
             fluidRow(
               box(width=12,
@@ -700,11 +678,6 @@ body <- dashboardBody(
                                        choices=NULL, multiple=FALSE,
                                        options = list(placeholder='Hierarchical'))
                         ),
-                        # column(width=2, selectInput("ColClrBy", "Color sample by?",
-                        #                             choices = list("NMF group" = "nmf",
-                        #                                            "Filename" = "filename"),
-                        #                             selected = "filename")
-                        # ),
                         column(width=2, sliderInput("ColSideColorsNum", label = "Num of Column Color:", min=1, max=4, value=1, ticks = F)),
                         column(width=2, numericInput("ColSideColorsSize", label = "Column Color Size:", value=1.5, step=0.1)),
                         # Need to fix this later
@@ -791,6 +764,15 @@ body <- dashboardBody(
                       uiOutput("visualperplexity_UI"),
                       column(width=6, bsAlert("visualperplexityAlert"))
                     )
+                  ),
+                  conditionalPanel(
+                    condition = "input.heatmoreopt == true & input.VisType=='Cluster Distribution'",
+                    fluidRow(
+                      column(width=2, numericInput("cl_alpha", label = "Alpha", value=0.4, step=0.05, max=1, min=0.05)),
+                      column(width=2, numericInput("cl_lgsize", label = "Legend size", value=10, step=1, max=14, min=6)),
+                      column(width=2, numericInput("cl_tickfont", label = "Tick font size", value=10, step=1, max=20, min=4)),
+                      column(width=2, numericInput("cl_axisfont", label = "Axis font size", value=14, step=1, max=20, min=4))
+                    )
                   )
               ),
               conditionalPanel(
@@ -806,6 +788,12 @@ body <- dashboardBody(
                 condition = "input.VisType == 't-SNE'",
                 box(width=6, title="2D t-SNE Plot", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput('tsneplot_2d', height=500)),
                 box(width=6, title="3D t-SNE Plot", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput("tsneplot_3d", height=500))
+              ),
+              conditionalPanel(
+                condition = "input.VisType == 'Cluster Distribution'",
+                box(width=4, title="Transcriptome variance", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput("nmfgrp_var", height=350)),
+                box(width=4, title="No. of Expressed genes", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput('nmfgrp_expgene', height=350)),
+                box(width=4, title="Correlation coefficient", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput('nmfgrp_coef', height=350))
               )
             )
     ),
