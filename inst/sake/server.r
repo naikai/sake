@@ -1562,6 +1562,8 @@ shinyServer(function(input, output, session) {
       min.cost <- signif(tsne_out$itercosts[length(tsne_out$itercosts)], 2)
       colors <- create.brewer.color(projection$color, length(unique(color)), "naikai")
 
+      print(head(projection))
+
       if(input$plot_label){
         t <- list( size=input$plot_label_size, color=toRGB("grey50") )
         p <- plot_ly(projection, x=x, y=y, mode="markers+text",
@@ -1573,6 +1575,7 @@ shinyServer(function(input, output, session) {
                      color = point_col()[['group']],
                      marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }
+      print("test")
       p %>% layout(showlegend = input$plot_legend,
                    title = title,
                    xaxis = list(title = "Component 1", zeroline=FALSE),
