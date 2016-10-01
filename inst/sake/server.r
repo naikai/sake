@@ -395,8 +395,8 @@ shinyServer(function(input, output, session) {
   })
   output$scatterPlot <- renderPlotly({
     transform_data <- transform_data$data
-    x <- scatterData()$x
-    y <- scatterData()$y
+    x <- scatterData()$x %>% as.numeric
+    y <- scatterData()$y %>% as.numeric
     plot_range <- min(x,y):max(x,y)
     reg = lm(y ~ x)
     modsum = summary(reg)
@@ -426,12 +426,6 @@ shinyServer(function(input, output, session) {
     }
     p
   })
-  # output$dlScatterPlots <- downloadHandler(
-  #   filename = function() { paste("test", '.png', sep='') },
-  #   content = function(file) {
-  #     plotly_IMAGE(patientCircleInput(), format = "png", out_file = file)
-  #   }
-  # )
   output$scatterdatatbl = DT::renderDataTable({
     x <- scatterData()$x
     y <- scatterData()$y
