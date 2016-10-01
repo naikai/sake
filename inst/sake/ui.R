@@ -792,8 +792,8 @@ body <- dashboardBody(
               conditionalPanel(
                 condition = "input.VisType == 'Cluster Distribution'",
                 box(width=4, title="Transcriptome variance", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput("nmfgrp_var", height=350)),
-                box(width=4, title="No. of Expressed genes", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput('nmfgrp_expgene', height=350)),
-                box(width=4, title="Correlation coefficient", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput('nmfgrp_coef', height=350))
+                box(width=4, title="No. of expressed genes", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput('nmfgrp_expgene', height=350)),
+                box(width=4, title="Intra-group correlation coefficient", solidHeader=TRUE, status="info", collapsible = TRUE, plotlyOutput('nmfgrp_coef', height=350))
               )
             )
     ),

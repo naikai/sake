@@ -397,11 +397,13 @@ shinyServer(function(input, output, session) {
     transform_data <- transform_data$data
     x <- scatterData()$x
     y <- scatterData()$y
+    plot_range <- min(x,y):max(x,y)
     reg = lm(y ~ x)
     modsum = summary(reg)
     r <- signif(cor(x,y), 3)
     R2 = signif(summary(reg)$r.squared, 3)
     textlab <- paste(paste0("x = ", signif(x,3)), paste0("y = ", signif(y,3)), rownames(transform_data), sep="<br>")
+
     n <- 2
     withProgress(message = 'Generating Scatter Plot', value = 0, {
       p <- plot_ly(x=x, y=y, text=textlab, type="scattergl", source = "scatter",
@@ -418,7 +420,6 @@ shinyServer(function(input, output, session) {
       p <- p %>% layout( annotations = list(x = x, y = y, text=paste0("R2=", R2), showarrow=FALSE) )
     }
 
-    plot_range <- min(x,y):max(x,y)
     if(input$show_fc){
       p <- add_trace(p, x=plot_range, y=plot_range[plot_range<=(max(plot_range)-1)]+1, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
       p <- add_trace(p, x=plot_range[plot_range>=1], y=plot_range[plot_range>=1]-1, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
