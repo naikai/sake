@@ -25,7 +25,7 @@ Imports:
     GO.db,
     matrixStats,
     pathview,
-    plotly,
+    plotly (>= 3.6.0),
     RcppArmadillo,
     Rtsne,
     shiny,
