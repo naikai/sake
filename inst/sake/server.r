@@ -1392,13 +1392,12 @@ shinyServer(function(input, output, session) {
                          choices = as.character(plot_colopts()),
                          selected = "Filename"
     )
-    # updateSelectizeInput(session, 'pt_allgene',
-    #                      server = TRUE,
-    #                      # choices = as.character(rownames(transform_data$data)),
-    #                      # selected = as.character(rownames(transform_data$data)[1])
-    #                      choices = as.character(rownames(heatmap_data$data)),
-    #                      selected = as.character(rownames(transform_data$data)[1])
-    # )
+    choices <- rawdata() %>% colnames() %>% strsplit("_") %>% .[[1]] %>% length %>% seq(1, .) %>% as.character()
+    updateSelectizeInput(session, 'pt_file_grp',
+                         server = TRUE,
+                         choices = choices,
+                         selected = choices[1]
+    )
   })
 
   observeEvent(transform_data$data, {
@@ -1407,7 +1406,6 @@ shinyServer(function(input, output, session) {
                          choices = as.character(rownames(transform_data$data)),
                          selected = as.character(rownames(transform_data$data)[1])
     )
-
   })
 
   observeEvent(input$runNMF,{
@@ -1443,7 +1441,8 @@ shinyServer(function(input, output, session) {
       group <- input$pt_nmfgene
     }else if(input$pt_col == "Filename"){
       filename <- colnames(heatmap_data)
-      filename <- sapply(strsplit(filename, "_"), function(x) paste0(x[c(1)], collapse = "_"))
+      # filename <- sapply(strsplit(filename, "_"), function(x) paste0(x[c(1)], collapse = "_"))
+      filename <- sapply(strsplit(filename, "_"), function(x) paste0(x[as.numeric(input$pt_file_grp)], collapse = "_"))
       col <- create.brewer.color(filename, length(unique(filename)), "naikai") %>% as.matrix
       group <- filename %>% as.matrix
     }else if(input$pt_col == "GeneExpr"){

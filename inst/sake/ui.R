@@ -119,7 +119,7 @@ body <- dashboardBody(
                       tabPanel("System setup",
                                selectInput("ncores", label = "Specify number of cores to run analysis",
                                            choices = c(1,2,4,8,16),
-                                           selected = 8)
+                                           selected = 16)
                       )
               ),
               column(width = 7,
@@ -741,6 +741,16 @@ body <- dashboardBody(
                         column(width=2, selectizeInput("pt_nmfgene",
                                                        label = "Select gene",
                                                        choices=NULL, multiple=FALSE,
+                                                       options = list(
+                                                         onInitialize = I('function() { this.setValue(""); }')
+                                                       ))
+                        )
+                      ),
+                      conditionalPanel(
+                        condition = "input.pt_col == 'Filename'",
+                        column(width=2, selectizeInput("pt_file_grp",
+                                                       label="Which Group",
+                                                       choices=NULL, multiple=TRUE,
                                                        options = list(
                                                          onInitialize = I('function() { this.setValue(""); }')
                                                        ))
