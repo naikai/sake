@@ -106,12 +106,13 @@ detect_genecnt_platform <- function(data, method="mean"){
   data.gene <- data %>% as.data.table() %>%
                         '['(, RowExp := select.fun(.SD)) %>%
                         '['(, SYMBOL := gene.symbols) %>%
-                        dplyr::group_by(., SYMBOL) %>%
-                        dplyr::filter(., which.max(RowExp))
+                        dplyr::group_by(SYMBOL) %>%
+                        dplyr::filter(RowExp == max(RowExp))
 
   # Remove rows without gene_symbols (NAs), then convert back to data.frame
   final.data <- data.gene %>%
                 dplyr::filter(!is.na(SYMBOL)) %>%
+                as.data.frame() %>% 
                 setDF %>%
                 magrittr::set_rownames(.$SYMBOL) %>%
                 '['(, !(colnames(.) %in% c("RowExp", "SYMBOL")))

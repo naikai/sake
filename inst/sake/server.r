@@ -1384,7 +1384,7 @@ shinyServer(function(input, output, session) {
   )
 
   plot_colopts <- reactive({
-    c("Default", "Filename", "GeneExpr")
+    c("Default", "Filename", "GeneExpr", "ReadDepth", "NumExpresGenes")
   })
   observeEvent(rawdata(), {
     updateSelectizeInput(session, 'pt_col',
@@ -1451,6 +1451,18 @@ shinyServer(function(input, output, session) {
       gene_data <- transform_data$data[input$pt_allgene, idx] %>% as.numeric
       col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
       group <- input$pt_allgene
+    }else if(input$pt_col == "ReadDepth"){
+      req(rawdata())
+      idx <- match(colnames(heatmap_data), colnames(rawdata()))
+      gene_data <- rawdata()[, idx] %>% colSums() %>% as.numeric
+      col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
+      group <- "Read Depth"
+    }else if(input$pt_col == "NumExpresGenes"){
+      req(rawdata())
+      idx <- match(colnames(heatmap_data), colnames(rawdata()))
+      gene_data <- colSums(rawdata()[, idx]>0) %>% as.numeric
+      col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
+      group <- "Num Expressed Genes"
     }else{
       warning("Wrong point color assigning method!")
     }
