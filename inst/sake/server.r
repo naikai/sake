@@ -166,8 +166,6 @@ shinyServer(function(input, output, session) {
   })
 
   # transform_data <- reactiveValues(data=NULL, rawdata=NULL)
-  # transform_data <- reactiveValues(data=data.frame(a=1:5, b=1:5),
-  #                                  rawdata=data.frame(a=1:5, b=1:5))
   transform_data <- reactiveValues(data=data.frame(a=NULL, b=NULL),
                                    rawdata=data.frame(a=NULL, b=NULL))
   run_selsamp <- reactiveValues(go=FALSE)
@@ -1570,7 +1568,7 @@ shinyServer(function(input, output, session) {
 
       if(input$plot_label){
         t <- list( size=input$plot_label_size, color=toRGB("grey50") )
-        p <- plot_ly(projection, x=projectiont$x, y=projection$y, mode="markers+text",
+        p <- plot_ly(projection, x=projection$x, y=projection$y, mode="markers+text",
                      color = point_col()[['group']],
                      text=rownames(projection), hoverinfo="text", textposition="top middle", textfont=t,
                      marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
