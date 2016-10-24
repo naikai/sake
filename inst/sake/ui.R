@@ -868,6 +868,9 @@ body <- dashboardBody(
                                                   selected = "MF")
                       )
                     ),
+                    column(width=2, br(),
+                           actionButton("run_enrich", "Run Analysis", icon("play-circle"), class = 'act')
+                    ),
                     column(width=2, checkboxInput('enrichmoreopt', 'More Options', FALSE))
                   ),
                   conditionalPanel(
@@ -890,9 +893,13 @@ body <- dashboardBody(
                                                   choices = c("Yes"=TRUE, "NO"=FALSE),
                                                   selected = TRUE)
                       ),
-                      column(width=2, sliderInput("min_rowMean",
-                                                  label = "Min expression cutoff:",
+                      column(width=2, numericInput("min_rowMean",
+                                                  label = "Expression cutoff:",
                                                   min=0, max=10, value=0.5, step=0.05)
+                      ),
+                      column(width=1, numericInput("qval_cutoff",
+                                                  label = "q_val cutoff:",
+                                                  min=0.05, max=1, value=0.1, step=0.05)
                       ),
                       column(width=2, br(),
                              downloadButton("downloadPathData", "Download Result", class="dwnld")

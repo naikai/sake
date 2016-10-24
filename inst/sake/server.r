@@ -1741,7 +1741,7 @@ shinyServer(function(input, output, session) {
       need(!is.null(nmf_groups()), "Please run NMF first")
     )
     rawdata <- transform_data$data
-    rawdata <- rawdata[rowMeans(rawdata) >= input$min_rowMean, ]
+    # rawdata <- rawdata[rowMeans(rawdata) >= input$min_rowMean, ]
     nmf_group <- nmf_groups()$nmf_subtypes
     num_nmf_subtypes <- nmf_group %>% unique %>% length
 
@@ -1825,40 +1825,58 @@ shinyServer(function(input, output, session) {
     return(go.gs)
   })
 
-  gage.exp.fc <- reactive({
+  gage.exp.fc <- eventReactive(input$run_enrich, {
     rankdata <- nmf_group_feature_rank()
-    validate(
-      need(input$pathway_group!="", "Please select the enrichment result for the group you are interest in")
-    )
-    # In logFC, error might come from the fact that some of them are Inf or -Inf
-    idx <- is.finite(rankdata[, input$pathway_group])
-    rankdata <- rankdata[idx, input$pathway_group, drop=F]
-    # ID conversion
-    id.map.sym2eg <- id2eg(ids=rownames(rankdata), category = "SYMBOL", org=id.org())
-    gene.entrez <- mol.sum(mol.data = rankdata, id.map = id.map.sym2eg, sum.method = "mean")
-    exp.fc <- gene.entrez[, 1]
-    return(exp.fc)
+    num_groups <- ncol(rankdata)
+    emp <- matrix(NA, nrow(rankdata), 1)
+    res <- rep(list(emp), num_groups)
+    names(res) <- colnames(rankdata)
+
+    for (i in 1:num_groups){
+      # In logFC, error might come from the fact that some of them are Inf or -Inf
+      idx <- is.finite(rankdata[, i])
+      sub_rankdata <- rankdata[idx, i, drop=F]
+      # ID conversion
+      id.map.sym2eg <- id2eg(ids=rownames(sub_rankdata), category = "SYMBOL", org=id.org())
+      gene.entrez <- mol.sum(mol.data = sub_rankdata, id.map = id.map.sym2eg, sum.method = "mean")
+      res[[i]] <- gene.entrez[, 1]
+      res[[i]] <- res[[i]][!is.na(res[[i]])]
+    }
+    return(res)
   })
 
   go.Res <- reactive({
     gage.exp.fc <- gage.exp.fc()
     gsets <- NULL
+    res <- rep(list(NA), length(gage.exp.fc))
+    names(res) <- names(gage.exp.fc)
+
     if(input$EnrichType == 'GO'){
       gsets <- go.gs()
       gsets <- gsets$go.sets[ gsets$go.subs[[input$goTerm]] ]
     }else if(input$EnrichType == 'KEGG'){
       gsets <- kegg.gs()
     }
+
     validate(
       need(length(gsets)>0, "Did not find any Gene Sets, maybe your gene count data is not from 'Human'?")
     )
+
     withProgress(message = 'Running enrichment analysis', value = NULL, {
-      goRes <- gage(gage.exp.fc, gsets = gsets, ref = NULL, samp = NULL, same.dir=ifelse(input$samedir, TRUE, FALSE))
+      for (i in 1:length(gage.exp.fc)){
+        exp.fc <- gage.exp.fc[[i]]
+        goRes <- gage(exp.fc, gsets = gsets, ref = NULL, samp = NULL, same.dir=ifelse(input$samedir, TRUE, FALSE))
+        res[[i]] <- goRes
+      }
     })
-    return(goRes)
+    return(res)
   })
   go_table <- reactive({
     goRes <- go.Res()
+    validate(
+      need(input$pathway_group!="", "Please select the enrichment result for the group you are interest in")
+    )
+    goRes <- goRes[[input$pathway_group]]
     if (is.null(goRes$greater)){
       stop("No significant gene sets found")
     }else{
@@ -1868,7 +1886,13 @@ shinyServer(function(input, output, session) {
 
   output$go_summary <- DT::renderDataTable({
     filename <- paste(input$EnrichType, input$pathway_group, input$goTerm, sep = "_")
-    datatable(go_table(), selection = 'single',
+    idx <- go_table()[, "q.val"] <= input$qval_cutoff
+    go_table <- go_table()[which(!is.na(idx) & idx), ]
+    if(nrow(go_table) == 0){
+      stop("No significant gene sets found")
+    }
+    print(head(go_table))
+    datatable(go_table, selection = 'single',
               extensions = 'Buttons',
               options = list(dom = 'Bfrtip',
                              buttons =
@@ -1897,7 +1921,7 @@ shinyServer(function(input, output, session) {
     withProgress(message = 'Rendering pathview map', value = NULL, {
       path.pid <- substr(rownames(go_table)[s.idx], 1, 8)
       out.suffix <- "nmf"
-      pathview(gene.data=gage.exp.fc(), pathway.id=path.pid, species=pathview.species(), out.suffix=out.suffix)
+      pathview(gene.data=gage.exp.fc()[[input$pathway_group]], pathway.id=path.pid, species=pathview.species(), out.suffix=out.suffix)
     })
 
     filename <- path.pid
