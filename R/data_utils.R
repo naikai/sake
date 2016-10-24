@@ -136,7 +136,7 @@ is.whole <- function(a, tol = 1e-7) {
 #' @keywords read data
 #' @export
 #' @examples
-#' myfread.table(system.file('icash', package='icash'))
+#' myfread.table(system.file('sake', package='sake'))
 myfread.table <- function(filepath, check.platform=T, header=T, sep="\t", detect.file.ext=T){
    ext <- tools::file_ext(filepath)
    if(detect.file.ext){

@@ -840,12 +840,6 @@ body <- dashboardBody(
               )
             )
     ),
-    tabItem("Monocle",
-          h3(tagList(shiny::icon("gg"), "Under Construction .."))
-    ),
-    tabItem("SCDE",
-          h3(tagList(shiny::icon("gg"), "Under Construction .."))
-    ),
     tabItem("enrichment",
             fluidRow(
               box(title="Enrichment Analysis Parameters", width=12, solidHeader=TRUE, status="success",
@@ -899,6 +893,9 @@ body <- dashboardBody(
                       column(width=2, sliderInput("min_rowMean",
                                                   label = "Min expression cutoff:",
                                                   min=0, max=10, value=0.5, step=0.05)
+                      ),
+                      column(width=2, br(),
+                             downloadButton("downloadPathData", "Download Result", class="dwnld")
                       )
                     )
                   )

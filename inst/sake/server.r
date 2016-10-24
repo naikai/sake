@@ -412,7 +412,7 @@ shinyServer(function(input, output, session) {
                    xaxis = list(title = input$cor_sample1, zeroline=TRUE),
                    yaxis = list(title = input$cor_sample2, zeroline=TRUE),
                    showlegend=FALSE)
-      p <- add_trace(p, x=plot_range, y=plot_range, type = "scattergl", mode = "lines", name = "Ref", line = list(width=2))
+      # p <- add_trace(p, x=plot_range, y=plot_range, type = "scattergl", mode = "lines", name = "Ref", line = list(width=2))
     })
     if(input$show_r2){
       p <- p %>% layout( annotations = list(x = x, y = y, text=paste0("R2=", R2), showarrow=FALSE) )
@@ -1737,7 +1737,8 @@ shinyServer(function(input, output, session) {
   ### Pathway analysis ###
   nmf_group_feature_rank <- reactive({
     validate(
-      need(is.numeric(input$num_cluster), "num of cluster is not a numeric value")
+      need(is.numeric(input$num_cluster), "num of cluster is not a numeric value") %then%
+      need(!is.null(nmf_groups()), "Please run NMF first")
     )
     rawdata <- transform_data$data
     rawdata <- rawdata[rowMeans(rawdata) >= input$min_rowMean, ]
@@ -1758,36 +1759,7 @@ shinyServer(function(input, output, session) {
       colnames(nmf_feature_rank) <- paste0("NMF", 1:num_nmf_subtypes)
       rownames(nmf_feature_rank) <- rownames(rawdata)
     }
-    ### Check whether they are mouse or human, then convert mouse to human if needed ###
-#     if(input$species=="Mouse"){
-#       n <- 2
-#       withProgress(message = 'Converting Mouse gene symbols to Human..', value = 0, {
-#         incProgress(1/n, detail = "Takes around 10~15 seconds")
-#         mouse_human_convert_genes <- gene_convert_mouse_to_human(rownames(nmf_feature_rank))
-#         ## After conversion, some of the mouse genes might point to the same human gene
-#         ## So select thoide mouse genes that has highest mean expression across groups?
-#         idx <- duplicated(mouse_human_convert_genes$HGNC.symbol)
-#         if (sum(idx)>0){
-#           warning("Some of the mouse genes are mapped back to the same human genes..")
-#         }
-#         print(dim(nmf_feature_rank))
-#         max_dup_mean_lfc_genes <-
-#           cbind(mouse_human_convert_genes, nmf_feature_rank) %>%
-#           mutate(avg_lfc=apply(nmf_feature_rank, 1, mean),
-#                  abs_lfc=apply(nmf_feature_rank, 1, function(x) max(abs(x)))
-#           ) %>%
-#           dplyr::group_by(HGNC.symbol) %>%
-#           dplyr::filter(min_rank(desc(avg_lfc))==1) %>%
-#           dplyr::slice(which.max(abs_lfc)) %>%
-#           ungroup    # this will give Error: corrupt 'grouped_df', workaround is to ungroup it below
-#         print(dim(max_dup_mean_lfc_genes))
-#         ## Return final de-duplicated genes only
-#         nmf_feature_rank <- max_dup_mean_lfc_genes %>%
-#           dplyr::select(starts_with("NMF")) %>%
-#           as.data.frame
-#         rownames(nmf_feature_rank) <- max_dup_mean_lfc_genes$HGNC.symbol
-#       })
-#     }
+    save(nmf_feature_rank, file="nmf_feature_rank.rda")
     return(nmf_feature_rank)
   })
 
@@ -1842,9 +1814,6 @@ shinyServer(function(input, output, session) {
     return(kegg.gs)
   })
   go.gs <- reactive({
-    # data(go.sets.hs)
-    # data(go.subs.hs)
-    # go.gs <- go.sets.hs[go.subs.hs[[input$goTerm]]]
     species <- input$species
     withProgress(message = 'Extracting GO term information', value = NULL, {
       if(species == "Human" | species == "human" | species == "hg19" | species == "hsa"){
@@ -1853,9 +1822,9 @@ shinyServer(function(input, output, session) {
         go.gs <- go.gsets(species="mouse", pkg.name=NULL, id.type = "eg")
       }
     })
-    # go.res <- go.gs$go.sets[ go.gs$go.subs[[input$goTerm]] ]
     return(go.gs)
   })
+
   gage.exp.fc <- reactive({
     rankdata <- nmf_group_feature_rank()
     validate(
@@ -1867,10 +1836,10 @@ shinyServer(function(input, output, session) {
     # ID conversion
     id.map.sym2eg <- id2eg(ids=rownames(rankdata), category = "SYMBOL", org=id.org())
     gene.entrez <- mol.sum(mol.data = rankdata, id.map = id.map.sym2eg, sum.method = "mean")
-    deseq2.fc <- gene.entrez[, 1]
-    exp.fc=deseq2.fc
+    exp.fc <- gene.entrez[, 1]
     return(exp.fc)
   })
+
   go.Res <- reactive({
     gage.exp.fc <- gage.exp.fc()
     gsets <- NULL
@@ -1888,7 +1857,6 @@ shinyServer(function(input, output, session) {
     })
     return(goRes)
   })
-
   go_table <- reactive({
     goRes <- go.Res()
     if (is.null(goRes$greater)){
@@ -1924,7 +1892,7 @@ shinyServer(function(input, output, session) {
     go_table <- go_table()
     s.idx <- input$go_summary_rows_selected[length(input$go_summary_rows_selected)]
     validate(
-      need(length(s.idx)>0, "Please select one GO-term/KEGG pathway from above.")
+      need(length(s.idx)>0, "Please select one KEGG pathway from above.")
     )
     withProgress(message = 'Rendering pathview map', value = NULL, {
       path.pid <- substr(rownames(go_table)[s.idx], 1, 8)
@@ -1942,6 +1910,46 @@ shinyServer(function(input, output, session) {
          alt = "This is alternate text")
   }, deleteFile = FALSE)
 
+  nmf_feature_rank_for_gsea <- reactive({
+    species <- input$species
+    nmf_feature_rank <- nmf_group_feature_rank()
+    # check if genenames contains all CAPITAL LETTERS (after removing all numeric characters)
+    cap_genes <- grepl("^[[:upper:]]+$", gsub('[[:digit:]]+', '', rownames(nmf_feature_rank))) %>% sum
+    cap_pct <- cap_genes/ nrow(nmf_feature_rank)
+    # some of the genes might contains '.', '-', 'orf', etc, so we use percentage of genes qualified as filtering criteria
+
+    # if(species == "Mouse" | species == "mouse" | species == "mm9" | species == "mmu"){
+    if(cap_pct < 0.1){
+      n <- 2
+      withProgress(message = 'Assuming the input gene symbols are from Mouse, Converting to Human..', value = 0, {
+        incProgress(1/n, detail = "Takes around 10~15 seconds")
+        mouse_human_convert_genes <- gene_convert_mouse_to_human(rownames(nmf_feature_rank))
+        ## After conversion, some of the mouse genes might point to the same human gene
+        ## So select thoide mouse genes that has highest mean expression across groups?
+        idx <- duplicated(mouse_human_convert_genes$HGNC.symbol)
+        if (sum(idx)>0){
+          warning("Some of the mouse genes are mapped back to the same human genes..")
+        }
+        print(dim(nmf_feature_rank))
+        max_dup_mean_lfc_genes <-
+          cbind(mouse_human_convert_genes, nmf_feature_rank) %>%
+          mutate(avg_lfc=apply(nmf_feature_rank, 1, mean),
+                 abs_lfc=apply(nmf_feature_rank, 1, function(x) max(abs(x)))
+          ) %>%
+          dplyr::group_by(HGNC.symbol) %>%
+          dplyr::filter(min_rank(desc(avg_lfc))==1) %>%
+          dplyr::slice(which.max(abs_lfc)) %>%
+          ungroup    # this will give Error: corrupt 'grouped_df', workaround is to ungroup it below
+        print(dim(max_dup_mean_lfc_genes))
+        ## Return final de-duplicated genes only
+        nmf_feature_rank <- max_dup_mean_lfc_genes %>%
+          dplyr::select(starts_with("NMF")) %>%
+          as.data.frame
+        rownames(nmf_feature_rank) <- max_dup_mean_lfc_genes$HGNC.symbol
+      })
+    }
+    return(nmf_feature_rank)
+  })
 
   output$downloadPathData <- downloadHandler(
     filename <- function() {
@@ -1952,19 +1960,16 @@ shinyServer(function(input, output, session) {
       # tmpdir <- "/mnt/sake-uploads/"
       current_dir <- getwd()
       setwd(tempdir())
-      ### modify it to save one file for each rank ###
-#       filenames <- sapply(c("group_feature_rank"),
-#                           function(x) paste(file_prefix(), x, "csv", sep="."))
-#       write.csv(nmf_group_feature_rank(), filenames[1], quote=F, row.names=T)
 
       ### modify it to save one file for each rank ###
-      num_samples <- ncol(nmf_group_feature_rank())
+      nmf_group_feature_rank <- nmf_feature_rank_for_gsea()
+      num_samples <- ncol(nmf_group_feature_rank)
       filenames <- paste(file_prefix(),
                          paste0("group_feature_rank", 1:num_samples),
                          "rnk",
                          sep=".")
       for (i in 1:num_samples){
-        sub.data <- data.frame(Gene=rownames(nmf_group_feature_rank()), LogFC=nmf_group_feature_rank()[,i])
+        sub.data <- data.frame(Gene=rownames(nmf_group_feature_rank), LogFC=nmf_group_feature_rank[,i])
         idx <- is.finite(sub.data$LogFC)
         write.table(sub.data[idx, ], filenames[i], quote=F, row.names = F, sep="\t")
       }
