@@ -412,7 +412,7 @@ shinyServer(function(input, output, session) {
                    xaxis = list(title = input$cor_sample1, zeroline=TRUE),
                    yaxis = list(title = input$cor_sample2, zeroline=TRUE),
                    showlegend=FALSE)
-      # p <- add_trace(p, x=plot_range, y=plot_range, type = "scattergl", mode = "lines", name = "Ref", line = list(width=2))
+      p <- add_trace(p, x=plot_range, y=plot_range, type = "scattergl", mode = "lines", name = "Ref", line = list(width=2))
     })
     if(input$show_r2){
       p <- p %>% layout( annotations = list(x = x, y = y, text=paste0("R2=", R2), showarrow=FALSE) )
