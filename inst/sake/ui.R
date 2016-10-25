@@ -906,14 +906,20 @@ body <- dashboardBody(
                       )
                     )
                   )
-              ),
-              box(width=12, #height = "450px",
+              )
+            ),
+            fluidRow(
+              box(width=7, #height = "450px",
                   DT::dataTableOutput('go_summary'),
                   tags$hr(),
                   p(
                     class = "text-muted",
                     paste("Note: Make sure you select the correct species.")
                   )
+              ),
+              box(width=5,
+                  plotlyOutput('goplot_hi'),
+                  plotlyOutput('goplot_lo')
               ),
               conditionalPanel(
                 condition = "input.EnrichType == 'KEGG'",

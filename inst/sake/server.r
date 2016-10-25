@@ -1759,7 +1759,6 @@ shinyServer(function(input, output, session) {
       colnames(nmf_feature_rank) <- paste0("NMF", 1:num_nmf_subtypes)
       rownames(nmf_feature_rank) <- rownames(rawdata)
     }
-    save(nmf_feature_rank, file="nmf_feature_rank.rda")
     return(nmf_feature_rank)
   })
 
@@ -1832,16 +1831,18 @@ shinyServer(function(input, output, session) {
     res <- rep(list(emp), num_groups)
     names(res) <- colnames(rankdata)
 
-    for (i in 1:num_groups){
-      # In logFC, error might come from the fact that some of them are Inf or -Inf
-      idx <- is.finite(rankdata[, i])
-      sub_rankdata <- rankdata[idx, i, drop=F]
-      # ID conversion
-      id.map.sym2eg <- id2eg(ids=rownames(sub_rankdata), category = "SYMBOL", org=id.org())
-      gene.entrez <- mol.sum(mol.data = sub_rankdata, id.map = id.map.sym2eg, sum.method = "mean")
-      res[[i]] <- gene.entrez[, 1]
-      res[[i]] <- res[[i]][!is.na(res[[i]])]
-    }
+    withProgress(message = 'Calculating LogFC between groups', value = NULL, {
+      for (i in 1:num_groups){
+        # In logFC, error might come from the fact that some of them are Inf or -Inf
+        idx <- is.finite(rankdata[, i])
+        sub_rankdata <- rankdata[idx, i, drop=F]
+        # ID conversion
+        id.map.sym2eg <- id2eg(ids=rownames(sub_rankdata), category = "SYMBOL", org=id.org())
+        gene.entrez <- mol.sum(mol.data = sub_rankdata, id.map = id.map.sym2eg, sum.method = "mean")
+        res[[i]] <- gene.entrez[, 1]
+        res[[i]] <- res[[i]][!is.na(res[[i]])]
+      }
+    })
     return(res)
   })
 
@@ -1869,8 +1870,64 @@ shinyServer(function(input, output, session) {
         res[[i]] <- goRes
       }
     })
+    save(res, file="goRes.rda")
     return(res)
   })
+
+  go_summary <- reactive({
+    goRes <- go.Res()
+    res <- list()
+    num_genes <- 5
+    hi_res <- lo_res <- matrix(NA, num_genes * length(goRes), length(goRes))
+    colnames(hi_res) <- colnames(lo_res) <- names(goRes)
+    total_hi_names <- total_lo_names <- rep(NA, num_genes * length(goRes))
+
+    for(i in 1:length(goRes)){
+      range <- ((i-1) * num_genes + 1) : (i * num_genes)
+      hi_genenames <- goRes[[i]]$greater %>% rownames %>% head(n = num_genes)
+      hi_res[range, ] <- sapply(goRes, function(x) x$greater[hi_genenames, "p.val"])
+      total_hi_names[range] <- hi_genenames
+
+      lo_genenames <- goRes[[i]]$less %>% rownames %>% head(n = num_genes)
+      lo_res[range, ] <- sapply(goRes, function(x) x$less[lo_genenames, "p.val"])
+      total_lo_names[range] <- lo_genenames
+    }
+    rownames(hi_res) <- total_hi_names
+    rownames(lo_res) <- total_lo_names
+
+    # save only the unique GO:Term
+    res[["hi"]] <- hi_res[!duplicated(rownames(hi_res)), ]
+    res[["lo"]] <- lo_res[!duplicated(rownames(lo_res)), ]
+    save(res, file="go_summary.rda")
+    return(res)
+  })
+
+  output$goplot_hi <- renderPlotly({
+    req(go_summary())
+    withProgress(message = 'Generating summary plot for GO term', value = NULL, {
+      aa <- melt(go_summary()[["hi"]])
+      p <- plot_ly(aa, x = ~Var2, y = ~Var1, z = ~value, type = "heatmap",
+                   reversescale=TRUE, colorscale = "RdBu")
+      m <- list( l = 400, r = 80, b = 80, t = 100)
+      p %>% layout(margin = m,
+               xaxis = list(title = "", zeroline=FALSE),
+               yaxis = list(title = "", tickfont=list(family = "Arial", size = 10), zeroline=FALSE))
+    })
+  })
+
+  output$goplot_lo <- renderPlotly({
+    req(go_summary())
+    withProgress(message = 'Generating summary plot for GO term', value = NULL, {
+      aa <- melt(go_summary()[["lo"]])
+      p <- plot_ly(aa, x = ~Var2, y = ~Var1, z = ~value, type = "heatmap",
+                   reversescale=TRUE, colorscale = "RdBu")
+      m <- list( l = 400, r = 80, b = 80, t = 100)
+      p %>% layout(margin = m,
+               xaxis = list(title = "", zeroline=FALSE),
+               yaxis = list(title = "", tickfont=list(family = "Arial", size = 10), zeroline=FALSE))
+    })
+  })
+
   go_table <- reactive({
     goRes <- go.Res()
     validate(
@@ -1878,7 +1935,7 @@ shinyServer(function(input, output, session) {
     )
     goRes <- goRes[[input$pathway_group]]
     if (is.null(goRes$greater)){
-      stop("No significant gene sets found")
+      stop("No significant gene sets found using this q.val cutoff")
     }else{
       return(goRes$greater)
     }
@@ -1889,9 +1946,8 @@ shinyServer(function(input, output, session) {
     idx <- go_table()[, "q.val"] <= input$qval_cutoff
     go_table <- go_table()[which(!is.na(idx) & idx), ]
     if(nrow(go_table) == 0){
-      stop("No significant gene sets found")
+      stop("No significant gene sets found using this q.val cutoff")
     }
-    print(head(go_table))
     datatable(go_table, selection = 'single',
               extensions = 'Buttons',
               options = list(dom = 'Bfrtip',
@@ -1954,7 +2010,6 @@ shinyServer(function(input, output, session) {
         if (sum(idx)>0){
           warning("Some of the mouse genes are mapped back to the same human genes..")
         }
-        print(dim(nmf_feature_rank))
         max_dup_mean_lfc_genes <-
           cbind(mouse_human_convert_genes, nmf_feature_rank) %>%
           mutate(avg_lfc=apply(nmf_feature_rank, 1, mean),
@@ -1981,7 +2036,6 @@ shinyServer(function(input, output, session) {
     },
     content = function(file) {
       tmpdir <- tempdir()
-      # tmpdir <- "/mnt/sake-uploads/"
       current_dir <- getwd()
       setwd(tempdir())
 
