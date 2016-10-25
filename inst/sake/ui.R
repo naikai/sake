@@ -54,7 +54,7 @@ sidebar <- dashboardSidebar(
                               selectInput("EnrichType",
                                           label = "Which Category?",
                                           choices = c("GO", "KEGG"),
-                                          selected = "GO")
+                                          selected = "KEGG")
              )
   )
 )
@@ -882,14 +882,8 @@ body <- dashboardBody(
                                                               "Log Fold Change" = "logFC"),
                                                   selected = "logFC")
                       ),
-                      column(width=2, selectInput("pathway_mode",
-                                                  label = "What kind of results?",
-                                                  choices = c("Enrichment Analysis" = "enrich",
-                                                              "Expr logFC btw groups" = "logFC"),
-                                                  selected = "enrich")
-                      ),
-                      column(width=3, selectInput("samedir",
-                                                  label = "Require logFC in same direction",
+                      column(width=2, selectInput("samedir",
+                                                  label = "Need logFC in same direction",
                                                   choices = c("Yes"=TRUE, "NO"=FALSE),
                                                   selected = TRUE)
                       ),
@@ -897,9 +891,38 @@ body <- dashboardBody(
                                                   label = "Expression cutoff:",
                                                   min=0, max=10, value=0.5, step=0.05)
                       ),
-                      column(width=1, numericInput("qval_cutoff",
+                      column(width=2, numericInput("qval_cutoff",
                                                   label = "q_val cutoff:",
-                                                  min=0.05, max=1, value=0.1, step=0.05)
+                                                  min=0.05, max=1, value=0.4, step=0.05)
+                      ),
+                      column(width=2, selectInput("go_logscale",
+                                                  label = "Use Log scale",
+                                                  choices = c("Yes"=TRUE, "No"=FALSE),
+                                                  selected = TRUE)
+                      )
+                    ),
+                    fluidRow(
+                      column(width=2, selectInput("go_colorscale",
+                                                  label = "Color Scheme:",
+                                                  # choices = c("Greys", "YlGnBu", "Greens", "YlOrRd", "Bluered", "RdBu", "Reds", "Blues", "Picnic", "Rainbow", "Portland", "Jet", "Hot", "Blackbody", "Earth", "Electric", "Viridis"),
+                                                  choices = c("YlOrRd", "YlOrBr", "YlGnBu", "PuBuGn", "Spectral", "RdYlGn", "RdYlBu", "RdGy", "RdBu", "PRGn", "BuPu", "BuGn", "Blues", "Greys", "PiYG", "BrBG"),
+                                                  selected = "Spectral")
+                      ),
+                      column(width=2, numericInput("go_xfontsize",
+                                                   label = "x-axis font size:",
+                                                   min=2, max=30, value=10, step=1)
+                      ),
+                      column(width=2, numericInput("go_yfontsize",
+                                                   label = "y-axis font size:",
+                                                   min=2, max=30, value=8, step=1)
+                      ),
+                      column(width=2, numericInput("go_leftmargin",
+                                                   label = "left margin:",
+                                                   min=50, max=500, value=200, step=10)
+                      ),
+                      column(width=2, numericInput("go_barwidth",
+                                                   label = "colorbar width:",
+                                                   min=10, max=40, value=14, step=2)
                       ),
                       column(width=2, br(),
                              downloadButton("downloadPathData", "Download Result", class="dwnld")
@@ -909,22 +932,32 @@ body <- dashboardBody(
               )
             ),
             fluidRow(
-              box(width=7, #height = "450px",
-                  DT::dataTableOutput('go_summary'),
-                  tags$hr(),
-                  p(
-                    class = "text-muted",
-                    paste("Note: Make sure you select the correct species.")
-                  )
+              column(width=4,
+                     box(width=NULL, title="GO term", height = "500px",
+                         DT::dataTableOutput('go_summary'),
+                         tags$hr(),
+                         p(
+                           class = "text-muted",
+                           paste("Note: Make sure you select the correct species.")
+                         )
+                     )
               ),
-              box(width=5,
-                  plotlyOutput('goplot_hi'),
-                  plotlyOutput('goplot_lo')
+              column(width=4,
+                     box(width=NULL, title="Summary Plot - Greater", solidHeader=TRUE, status="info", height="500px",
+                         plotlyOutput('goplot_hi')
+                     )
+              ),
+              column(width=4,
+                     box(width=NULL, title="Summary Plot - Less", solidHeader=TRUE, status="info", height="500px",
+                         plotlyOutput('goplot_lo')
+                     )
               ),
               conditionalPanel(
                 condition = "input.EnrichType == 'KEGG'",
-                box(width=12, height = "850px",
-                    imageOutput("pathviewImg")
+                column(width=12,
+                       box(width=NULL, height = "850px",
+                           imageOutput("pathviewImg")
+                       )
                 )
               )
             )

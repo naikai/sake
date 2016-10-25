@@ -139,7 +139,7 @@ shinyServer(function(input, output, session) {
                                    scrollY = TRUE,
                                    pageLength = 8
                     )
-      )
+      ) %>% formatRound(1:ncol(rawdata), 3)
     })
   }, server=TRUE)
 
@@ -1870,12 +1870,12 @@ shinyServer(function(input, output, session) {
         res[[i]] <- goRes
       }
     })
-    save(res, file="goRes.rda")
     return(res)
   })
 
   go_summary <- reactive({
     goRes <- go.Res()
+    genes <- goRes[[1]]$greater %>% rownames
     res <- list()
     num_genes <- 5
     hi_res <- lo_res <- matrix(NA, num_genes * length(goRes), length(goRes))
@@ -1888,43 +1888,77 @@ shinyServer(function(input, output, session) {
       hi_res[range, ] <- sapply(goRes, function(x) x$greater[hi_genenames, "p.val"])
       total_hi_names[range] <- hi_genenames
 
-      lo_genenames <- goRes[[i]]$less %>% rownames %>% head(n = num_genes)
-      lo_res[range, ] <- sapply(goRes, function(x) x$less[lo_genenames, "p.val"])
-      total_lo_names[range] <- lo_genenames
+      if(!is.na(goRes[[i]]$less)){
+        lo_genenames <- goRes[[i]]$less %>% rownames %>% head(n = num_genes)
+        lo_res[range, ] <- sapply(goRes, function(x) x$less[lo_genenames, "p.val"])
+        total_lo_names[range] <- lo_genenames
+      }
     }
     rownames(hi_res) <- total_hi_names
     rownames(lo_res) <- total_lo_names
-
     # save only the unique GO:Term
-    res[["hi"]] <- hi_res[!duplicated(rownames(hi_res)), ]
-    res[["lo"]] <- lo_res[!duplicated(rownames(lo_res)), ]
-    save(res, file="go_summary.rda")
+    res[["hi_sub_pval"]] <- hi_res[!duplicated(rownames(hi_res)), ]
+    res[["lo_sub_pval"]] <- lo_res[!duplicated(rownames(lo_res)), ]
+
+    # save total results
+    res[["hi_total_pval"]] <- sapply(goRes, function(x) x$greater[genes, "p.val"])
+    res[["hi_total_qval"]] <- sapply(goRes, function(x) x$greater[genes, "q.val"])
+    res[["lo_total_pval"]] <- sapply(goRes, function(x) x$less[genes, "p.val"])
+    res[["lo_total_qval"]] <- sapply(goRes, function(x) x$less[genes, "q.val"])
+
     return(res)
   })
 
   output$goplot_hi <- renderPlotly({
     req(go_summary())
     withProgress(message = 'Generating summary plot for GO term', value = NULL, {
-      aa <- melt(go_summary()[["hi"]])
-      p <- plot_ly(aa, x = ~Var2, y = ~Var1, z = ~value, type = "heatmap",
-                   reversescale=TRUE, colorscale = "RdBu")
-      m <- list( l = 400, r = 80, b = 80, t = 100)
-      p %>% layout(margin = m,
-               xaxis = list(title = "", zeroline=FALSE),
-               yaxis = list(title = "", tickfont=list(family = "Arial", size = 10), zeroline=FALSE))
+      aa <- melt(go_summary()[["hi_sub_pval"]])
+      colnames(aa) <- c("GO", "NMF", "P")
+
+      if(input$go_logscale){
+        p <- plot_ly(aa, x = NMF, y = GO, z = log10(P), type = "heatmap", colors = input$go_colorscale)
+      }else{
+        p <- plot_ly(aa, x = NMF, y = GO, z = P, type = "heatmap", colors = input$go_colorscale)
+      }
+
+      m <- list( l = input$go_leftmargin, r = 10, b = 40, t = 20)
+      l <- list(margin = m,
+                xaxis = list(title = "", tickfont=list(family = "Arial", size = input$go_xfontsize), zeroline=FALSE),
+                yaxis = list(title = "", tickfont=list(family = "Arial", size = input$go_yfontsize), zeroline=FALSE))
+
+      colorbar_format <- list(family = "Arial", size = 8)
+      naikai <- plotly_build(p)
+      naikai$data[[1]]$colorbar <- list(title = "P", thickness = input$go_barwidth, len=0.5, titlefont=colorbar_format, tickfont=colorbar_format)
+      naikai$layout <- l
+      naikai
     })
   })
 
   output$goplot_lo <- renderPlotly({
     req(go_summary())
+    validate(
+      need(!is.na(go_summary()[["lo_sub_pval"]]), "Did not find any GO terms for less, maybe your select 'two-directional test'?")
+    )
     withProgress(message = 'Generating summary plot for GO term', value = NULL, {
-      aa <- melt(go_summary()[["lo"]])
-      p <- plot_ly(aa, x = ~Var2, y = ~Var1, z = ~value, type = "heatmap",
-                   reversescale=TRUE, colorscale = "RdBu")
-      m <- list( l = 400, r = 80, b = 80, t = 100)
-      p %>% layout(margin = m,
-               xaxis = list(title = "", zeroline=FALSE),
-               yaxis = list(title = "", tickfont=list(family = "Arial", size = 10), zeroline=FALSE))
+      aa <- melt(go_summary()[["lo_sub_pval"]])
+      colnames(aa) <- c("GO", "NMF", "P")
+
+      if(input$go_logscale){
+        p <- plot_ly(aa, x = NMF, y = GO, z = log10(P), type = "heatmap", colors = input$go_colorscale)
+      }else{
+        p <- plot_ly(aa, x = NMF, y = GO, z = P, type = "heatmap", colors = input$go_colorscale)
+      }
+
+      m <- list( l = input$go_leftmargin, r = 10, b = 40, t = 20)
+      l <- list(margin = m,
+                   xaxis = list(title = "", tickfont=list(family = "Arial", size = input$go_xfontsize), zeroline=FALSE),
+                   yaxis = list(title = "", tickfont=list(family = "Arial", size = input$go_yfontsize), zeroline=FALSE))
+
+      colorbar_format <- list(family = "Arial", size = 8)
+      naikai <- plotly_build(p)
+      naikai$data[[1]]$colorbar <- list(title = "P", thickness = input$go_barwidth, len=0.5, titlefont=colorbar_format, tickfont=colorbar_format)
+      naikai$layout <- l
+      naikai
     })
   })
 
@@ -1948,8 +1982,9 @@ shinyServer(function(input, output, session) {
     if(nrow(go_table) == 0){
       stop("No significant gene sets found using this q.val cutoff")
     }
+    go_table <- go_table[, c(3,4,2,5)]
     datatable(go_table, selection = 'single',
-              extensions = 'Buttons',
+              extensions = c('Buttons', 'Responsive'),
               options = list(dom = 'Bfrtip',
                              buttons =
                                list('colvis', 'copy', 'print', list(
@@ -1961,10 +1996,10 @@ shinyServer(function(input, output, session) {
                                  text = 'Download'
                                )),
                              pageLength = 6,
-                             autoWidth = TRUE,
-                             columnDefs = list(list(width = '50px', targets = "_all"))
+                             autoWidth = TRUE
+                             # columnDefs = list(list(width = '10px', targets = "_all"))
               )
-    ) %>% formatRound(1:ncol(go_table()), 3)
+    ) %>% formatRound(1:3, 3)
   }, server = FALSE)
 
 
@@ -2039,19 +2074,25 @@ shinyServer(function(input, output, session) {
       current_dir <- getwd()
       setwd(tempdir())
 
-      ### modify it to save one file for each rank ###
+      ### Save GO Term results
+      go_summary <- go_summary()
+      total_idx <- grep("total", names(go_summary))
+      go_filenames <- paste(file_prefix(), paste0("Enrichment_", names(go_summary)[total_idx]), "txt", sep=".")
+      for(i in 1:length(total_idx)){
+        write.table(go_summary[[ total_idx[i] ]], go_filenames[i], quote=F, row.names = TRUE, col.names=NA, sep="\t")
+      }
+      ### Rank file for GSEA
+      # modify it to save one file for each rank ###
       nmf_group_feature_rank <- nmf_feature_rank_for_gsea()
       num_samples <- ncol(nmf_group_feature_rank)
-      filenames <- paste(file_prefix(),
-                         paste0("group_feature_rank", 1:num_samples),
-                         "rnk",
-                         sep=".")
+      filenames <- paste(file_prefix(), paste0("group_feature_rank", 1:num_samples), "rnk", sep=".")
       for (i in 1:num_samples){
         sub.data <- data.frame(Gene=rownames(nmf_group_feature_rank), LogFC=nmf_group_feature_rank[,i])
         idx <- is.finite(sub.data$LogFC)
         write.table(sub.data[idx, ], filenames[i], quote=F, row.names = F, sep="\t")
       }
-      zip(zipfile=file, files=filenames)
+
+      zip(zipfile=file, files=c(go_filenames, filenames))
       setwd(as.character(current_dir))
     },
     contentType = "application/zip"
