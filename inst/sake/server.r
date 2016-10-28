@@ -477,7 +477,7 @@ shinyServer(function(input, output, session) {
         if(test_yabi == 0){
           createAlert(session, "YabiAlert", "YabiAlert1", title = "Running NMF on Amazon Cloud", style = "success",
                       content = paste0("Sample size is ", ncol(merged),
-                                       ". We are running this job on the cloud and will notify you when the results are ready.<br>"),
+                                       ". We are running tiis job on the cloud and will notify you when the results are ready.<br>"),
                       append = FALSE)
           # pop up window asking for email
           data_path <- "/mnt/sake-uploads"
@@ -878,7 +878,7 @@ shinyServer(function(input, output, session) {
 
     num_clus <- nmf_groups$nmf_subtypes %>% unique %>% length
     mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
-    num_poss_cor <- nmf_groups$nmf_subtypes %>% table %>% apply(., 1, function(x) x * (x-1)) %>% sum
+    num_poss_cor <- nmf_groups$nmf_subtypes %>% table %>% apply(., 1, function(x) x * (x-1) / 2) %>% sum
     group_cor <- data.frame(matrix(NA_real_, nrow=num_poss_cor, ncol=2))
 
     j <- 1
@@ -1007,7 +1007,6 @@ shinyServer(function(input, output, session) {
             geom_boxplot(aes(color = NMF)) +
             geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
             theme_bw() +
-            xlab("") + ylab("Expression") +
             scale_colour_manual(values = mycolor) +
             labs(title=gene, x="", y="Expression", colour="")
       p <- plotly_build(a)
@@ -1018,6 +1017,11 @@ shinyServer(function(input, output, session) {
         }
         return(x)
       })
+      p$layout$margin$l <- p$layout$margin$l + 15
+      p$layout$annotations[[1]]$x <- -0.1
+      p$layout$xaxis$tickfont$size <- 8
+      p$layout$annotations[[1]]$font$size <- 11
+      p$layout$yaxis$tickfont$size <- 10
       p
     })
   })
@@ -1396,6 +1400,11 @@ shinyServer(function(input, output, session) {
                          choices = choices,
                          selected = choices[1]
     )
+    updateSelectizeInput(session, 'pt_grp_order',
+                         server = TRUE,
+                         choices = choices,
+                         selected = choices[1]
+    )
   })
 
   observeEvent(transform_data$data, {
@@ -1439,7 +1448,6 @@ shinyServer(function(input, output, session) {
       group <- input$pt_nmfgene
     }else if(input$pt_col == "Filename"){
       filename <- colnames(heatmap_data)
-      # filename <- sapply(strsplit(filename, "_"), function(x) paste0(x[c(1)], collapse = "_"))
       filename <- sapply(strsplit(filename, "_"), function(x) paste0(x[as.numeric(input$pt_file_grp)], collapse = "_"))
       col <- create.brewer.color(filename, length(unique(filename)), "naikai") %>% as.matrix
       group <- filename %>% as.matrix
@@ -1564,8 +1572,6 @@ shinyServer(function(input, output, session) {
       projection <- parse_tsne_res(tsne_out) %>% data.frame
       projection$color <- color
       min.cost <- signif(tsne_out$itercosts[length(tsne_out$itercosts)], 2)
-      colors <- create.brewer.color(projection$color, length(unique(color)), "naikai")
-
       if(input$plot_label){
         t <- list( size=input$plot_label_size, color=toRGB("grey50") )
         p <- plot_ly(projection, x=projection$x, y=projection$y, mode="markers+text",
@@ -1717,10 +1723,8 @@ shinyServer(function(input, output, session) {
         geom_boxplot(aes(color = NMF)) +
         geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
         theme_bw() +
-        xlab("") + ylab("Expression") +
         scale_colour_manual(values = mycolor) +
-        labs(title=gene, x="", y="Expression",
-             colour="")
+        labs(title=gene, x="", y="Expression", colour="")
       p <- plotly_build(a)
       # remove outliers for plotly boxplot
       p$data <- lapply(p$data, FUN = function(x){
@@ -1729,6 +1733,11 @@ shinyServer(function(input, output, session) {
         }
         return(x)
       })
+      p$layout$margin$l <- p$layout$margin$l + 15
+      p$layout$annotations[[1]]$x <- -0.1
+      p$layout$xaxis$tickfont$size <- 8
+      p$layout$annotations[[1]]$font$size <- 11
+      p$layout$yaxis$tickfont$size <- 10
       p
     })
   })
@@ -1914,6 +1923,7 @@ shinyServer(function(input, output, session) {
     withProgress(message = 'Generating summary plot for GO term', value = NULL, {
       aa <- melt(go_summary()[["hi_sub_pval"]])
       colnames(aa) <- c("GO", "NMF", "P")
+      aa$P[is.na(aa$P)] <- 1
 
       if(input$go_logscale){
         p <- plot_ly(aa, x = NMF, y = GO, z = log10(P), type = "heatmap", colors = input$go_colorscale)
@@ -1942,6 +1952,7 @@ shinyServer(function(input, output, session) {
     withProgress(message = 'Generating summary plot for GO term', value = NULL, {
       aa <- melt(go_summary()[["lo_sub_pval"]])
       colnames(aa) <- c("GO", "NMF", "P")
+      aa$P[is.na(aa$P)] <- 1
 
       if(input$go_logscale){
         p <- plot_ly(aa, x = NMF, y = GO, z = log10(P), type = "heatmap", colors = input$go_colorscale)
