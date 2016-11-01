@@ -212,7 +212,7 @@ body <- dashboardBody(
                                                   selected = "mad")),
                       column(width=4, sliderInput("top.num",
                                                   label = "How many genes to select", ticks = FALSE,
-                                                  min=20, max=5000, value=3000, step = 20)
+                                                  min=20, max=15000, value=5000, step = 1000)
                       )
                     ),
                     conditionalPanel(
@@ -502,7 +502,7 @@ body <- dashboardBody(
                       column(width=2, selectInput("heat.top.num",
                                                   label = "How many top genes:",
                                                   choices = c(seq(10,100,10), seq(200, 1000, 100), seq(2000, 15000, 1000)),
-                                                  selected = 3000)
+                                                  selected = 5000)
                       )
                     ),
                     conditionalPanel(
@@ -678,40 +678,48 @@ body <- dashboardBody(
                                        choices=NULL, multiple=FALSE,
                                        options = list(placeholder='Hierarchical'))
                         ),
-                        column(width=2, sliderInput("ColSideColorsNum", label = "Num of Column Color:", min=1, max=4, value=1, ticks = F)),
                         column(width=2, numericInput("ColSideColorsSize", label = "Column Color Size:", value=1.5, step=0.1)),
-                        # Need to fix this later
                         conditionalPanel(
-                          condition = "input.ColSideColorsNum == 1",
+                          condition = "input.ColClrBy == 'Filename'",
+                          column(width=2, selectInput("SelColSideColors",
+                                                      label = "Show columns in order:",
+                                                      multiple = TRUE,
+                                                      choices = c(1,2,3,4),
+                                                      selected = 1)),
+                          column(width=2, sliderInput("ColSideColorsNum", label = "Modify Which Column:", min=1, max=4, value=1, ticks = F)),
+                          # Need to fix this later
+                          conditionalPanel(
+                            condition = "input.ColSideColorsNum == 1",
                             column(width=2, selectInput("ColScheme1",
                                                         label = "Column Color 1:",
                                                         choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
                                                         selected = "naikai")),
                             column(width=2, numericInput("ColScheme1.num", label = "Num of colors:", value = 5))
-                        ),
-                        conditionalPanel(
-                          condition = "input.ColSideColorsNum == 2",
+                          ),
+                          conditionalPanel(
+                            condition = "input.ColSideColorsNum == 2",
                             column(width=2, selectInput("ColScheme2",
                                                         label = "Column Color 2:",
                                                         choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
                                                         selected = "Paired")),
                             column(width=2, numericInput("ColScheme2.num", label = "Num of colors:", value = 10))
-                        ),
-                        conditionalPanel(
-                          condition = "input.ColSideColorsNum == 3",
+                          ),
+                          conditionalPanel(
+                            condition = "input.ColSideColorsNum == 3",
                             column(width=2, selectInput("ColScheme3",
                                                         label = "Column Color 3:",
                                                         choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
                                                         selected = "Greys")),
                             column(width=2, numericInput("ColScheme3.num", label = "Num of colors:", value = 10))
-                        ),
-                        conditionalPanel(
-                          condition = "input.ColSideColorsNum == 4",
+                          ),
+                          conditionalPanel(
+                            condition = "input.ColSideColorsNum == 4",
                             column(width=2, selectInput("ColScheme4",
                                                         label = "Column Color 4:",
                                                         choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
                                                         selected = "YlOrRd")),
                             column(width=2, numericInput("ColScheme4.num", label = "Num of colors:", value = 10))
+                          )
                         )
                       )
                     )
@@ -771,6 +779,17 @@ body <- dashboardBody(
                       column(width=1, numericInput("plot_label_size", label = "LabelSize", value=9)),
                       column(width=1, checkboxInput('plot_label', 'Add label', FALSE)),
                       column(width=1, checkboxInput('plot_legend', 'Add legend', TRUE)),
+                      column(width=2, selectInput("pt_sel_grp_order", label="Group Order", choices=c("Default", "Manual"), selected="Default")),
+                      conditionalPanel(
+                        condition = "input.pt_sel_grp_order == 'Manual' & (input.pt_col == 'Filename' || input.pt_col == 'NMF Group')",
+                        column(width=2, selectizeInput("pt_grp_order",
+                                                       label="Select group order",
+                                                       choices=NULL, multiple=TRUE,
+                                                       options = list(
+                                                         onInitialize = I('function() { this.setValue(""); }')
+                                                       ))
+                        )
+                      ),
                       uiOutput("visualperplexity_UI"),
                       column(width=6, bsAlert("visualperplexityAlert"))
                     )

@@ -1233,8 +1233,18 @@ shinyServer(function(input, output, session) {
       res[['name']] <- paste0("NMF", nmf_subtypes) %>% as.matrix
     }else if(input$ColClrBy == 'Filename'){
       res <- name_to_color(colnames(heatmap_data), split_pattern ="\\_",
-                           num_color = input$ColSideColorsNum,
-                           ColScheme = ColScheme()[1:input$ColSideColorsNum] )
+                           num_color = 4,
+                           ColScheme = ColScheme()[1:4] )
+                           # num_color = input$ColSideColorsNum,
+                           # ColScheme = ColScheme()[1:input$ColSideColorsNum] )
+      # add options to select which column to show
+      if(is.null(input$SelColSideColors)){
+        res[['color']] <- NULL
+        res[['name']] <- NULL
+      }else{
+        res[['color']] <- res[['color']][, as.numeric(input$SelColSideColors)] %>% as.matrix()
+        res[['name']] <- res[['name']][, as.numeric(input$SelColSideColors)] %>% as.matrix()
+      }
     }
     return(res)
   })
