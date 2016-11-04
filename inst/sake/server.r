@@ -95,9 +95,9 @@ shinyServer(function(input, output, session) {
     validate(
       need(!is.null(rda$rawdata), "Variable 'rawdata' does not exist in your .rda file, please check it and upload again") %then%
       need(nrow(rda$rawdata) > 0, "Variable 'rawdata' in your .rda file is empty, please check it and upload again") %then%
-      need(!is.null(rda$nmfres), "Variable 'nmfres' does not exist in your .rda file, please check it and upload again") %then%
-      need(!is.null(rda$tsne_2d), "Variable 'tsne_2d' does not exist in your .rda file, please check it and upload again") %then%
-      need(!is.null(rda$tsne_3d), "Variable 'tsne_3d' does not exist in your .rda file, please check it and upload again") #%then%
+      need(!is.null(rda$nmfres), "Variable 'nmfres' does not exist in your .rda file, please check it and upload again")
+      # need(!is.null(rda$tsne_2d), "Variable 'tsne_2d' does not exist in your .rda file, please check it and upload again") %then%
+      # need(!is.null(rda$tsne_3d), "Variable 'tsne_3d' does not exist in your .rda file, please check it and upload again") #%then%
       # need(!is.null(rda$dds), "Variable 'dds' does not exist in your .rda file, please check it and upload again")
     )
     return(rda)
@@ -468,12 +468,13 @@ shinyServer(function(input, output, session) {
     if(input$selectfile == "saved"){
       nmfres <- rda()$nmfres
     }else{
-      if(ncol(merged) >= 500){
+      if(ncol(merged) >= 300){
         # toggleModal(session, "nmfModal1", toggle = "open")
 
         # Run NMF through YABI
-        test_yabi <- try(system("yabish login yabi buffalo! backends"))
-        # test_yabi <- try(system("ls"))
+        # test_yabi <- try(system("yabish login yabi buffalo! backends"))
+        # Will remove yabi later, right now just don't let yabi command start and run NMF on the shiny01 server
+        test_yabi <- try(system("naikai"))
         if(test_yabi == 0){
           createAlert(session, "YabiAlert", "YabiAlert1", title = "Running NMF on Amazon Cloud", style = "success",
                       content = paste0("Sample size is ", ncol(merged),
@@ -573,13 +574,16 @@ shinyServer(function(input, output, session) {
       tmpdir <- tempdir()
       current_dir <- getwd()
       setwd(tmpdir)
-      filenames <- sapply(c("nmf_Groups", "nmf_Features", "Original_plus_NMF", "runSummary"),
+      filenames <- sapply(c("nmf_Groups", "nmf_Features", "Original_plus_NMF"),
                           function(x) paste(file_prefix(), x, "csv", sep="."))
       write.csv(nmf_groups(), filenames[1], quote=F, row.names=F)
       write.csv(nmf_features(), filenames[2], quote=F, row.names=F)
       write.csv(ori_plus_nmfResult(), filenames[3], quote=F)
-      # write.csv(runSummary(), filenames[4], quote=F)
-      zip(zipfile=file, files=filenames)
+      nmfres <- nmf_res()
+      rawdata <- rawdata()
+      nmfres_filename <- paste(file_prefix(), "nmfres", "rda", sep=".")
+      save(rawdata, nmfres, file=nmfres_filename)
+      zip(zipfile=file, files=c(filenames, nmfres_filename))
       setwd(as.character(current_dir))
     },
     contentType = "application/zip"
