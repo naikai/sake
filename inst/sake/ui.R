@@ -45,7 +45,6 @@ sidebar <- dashboardSidebar(
              ),
     menuItem("Differential analysis", tabName="DE", icon = icon('tasks', lib="glyphicon"),
              menuSubItem("DESeq2", tabName="DESeq2")
-             # menuSubItem("Monocle", tabName="Monocle"),
              # menuSubItem("SCDE", tabName="SCDE")
     ),
     menuItem("Enrichment analysis", tabName="enrichment", icon = icon('cogs')
@@ -288,12 +287,13 @@ body <- dashboardBody(
                     ),
                     uiOutput("dlNMF_UI"),
                     column(width=6, bsAlert("NMFAlert")),
-                    column(width=6, bsAlert("YabiAlert"))
-                    # bsModal("nmfModal1", "Warning!\nYour gene size is above 1000, it will take longer than usual.\nAre you sure you want to continue?",
-                    #         trigger = "", size = "small",
-                    #         actionButton("nmf_yabi_yes", 'Yes'),
-                    #         actionButton("nmf_yabi_no", 'No')
-                    # )
+                    column(width=6, bsAlert("YabiAlert")),
+                    bsModal("nmfModal1", "Warning!\nYour gene size is above 1000, it will take longer than usual.\nAre you sure you want to continue?",
+                            trigger = "", size = "small",
+                            textInput("mailto", label = "To:", placeholder = "To:"),
+                            actionButton("nmf_yabi_yes", 'Yes'),
+                            actionButton("nmf_yabi_no", 'No')
+                    )
                   ),
                   fluidRow(
                     conditionalPanel(
@@ -678,15 +678,15 @@ body <- dashboardBody(
                                        choices=NULL, multiple=FALSE,
                                        options = list(placeholder='Hierarchical'))
                         ),
-                        column(width=2, numericInput("ColSideColorsSize", label = "Column Color Size:", value=1.5, step=0.1)),
+                        column(width=2, numericInput("ColSideColorsSize", label = "Column Color Size:", value=2.0, step=0.1)),
                         conditionalPanel(
                           condition = "input.ColClrBy == 'Filename'",
                           column(width=2, selectInput("SelColSideColors",
                                                       label = "Show columns in order:",
                                                       multiple = TRUE,
-                                                      choices = c(1,2,3,4),
+                                                      choices = c(1,2,3,4,5),
                                                       selected = 1)),
-                          column(width=2, sliderInput("ColSideColorsNum", label = "Modify Which Column:", min=1, max=4, value=1, ticks = F)),
+                          column(width=2, sliderInput("ColSideColorsNum", label = "Modify Which Column:", min=1, max=5, value=1, ticks = F)),
                           # Need to fix this later
                           conditionalPanel(
                             condition = "input.ColSideColorsNum == 1",
@@ -719,6 +719,14 @@ body <- dashboardBody(
                                                         choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
                                                         selected = "YlOrRd")),
                             column(width=2, numericInput("ColScheme4.num", label = "Num of colors:", value = 10))
+                          ),
+                          conditionalPanel(
+                            condition = "input.ColSideColorsNum == 5",
+                            column(width=2, selectInput("ColScheme5",
+                                                        label = "Column Color 5:",
+                                                        choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
+                                                        selected = "Pastel1")),
+                            column(width=2, numericInput("ColScheme5.num", label = "Num of colors:", value = 10))
                           )
                         )
                       )

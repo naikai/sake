@@ -468,8 +468,8 @@ shinyServer(function(input, output, session) {
     if(input$selectfile == "saved"){
       nmfres <- rda()$nmfres
     }else{
-      if(ncol(merged) >= 300){
-        toggleModal(session, "nmfModal1", toggle = "open")
+      if(ncol(merged) >= 500){
+        # toggleModal(session, "nmfModal1", toggle = "open")
 
         # Run NMF through YABI
         test_yabi <- try(system("yabish login yabi buffalo! backends"))
@@ -714,8 +714,8 @@ shinyServer(function(input, output, session) {
 
   # Add t-SNE plot next to NMF group
   observeEvent(input$run_nmftSNE, {
-    heatmap_data <- heatmap_data()[['heatmap_data']]
-    nsamples <- ncol(heatmap_data()[['heatmap_data']])
+    plot_data <- plot_data()[['plot_data']]
+    nsamples <- ncol(plot_data()[['plot_data']])
     if(input$nmftsne_perplexity*3 > (nsamples-1)) {
            createAlert(session, "perplexityAlert", "perplexityAlert1", title = "WARNING", style = "warning",
                        content = paste("Perpleixty", input$nmftsne_perplexity,
@@ -727,12 +727,12 @@ shinyServer(function(input, output, session) {
       withProgress(message = 'Running t-SNE', value = NULL, {
         incProgress(1/3, detail = "For t-SNE 2D")
         try(
-          tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
+          tsne_2d$data <- run_tsne(plot_data, iter=input$tsne_iter, dims=2,
                                    perplexity=input$nmftsne_perplexity, cores=cores())
         )
         incProgress(2/3, detail = "For t-SNE 3D")
         try(
-          tsne_3d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=3,
+          tsne_3d$data <- run_tsne(plot_data, iter=input$tsne_iter, dims=3,
                                    perplexity=input$nmftsne_perplexity, cores=cores())
         )
       })
@@ -740,8 +740,8 @@ shinyServer(function(input, output, session) {
   })
 
   nmfplottsne <- reactive({
-    heatmap_data <- heatmap_data()[['heatmap_data']]
-    nsamples <- ncol(heatmap_data)
+    plot_data <- plot_data()[['plot_data']]
+    nsamples <- ncol(plot_data)
     validate(
       need(input$mode=="real", "This part won't work for 'estim' module\nPlease Try NMF 'Real' run") %then%
       need(!is.null(tsne_2d$data), "Please hit 'Run t-SNE' button")
@@ -749,7 +749,7 @@ shinyServer(function(input, output, session) {
     color <- NULL
     # Will add an option to select by default column names from samples
     if(length(nmf_groups()$nmf_subtypes)>0){
-      idx <- match(colnames(heatmap_data), nmf_groups()$Sample_ID)
+      idx <- match(colnames(plot_data), nmf_groups()$Sample_ID)
       nmf_subtypes <- nmf_groups()$nmf_subtypes[idx]
       # color <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai")
       color <- nmf_subtypes
@@ -793,11 +793,11 @@ shinyServer(function(input, output, session) {
 
   output$nmfgrp_var <- renderPlotly({
     nmf_groups <- nmf_groups()
-    heatmap_data <- heatmap_data()[['heatmap_data']]
-    idx <- match(colnames(heatmap_data), nmf_groups$Sample_ID)
+    plot_data <- plot_data()[['plot_data']]
+    idx <- match(colnames(plot_data), nmf_groups$Sample_ID)
 
-    colnames(heatmap_data) <- paste0("NMF", nmf_groups$nmf_subtypes[idx])
-    dd <- heatmap_data %>% t %>% reshape2::melt(.) %>% group_by(Var2, Var1) %>% summarise(var=var(value))
+    colnames(plot_data) <- paste0("NMF", nmf_groups$nmf_subtypes[idx])
+    dd <- plot_data %>% t %>% reshape2::melt(.) %>% group_by(Var2, Var1) %>% summarise(var=var(value))
     dd <- dd[order(dd$Var1), ]
 
     num_clus <- dd$Var1 %>% levels %>% length
@@ -866,11 +866,11 @@ shinyServer(function(input, output, session) {
 
   output$nmfgrp_coef <- renderPlotly({
     nmf_groups <- nmf_groups()
-    heatmap_data <- heatmap_data()[['heatmap_data']]
-    idx <- match(colnames(heatmap_data), nmf_groups$Sample_ID)
+    plot_data <- plot_data()[['plot_data']]
+    idx <- match(colnames(plot_data), nmf_groups$Sample_ID)
     nmf_groups <- nmf_groups[idx, ]
 
-    colnames(heatmap_data) <- paste0("NMF", nmf_groups$nmf_subtypes)
+    colnames(plot_data) <- paste0("NMF", nmf_groups$nmf_subtypes)
     pair_cor <- function(x) {
       res <- WGCNA::cor(x, nThreads = 4)
       return(res[lower.tri(res)])
@@ -884,7 +884,7 @@ shinyServer(function(input, output, session) {
     j <- 1
     for(i in 1:num_clus){
       idx <- nmf_groups$nmf_subtypes == i
-      res <- pair_cor(heatmap_data[, idx])
+      res <- pair_cor(plot_data[, idx])
       group_cor[j:(j+length(res)-1), ] <- cbind(paste0("NMF", i), res)
       j <- j + length(res)
     }
@@ -1170,6 +1170,20 @@ shinyServer(function(input, output, session) {
     )
   })
 
+  # separate out this for PCA and t-SNE plots
+  plot_data <- reactive({
+    rawdata <- transform_data$data
+    genelist <- geneListInfo()[['list']]
+
+    idx <- match(genelist, rownames(rawdata))
+    plot_data <- rawdata[idx,]
+
+    res <- list()
+    res[["plot_data"]] <- plot_data
+    res[["genelist"]] <- genelist
+    return(res)
+  })
+
   heatmap_data <- reactive({
     rawdata <- transform_data$data
     genelist <- geneListInfo()[['list']]
@@ -1204,6 +1218,7 @@ shinyServer(function(input, output, session) {
     res[["gene.groups"]] <- gene.groups
     return(res)
   })
+
   color <- reactive({
     color <- switch(input$heatColorScheme,
                     "RdBu_Brewer" = colorRampPalette(rev(brewer.pal(input$color_num, "RdBu")))(51),
@@ -1217,7 +1232,7 @@ shinyServer(function(input, output, session) {
   })
   ColScheme <- reactive({
     ColScheme <- list()
-    ColScheme <- c(input$ColScheme1, input$ColScheme2, input$ColScheme3, input$ColScheme4)
+    ColScheme <- c(input$ColScheme1, input$ColScheme2, input$ColScheme3, input$ColScheme4, input$ColScheme5)
     return(ColScheme)
   })
 
@@ -1233,8 +1248,8 @@ shinyServer(function(input, output, session) {
       res[['name']] <- paste0("NMF", nmf_subtypes) %>% as.matrix
     }else if(input$ColClrBy == 'Filename'){
       res <- name_to_color(colnames(heatmap_data), split_pattern ="\\_",
-                           num_color = 4,
-                           ColScheme = ColScheme()[1:4] )
+                           num_color = 5,
+                           ColScheme = ColScheme()[1:5] )
                            # num_color = input$ColSideColorsNum,
                            # ColScheme = ColScheme()[1:input$ColSideColorsNum] )
       # add options to select which column to show
@@ -1440,42 +1455,42 @@ shinyServer(function(input, output, session) {
 
   point_col <- reactive({
     col <- toRGB("steelblue")
-    heatmap_data <- heatmap_data()[['heatmap_data']]
+    plot_data <- plot_data()[['plot_data']]
     group <- NULL
     if(input$pt_col == "Default"){
       group <- "Default"
     }else if(input$pt_col == "NMF Group"){
       req(nmf_groups)
-      idx <- match(colnames(heatmap_data), nmf_groups()$Sample_ID)
+      idx <- match(colnames(plot_data), nmf_groups()$Sample_ID)
       nmf_subtypes <- nmf_groups()$nmf_subtypes[idx]
       col <- create.brewer.color(nmf_subtypes, length(unique(nmf_subtypes)), "naikai")
       group <- paste0("NMF", nmf_subtypes)
     }else if(input$pt_col == "NMF Feature"){
       req(input$pt_nmfgene)
-      idx <- match(colnames(heatmap_data), colnames(transform_data$data))
+      idx <- match(colnames(plot_data), colnames(transform_data$data))
       gene_data <- transform_data$data[input$pt_nmfgene, idx] %>% as.numeric
       col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
       group <- input$pt_nmfgene
     }else if(input$pt_col == "Filename"){
-      filename <- colnames(heatmap_data)
+      filename <- colnames(plot_data)
       filename <- sapply(strsplit(filename, "_"), function(x) paste0(x[as.numeric(input$pt_file_grp)], collapse = "_"))
       col <- create.brewer.color(filename, length(unique(filename)), "naikai") %>% as.matrix
       group <- filename %>% as.matrix
     }else if(input$pt_col == "GeneExpr"){
       req(input$pt_allgene)
-      idx <- match(colnames(heatmap_data), colnames(transform_data$data))
+      idx <- match(colnames(plot_data), colnames(transform_data$data))
       gene_data <- transform_data$data[input$pt_allgene, idx] %>% as.numeric
       col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
       group <- input$pt_allgene
     }else if(input$pt_col == "ReadDepth"){
       req(rawdata())
-      idx <- match(colnames(heatmap_data), colnames(rawdata()))
+      idx <- match(colnames(plot_data), colnames(rawdata()))
       gene_data <- rawdata()[, idx] %>% colSums() %>% as.numeric
       col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
       group <- "Read Depth"
     }else if(input$pt_col == "NumExpresGenes"){
       req(rawdata())
-      idx <- match(colnames(heatmap_data), colnames(rawdata()))
+      idx <- match(colnames(plot_data), colnames(rawdata()))
       gene_data <- colSums(rawdata()[, idx]>0) %>% as.numeric
       col <- create.brewer.color(gene_data, num = 9, name="YlOrRd")
       group <- "Num Expressed Genes"
@@ -1491,7 +1506,7 @@ shinyServer(function(input, output, session) {
 
   #' PCA plot
   output$pcaPlot_2D <- renderPlotly({
-    data <- heatmap_data()[['heatmap_data']]
+    data <- plot_data()[['plot_data']]
     withProgress(message = 'Generating 2d PCA plot', value = NULL, {
       pc <- prcomp(t(data))
       projection <- as.data.frame(pc$x)
@@ -1516,7 +1531,7 @@ shinyServer(function(input, output, session) {
     })
   })
   output$pcaPlot_3D <- renderPlotly({
-    data <- heatmap_data()[['heatmap_data']]
+    data <- plot_data()[['plot_data']]
     withProgress(message = 'Generating 3d PCA plot', value = NULL, {
       pc <- prcomp(t(data))
       projection <- as.data.frame(pc$x)
@@ -1548,7 +1563,7 @@ shinyServer(function(input, output, session) {
   tsne_3d <- reactiveValues(data=NULL)
 
   observeEvent(input$runtSNE, {
-    nsamples <- ncol(heatmap_data()[['heatmap_data']])
+    nsamples <- ncol(plot_data()[['plot_data']])
     if(input$tsne_perplexity*3 > (nsamples-1)) {
       createAlert(session, "visualperplexityAlert", "visualperplexityAlert1", title = "WARNING", style = "warning",
                   content = paste("Perpleixty", input$tsne_perplexity,
@@ -1557,20 +1572,20 @@ shinyServer(function(input, output, session) {
     }else {
       closeAlert(session, "visualperplexityAlert1")
 
-      heatmap_data <- heatmap_data()[['heatmap_data']]
+      plot_data <- plot_data()[['plot_data']]
       withProgress(message = 'Running t-SNE', value = NULL, {
         incProgress(1/3, detail = "For t-SNE 2D")
-        tsne_2d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=2,
+        tsne_2d$data <- run_tsne(plot_data, iter=input$tsne_iter, dims=2,
                                  perplexity=input$tsne_perplexity, cores=cores())
         incProgress(2/3, detail = "For t-SNE 3D")
-        tsne_3d$data <- run_tsne(heatmap_data, iter=input$tsne_iter, dims=3,
+        tsne_3d$data <- run_tsne(plot_data, iter=input$tsne_iter, dims=3,
                                  perplexity=input$tsne_perplexity, cores=cores())
       })
     }
   })
 
   plot_tsne_2d <- reactive({
-    nsamples <- ncol(heatmap_data()[['heatmap_data']])
+    nsamples <- ncol(plot_data()[['plot_data']])
     validate(
       need(!is.null(tsne_2d$data), "Please click 'Run t-SNE' button")
     )
@@ -1603,7 +1618,7 @@ shinyServer(function(input, output, session) {
     plot_tsne_2d()
   })
   output$tsneplot_3d <- renderPlotly({
-    nsamples <- ncol(heatmap_data()[['heatmap_data']])
+    nsamples <- ncol(plot_data()[['plot_data']])
     if(is.null(tsne_3d$data)) return ()
     projection <- isolate(as.data.frame(tsne_3d$data$Y))
     labels <- rownames(projection)
