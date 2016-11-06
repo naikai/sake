@@ -802,10 +802,10 @@ shinyServer(function(input, output, session) {
 
     colnames(plot_data) <- paste0("NMF", nmf_groups$nmf_subtypes[idx])
     dd <- plot_data %>% t %>% reshape2::melt(.) %>% group_by(Var2, Var1) %>% summarise(var=var(value))
-    dd <- dd[order(dd$Var1), ]
 
     num_clus <- dd$Var1 %>% levels %>% length
     mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
+    dd$Var1 <- factor(dd$Var1, levels = paste0("NMF", 1:num_clus))
 
     a <- ggplot(dd, aes(var, fill=Var1, colour=Var1)) +
           geom_density(alpha=input$cl_alpha) + scale_x_log10() +

@@ -25,6 +25,7 @@ Imports:
     GO.db,
     matrixStats,
     pathview,
+    pkgmaker,
     plotly (>= 3.4.13),
     RcppArmadillo,
     Rtsne,
@@ -61,6 +62,7 @@ Suggests:
     knitr
 Remotes:
     hadley/devtools,
+    renozao/pkgmaker,
     renozao/NMF,
     bmbolstad/preprocessCore,
     rstudio/DT,
