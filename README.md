@@ -8,14 +8,40 @@ The aim of `sake` is to provide a user-friendly tool for easy analysis of NGS Si
 
 ### Version 0.3.1.0
 
+### Hardware requirement 
+
+Need at least **4G** RAM 
+
+
 ### Installation Guide
+
+#### First we will install these libraries before installing `sake` 
+For Centos 6.9
+```
+sudo yum install openssl-devel libcurl-devel libpng-devel libxml2-devel libxslt
+```
+
+For MacOS 
+```
+brew install 
+```
+
+##### Require `gcc` >= 4.6 
+```
+sudo yum install centos-release-scl
+sudo yum install devtoolset-3-toolchain
+scl enable devtoolset-3 bash
+```
+
+
 To install the latest development version from GitHub:
 ```R
 source("http://bioconductor.org/biocLite.R")
 biocLite(c("annotate", "AnnotationHub", "biomaRt", "DESeq2", "gage", "gageData", "GO.db", "pathview"))
 
 install.packages("devtools")
-devtools::install_github("naikai/sake")
+devtools::install_github("renozao/pkgmaker", ref="develop")
+devtools::install_github("naikai/sake", ref="package-installation")
 ```
 
 ### Usage 

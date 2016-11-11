@@ -16,7 +16,7 @@ Remotes:
     hadley/devtools,
     Bioconductor-mirror/biomaRt,
     renozao/pkgmaker@develop,
-    renozao/NMF@devel,
+    renozao/NMF,
     bmbolstad/preprocessCore,
     rstudio/DT,
     rstudio/d3heatmap@colorlabels

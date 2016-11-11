@@ -1658,6 +1658,11 @@ shinyServer(function(input, output, session) {
       closeAlert(session, "exampleAlert")
     }
 
+    # since the user might have filtered samples during the QC steps,
+    # rematch sample_ID and only kept the ones that are presented in NMF res
+    idx <- match(nmf_groups()$Sample_ID, colnames(rawdata))
+    rawdata <- rawdata[, idx]
+
     register(BiocParallel::MulticoreParam(workers = cores()))
     colData <- data.frame(Group = paste0("NMF", nmf_groups()$nmf_subtypes))
     ddsfeatureCounts <- DESeq2::DESeqDataSetFromMatrix(countData = rawdata,

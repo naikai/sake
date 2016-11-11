@@ -593,7 +593,7 @@ body <- dashboardBody(
                                               options = list(placeholder='Hierarchical')),
                                conditionalPanel(
                                  condition = "input.OrdCol == 'Filename'",
-                                 numericInput("sortcolumn_num", label = "Sort by which group:", value = 1)
+                                 numericInput("sortcolumn_num", label = "Sort by which group:", value = 1, min = 1)
                                ),
                                conditionalPanel(
                                  condition = "input.OrdCol == 'GeneExpr'",
