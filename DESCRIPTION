@@ -1,21 +1,27 @@
 Package: sake
 Type: Package
 Title: Single-cell RNA-Seq Analysis and Klustering Evaluation
-Version: 0.3.1
+Version: 0.3.2
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 Authors@R: c(
     person("Yu-Jui", "Ho", email = "naikai@gmail.com", role = c("aut", "cre")),
-    paerson("David", "Molik", email = "dmolik@nd.edu", role = "aut"),
-    paerson("Toby", "Aicher", email = "tpaicher@gmail.com", role = "aut")
+    person("David", "Molik", email = "dmolik@nd.edu", role = "aut"),
+    person("Toby", "Aicher", email = "tpaicher@gmail.com", role = "aut")
     )
-
 Description: This tool can help you quickly navigate through the expression profile,
     Using NMF method for unsupervised clustering.
 URL: http://github.com/naikai/sake
 BugReports: http://github.com/naikai/sake/issues
+Remotes:
+    hadley/devtools,
+    renozao/pkgmaker@develop,
+    renozao/NMF@devel,
+    bmbolstad/preprocessCore,
+    rstudio/DT,
+    rstudio/d3heatmap@colorlabels
 Depends:
-    R (>= 3.3.0),
-    pkgmaker (>= 0.26.1),
+    R (>= 3.1.0),
+    pkgmaker (>= 0.25.7),
     NMF (>= 0.22),
     dplyr (>= 0.4.3)
 Imports:
@@ -64,13 +70,6 @@ Suggests:
     WGCNA,
     webshot,
     knitr
-Remotes:
-    hadley/devtools,
-    renozao/pkgmaker@develop,
-    renozao/NMF@devel,
-    bmbolstad/preprocessCore,
-    rstudio/DT,
-    rstudio/d3heatmap@colorlabels,
 License: GPL (>=2)
 LazyData: TRUE
 RoxygenNote: 5.0.1
