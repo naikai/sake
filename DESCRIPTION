@@ -2,15 +2,20 @@ Package: sake
 Type: Package
 Title: Single-cell RNA-Seq Analysis and Klustering Evaluation
 Version: 0.3.1
-Date: 2016-07-14
-Authors@R: person("Yu-Jui", "Ho", email = "naikai@gmail.com",
-                  role = c("aut", "cre"))
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+Authors@R: c(
+    person("Yu-Jui", "Ho", email = "naikai@gmail.com", role = c("aut", "cre")),
+    paerson("David", "Molik", email = "dmolik@nd.edu", role = "aut"),
+    paerson("Toby", "Aicher", email = "tpaicher@gmail.com", role = "aut")
+    )
+
 Description: This tool can help you quickly navigate through the expression profile,
     Using NMF method for unsupervised clustering.
 URL: http://github.com/naikai/sake
 BugReports: http://github.com/naikai/sake/issues
 Depends:
-    R (>= 3.1.0),
+    R (>= 3.3.0),
+    pkgmaker (>= 0.25.7),
     NMF (>= 0.22),
     dplyr (>= 0.4.3)
 Imports:
@@ -25,7 +30,6 @@ Imports:
     GO.db,
     matrixStats,
     pathview,
-    pkgmaker (>= 0.25.7),
     plotly (>= 3.4.13),
     RcppArmadillo,
     Rtsne,
