@@ -14,6 +14,7 @@ URL: http://github.com/naikai/sake
 BugReports: http://github.com/naikai/sake/issues
 Remotes:
     hadley/devtools,
+    Bioconductor-mirror/biomaRt,
     renozao/pkgmaker@develop,
     renozao/NMF@devel,
     bmbolstad/preprocessCore,
@@ -26,7 +27,7 @@ Depends:
     dplyr (>= 0.4.3)
 Imports:
     AnnotationHub,
-    biomaRt,
+    biomaRt (>=3.4),
     caret,
     corrplot,
     d3heatmap,
