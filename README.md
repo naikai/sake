@@ -8,8 +8,11 @@ The aim of `sake` is to provide a user-friendly tool for easy analysis of NGS Si
 
 ### Version 0.3.1.0
 
+
 ### Installation Guide
-To install the latest development version from GitHub:
+
+
+To install the latest development version from `GitHub`:
 ```R
 source("http://bioconductor.org/biocLite.R")
 biocLite(c("annotate", "AnnotationHub", "biomaRt", "DESeq2", "gage", "gageData", "GO.db", "pathview"))
@@ -23,6 +26,7 @@ devtools::install_github("naikai/sake")
 library(sake)
 shiny::runApp(system.file("sake", package="sake"))
 ```
+
 
 ### Copying & Distribution
 Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.

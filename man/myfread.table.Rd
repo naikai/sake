@@ -14,7 +14,7 @@ myfread.table(filepath, check.platform = T, header = T, sep = "\\t",
 Use data.table for faster read.table
 }
 \examples{
-myfread.table(system.file('icash', package='icash'))
+myfread.table(system.file('sake', package='sake'))
 }
 \keyword{data}
 \keyword{read}
