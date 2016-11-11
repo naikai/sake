@@ -15,7 +15,7 @@ URL: http://github.com/naikai/sake
 BugReports: http://github.com/naikai/sake/issues
 Depends:
     R (>= 3.3.0),
-    pkgmaker (>= 0.25.7),
+    pkgmaker (>= 0.26.1),
     NMF (>= 0.22),
     dplyr (>= 0.4.3)
 Imports:
@@ -67,7 +67,7 @@ Suggests:
 Remotes:
     hadley/devtools,
     renozao/pkgmaker@develop,
-    renozao/NMF,
+    renozao/NMF@devel,
     bmbolstad/preprocessCore,
     rstudio/DT,
     rstudio/d3heatmap@colorlabels,
