@@ -22,8 +22,7 @@ Remotes:
     rstudio/d3heatmap@colorlabels
 Depends:
     R (>= 3.1.0),
-    pkgmaker (>= 0.25.7),
-    NMF (>= 0.22),
+    NMF (>= 0.20),
     dplyr (>= 0.4.3)
 Imports:
     AnnotationHub,
