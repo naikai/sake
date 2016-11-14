@@ -6,24 +6,12 @@
 ### **S**ingle-cell RNA-Seq **A**nalysis and **K**lustering **E**valuation
 The aim of `sake` is to provide a user-friendly tool for easy analysis of NGS Single-Cell transcriptomic data
 
-### Version 0.3.1.0
-
-### Hardware requirement 
-
-Need at least **4G** RAM 
-
-
 ### Installation Guide
 
 #### First we will install these libraries before installing `sake` 
 For Centos 6.9
 ```
 sudo yum install openssl-devel libcurl-devel libpng-devel libxml2-devel libxslt
-```
-
-For MacOS 
-```
-brew install 
 ```
 
 ##### Require `gcc` >= 4.6 
@@ -49,6 +37,12 @@ devtools::install_github("naikai/sake", ref="package-installation")
 library(sake)
 shiny::runApp(system.file("sake", package="sake"))
 ```
+
+### Getting Started
+These are the instructions that will walk you through the functions of `sake` package. 
+
+- [Data input](vignettes/Data_Input.html)
+
 
 ### Copying & Distribution
 Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.
