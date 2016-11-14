@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 ### **S**ingle-cell RNA-Seq **A**nalysis and **K**lustering **E**valuation
 The aim of `sake` is to provide a user-friendly tool for easy analysis of NGS Single-Cell transcriptomic data
 
-### Installation 
+## Installation 
 
 First we will install some prerequisite libraries before installing `sake`  
 
@@ -49,29 +49,25 @@ brew install gcc48
 ```
 
 Download and [Install R](http://cran.wustl.edu)   
-Download and [Install RStudio](https://www.rstudio.com/products/rstudio/download/) (Suggested but not Required)  
 
 
-#### To install the latest development version from GitHub (takes around 30-40 minutes)
+#### To install the latest development version from GitHub (around 30-40 minutes)
 ```R
 source("http://bioconductor.org/biocLite.R")
 biocLite(c("annotate", "AnnotationHub", "biomaRt", "DESeq2", "gage", "gageData", "GO.db", "pathview"))
 
 install.packages("devtools")
 devtools::install_github("renozao/pkgmaker", ref="develop")
-devtools::install_github("naikai/sake", ref="package-installation")
+devtools::install_github("naikai/sake")
 ```
 
-#### Or you can install package through [packrat](https://rstudio.github.io/packrat/) (takes around 7-10 minutes)
-
-
-### Usage 
+## Usage 
 ```R
 library(sake)
 shiny::runApp(system.file("sake", package="sake"))
 ```
 
-### Getting Started
+## Getting Started
 Please follow the links to briefly walk you through the functions of `sake` package. 
 
 - [Data input](vignettes/Data_Input.Rmd)
@@ -81,8 +77,8 @@ Please follow the links to briefly walk you through the functions of `sake` pack
 - [Visualization](vignettes/Visualization.Rmd)
 
 
-### Copying & Distribution
+## Copying & Distribution
 Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.
 
-### Web version 
+## Web version 
 Feel free to try out the web verison of the tool at url [sake](http://sake.mhammell.tools)
