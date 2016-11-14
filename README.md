@@ -42,8 +42,10 @@ shiny::runApp(system.file("sake", package="sake"))
 These are the instructions that will walk you through the functions of `sake` package. 
 
 - [Data input](vignettes/Data_Input.Rmd)
-- [Test input](DESCRIPTION)
-- [plot](Rplot.png)
+- [Data Metrics](vignettes/Data_Metrics.Rmd)
+- [Filtering](vignettes/Filtering.Rmd)
+- [Run NMF](vignettes/NMF.Rmd)
+- [Visualization](vignettes/Visualization.Rmd)
 
 ### Copying & Distribution
 Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.
