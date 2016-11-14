@@ -2,7 +2,11 @@
 title: "Data Visualization"
 author: "Yu-Jui Ho and Toby Aicher"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    fig_caption: yes
+    toc: true
+    keep_md: true
 vignette: >
   %\VignetteIndexEntry{Data Visualization}
   %\VignetteEngine{knitr::rmarkdown}
@@ -63,16 +67,23 @@ There are five options for selecting sets of genes to analyze:
 
 An example heatmap using genes from NMF features will look this. The color bar on the top of the heatmap indicates which NMF group each sample is assigned to.  
 
-<img src="Figures/heatmap_NMF.pdf" width="700px" height="550px" />
+<img src="Figures/heatmap_NMF.png" width="700px" height="550px" />
 
 - **Upload gene list:** the user can upload their own gene list. 
 
 An example gene list file should look like this:
                   
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-# library(sake)
-# data.frame(Gene = head(rownames(Usoskin), n=15))
-```        
+Gene         | 
+------------ | -------------
+CREB3L1      |
+MMP2         |
+TMEM216      |
+LRRC37A5P		 |  
+LOC653712		 |		
+GPR98				 |
+RXFP3				 |
+SOX4         |
+
                      
 The first row should be a character string `Gene`. The following rows should be the names/IDs of your gene of interest. 
                 

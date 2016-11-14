@@ -2,7 +2,11 @@
 title: "Non-negative Matrix Factorization"
 author: "Yu-Jui Ho and Toby Aicher"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    fig_caption: yes
+    toc: true
+    keep_md: true
 vignette: >
   %\VignetteIndexEntry{Non-negative Matrix Factorization}
   %\VignetteEngine{knitr::rmarkdown}
@@ -73,3 +77,6 @@ Genes are rank by their featureScores in each group. Users can either click on t
 
 Users are encouraged to read more about the theory behinds [NMF](http://renozao.github.io/NMF/devel/index.html). 
 
+***
+
+Continue on the next section [Visualization](Visualization.Rmd)

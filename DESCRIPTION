@@ -1,20 +1,6 @@
 Package: sake
 Type: Package
 Title: Single-cell RNA-Seq Analysis and Klustering Evaluation
-<<<<<<< HEAD
-Version: 0.3.2
-Date: 2016-11-11
-Authors@R: c(
-    person("Yu-Jui", "Ho", email = "naikai@gmail.com", role = c("aut", "cre")), 
-    person("David", "Molik", role = "aut"),
-    person("Toby", "Aicher", role = "aut")
-    )
-||||||| merged common ancestors
-Version: 0.3.1
-Date: 2016-07-14
-Authors@R: person("Yu-Jui", "Ho", email = "naikai@gmail.com",
-                  role = c("aut", "cre"))
-=======
 Version: 0.3.2
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 Authors@R: c(
@@ -22,7 +8,6 @@ Authors@R: c(
     person("David", "Molik", email = "dmolik@nd.edu", role = "aut"),
     person("Toby", "Aicher", email = "tpaicher@gmail.com", role = "aut")
     )
->>>>>>> d81503917801e4aca8062449595a677cb7432f60
 Description: This tool can help you quickly navigate through the expression profile,
     Using NMF method for unsupervised clustering.
 URL: http://github.com/naikai/sake
@@ -36,16 +21,8 @@ Remotes:
     rstudio/DT,
     rstudio/d3heatmap@colorlabels
 Depends:
-<<<<<<< HEAD
-    R (>= 3.3.0),
-    NMF (>= 0.22),
-||||||| merged common ancestors
-    R (>= 3.1.0),
-    NMF (>= 0.22),
-=======
     R (>= 3.1.0),
     NMF (>= 0.20),
->>>>>>> d81503917801e4aca8062449595a677cb7432f60
     dplyr (>= 0.4.3)
 Imports:
     AnnotationHub,
@@ -59,7 +36,6 @@ Imports:
     GO.db,
     matrixStats,
     pathview,
-    pkgmaker (>= 0.25.7),
     plotly (>= 3.4.13),
     RcppArmadillo,
     Rtsne,
@@ -94,23 +70,6 @@ Suggests:
     WGCNA,
     webshot,
     knitr
-<<<<<<< HEAD
-Remotes:
-    hadley/devtools,
-    renozao/pkgmaker,
-    renozao/NMF,
-    bmbolstad/preprocessCore,
-    rstudio/DT,
-    rstudio/d3heatmap@colorlabels,
-||||||| merged common ancestors
-Remotes:
-    hadley/devtools,
-    renozao/NMF,
-    bmbolstad/preprocessCore,
-    rstudio/DT,
-    rstudio/d3heatmap@colorlabels,
-=======
->>>>>>> d81503917801e4aca8062449595a677cb7432f60
 License: GPL (>=2)
 LazyData: TRUE
 RoxygenNote: 5.0.1

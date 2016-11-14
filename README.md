@@ -4,9 +4,14 @@ sake
 
 [![Build Status](https://travis-ci.com/naikai/sake.svg?token=qigAqQi4xmKjKDqnm97n&branch=master)](https://travis-ci.com/naikai/sake) [![codecov](https://codecov.io/gh/naikai/sake/branch/master/graph/badge.svg?token=WEipAvcFMf)](https://codecov.io/gh/naikai/sake)
 
-### **S**ingle-cell RNA-Seq **A**nalysis and **K**lustering **E**valuation
+**S**ingle-cell RNA-Seq **A**nalysis and **K**lustering **E**valuation
+----------------------------------------------------------------------
 
 The aim of `sake` is to provide a user-friendly tool for easy analysis of NGS Single-Cell transcriptomic data
+
+<img src="vignettes/Figures/SAKE_workflow.png" width="1024px" height="647px" />
+
+**Flowchart of SAKE package and example analysis results**: **a)** Analysis workflow for analyzing single-cell RNA-Seq data. **b)** Quality Controls to compare total sequenced reads to total gene transcripts detected. **c)** Sample correlation heat map plot **d)** A heat map of sample assignment from NMF run, with dark red indicating high confidence in cluster assignments **e)** t-SNE plot to compare NMF assigned groups with t-SNE projections. **f)** A table of NMF identified features (genes defining each cluster) and a box plot of gene expression distributions across NMF assigned groups. **g)** Summary table for GO term enrichment analysis for each NMF assigned group.
 
 Installation
 ------------

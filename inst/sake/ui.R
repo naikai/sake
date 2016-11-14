@@ -25,7 +25,7 @@ header <- dashboardHeader(
 sidebar <- dashboardSidebar(
   sidebarMenu(id = "sidebarmenu",
     menuItem("File", tabName="File", icon=icon('file-text-o')),
-    menuItem("Data Metrics", tabName="datametrics", icon = icon('bar-chart-o')),
+    menuItem("Quality control", tabName="quality", icon = icon('bar-chart-o')),
     menuItem("Filtering", tabName="filter", icon = icon('scissors'),
              menuSubItem("Correlation", tabName="featureSelection"),
              menuSubItem("Sample Scatter Plot", tabName="scatter")
@@ -140,7 +140,7 @@ body <- dashboardBody(
               infoBoxOutput("featureBox")
             )
     ),
-    tabItem("datametrics",
+    tabItem("quality",
             fluidRow(
               box(title="Datatable", width=12, solidHeader=TRUE, status="success",
                   fluidRow(
