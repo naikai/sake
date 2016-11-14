@@ -23,8 +23,8 @@ The first step of running NMF is to decide the number of clusters (K) present in
 
 An example result of the consensus plot running for different rank (K) using published data^[Treutlein *et al*, Dissecting direct reprogramming from fibroblast to neuron using single-cell RNA-seq, Nature, 2016] is displayed below. In this case, the estimated number of clusters presented in the data is **3**. 
 
-<img src="Figures/NMF_Treutlein_d0d5_EstimK.png" width="800px" height="600px" />
-<img src="Figures/NMF_Treutlein_d0d5_EstimK_2.png" width="800px" height="600px" />
+<img src="./Figures/NMF_Treutlein_d0d5_EstimK.png" width="800px" height="600px" />
+<img src="./Figures/NMF_Treutlein_d0d5_EstimK_2.png" width="800px" height="600px" />
 
 ## Run NMF 
 
@@ -41,7 +41,7 @@ Most of the time, samples from each NMF group form tight clusters on the t-SNE p
 
 ####
 
-<img src="Figures/NMF_Treutlein_d0d5_K3_Group.png" width="800px" height="500px" />  
+<img src="./Figures/NMF_Treutlein_d0d5_K3_Group.png" width="800px" height="500px" />  
 
 In some other cases, samples displayed as two different tight clusters in the t-SNE plot may be assigned into the same NMF group. This happens when NMF is trying to factorize the expression matrix into the specify rank number (K), and the differences between these small sub-clusters are less than the other larger ones **(show examples)**. NMF groups and t-SNE plots are complementary to each other and can thus improve the classification result. An example is shown below.
 
@@ -54,7 +54,7 @@ In this figure, the NMF1 cluster (red) appears to contain three distinct t-SNE g
 
 ####
 
-<img src="Figures/NMF1_subclusters.png" width="600px" height="500px" />
+<img src="./Figures/NMF1_subclusters.png" width="600px" height="500px" />
 
 When NMF was run on the NMF1 group, it uncovered three distinct subgroup and verified the results from the earlier t-SNE that NMF1 contains three further subclusters. 
 
@@ -67,7 +67,7 @@ The `feature` tab includes the enriched features in each group. For each gene, a
 
 Genes are rank by their featureScores in each group. Users can either click on the name for the gene of interest, and it will link to the `GeneCards`^[GeneCards: http://www.genecards.org] page with more detailed information. Users can also click on the gene (as highlighted in the figure below), the gene expression value for samples in each NMF group will be displayed on the right. As in this example, `X1500015O10Rik` is the enriched feature identified in `NMF group1`, therefore its expression value is expected to be high in `NMF group1`. 
 
-<img src="Figures/NMF_Treutlein_d0d5_K3_Feature.png" width="800px" height="500px" />  
+<img src="./Figures/NMF_Treutlein_d0d5_K3_Feature.png" width="800px" height="500px" />  
 
 ## More Information
 
