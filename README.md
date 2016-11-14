@@ -41,8 +41,9 @@ shiny::runApp(system.file("sake", package="sake"))
 ### Getting Started
 These are the instructions that will walk you through the functions of `sake` package. 
 
-- [Data input](vignettes/Data_Input.html)
-
+- [Data input](vignettes/Data_Input.Rmd)
+- [Test input](DESCRIPTION)
+- [plot](Rplot.png)
 
 ### Copying & Distribution
 Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.

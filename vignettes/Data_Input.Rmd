@@ -1,12 +1,14 @@
 ---
-title: "Data Input"
+title: "Data_Input"
 author: "Yu-Jui Ho and Toby Aicher"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     fig_caption: yes
+    toc: true
+    keep_md: true
 vignette: >
-  %\VignetteIndexEntry{Data Input}
+  %\VignetteIndexEntry{Data_Input}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -51,6 +53,8 @@ A successfully loaded data will look like this
 <img src="Figures/File.png" width="800px" height="500px" />
 
 ***
+
+Continue on the next section [Data Metrics](Data_Input.Rmd)
 
 > "*If you are thinking without writing, you only think your're thinking* - Leslie Lamport"
 ([via](https://www.youtube.com/watch?v=-4Yp3j_jk8Q))
