@@ -120,6 +120,7 @@ shinyServer(function(input, output, session) {
         rawdata <- myfread.table(filepath, check.platform=T, sep=input$sep, detect.file.ext=FALSE)
       }
     })
+    colnames(rawdata) <- gsub("\\.", "_", colnames(rawdata))
     return (rawdata)
   })
 

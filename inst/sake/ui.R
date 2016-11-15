@@ -27,7 +27,7 @@ sidebar <- dashboardSidebar(
     menuItem("File", tabName="File", icon=icon('file-text-o')),
     menuItem("Quality control", tabName="quality", icon = icon('bar-chart-o')),
     menuItem("Filtering", tabName="filter", icon = icon('scissors'),
-             menuSubItem("Correlation", tabName="featureSelection"),
+             menuSubItem("Identify Variable Genes", tabName="featureSelection"),
              menuSubItem("Sample Scatter Plot", tabName="scatter")
     ),
     menuItem("NMF", tabName="NMF", icon = icon('sitemap'),
@@ -194,8 +194,7 @@ body <- dashboardBody(
                                        label = "How to extract genes",
                                        choices = c("Whole transcriptome",
                                                    "Rank from data",
-                                                   "Upload gene list",
-                                                   "WGCNA"),
+                                                   "Upload gene list"),
                                        selected = "Rank from data"
                            )
                     ),
@@ -222,10 +221,6 @@ body <- dashboardBody(
                                                 'text/comma-separated-values,text/plain',
                                                 '.csv'))
                       )
-                    ),
-                    conditionalPanel(
-                      condition = "input.list_type == 'WGCNA'",
-                      tags$blockquote("Under Construction ..")
                     )
                   )
               )

@@ -42,7 +42,9 @@ brew install curl openssl libpng libxslt libxml2
 brew install gcc48
 ```
 
-Download and [Install R](http://cran.wustl.edu)
+#### Download and [Install R](http://cran.wustl.edu)
+
+-   Download and [Install Rstudio](https://www.rstudio.com/products/rstudio/download/) (Suggested but not required)
 
 #### To install the latest development version from GitHub (around 30-40 minutes)
 
@@ -54,6 +56,12 @@ install.packages("devtools")
 devtools::install_github("renozao/pkgmaker", ref="develop")
 devtools::install_github("naikai/sake")
 ```
+
+#### To install the latest development version from [Packrat](https://rstudio.github.io/packrat/) (around 10 minutes)
+
+-   Download [file](https://drive.google.com/open?id=0B1IIy0OXXU2kQWwzUnBGdTdOc0U)
+-   Unarchive file, open the folder, start `R` in this folder
+-   Packrat will then automate the whole process for you
 
 Usage
 -----

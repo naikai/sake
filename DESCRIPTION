@@ -26,7 +26,7 @@ Depends:
     dplyr (>= 0.4.3)
 Imports:
     AnnotationHub,
-    biomaRt (>= 3.4),
+    biomaRt (>= 2.30),
     caret,
     corrplot,
     d3heatmap,

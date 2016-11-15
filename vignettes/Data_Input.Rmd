@@ -29,7 +29,7 @@ You can also specify the delimiter according to different file type.
 - Comma (,) - Usually used by `.csv` file
 - Semicolon (;) - Not so common, but some use this type
 
-### Example data sets should look like this^[Ting *et al*, Single-Cell RNA Sequencing Identifies Extracellular Matrix Gene Expression by Pancreatic Circulating Tumor Cells, Cell Reports, 2014] 
+### Example data sets should look like this
 
 Gene    |MEF-1    |MEF-10   |MEF-11   |MEF-12   |MEF-2
 --------|---------|---------|---------|---------|-----
@@ -50,13 +50,13 @@ There are several preloaded gene expression data from published single-cell stud
 
 User has the option to utlize [yabi](https://demo.bsr.tools/yabi/login/?next=/yabi/) to run clustering analysis through its user-friendlly web interface. This is especially useful when the sample sizes of the single-cell study becomes larger and larger. The previous run results can be saved in [.rda](https://stat.ethz.ch/R-manual/R-devel/library/base/html/load.html) format and then loaded back to `sake` package. Once the analysis is done, it will include data analysis of NMF, t-SNE, and DESeq2 (if specified). 
 
-Example saved data can be downloaded [here](data/Ting.NMF5.rda)
+Example saved data can be downloaded [here](../data/Ting.NMF5.rda)
 
 ## Loaded Data 
 
 A successfully loaded data will look like this  
 
-<img src="Figures/File.png" width="800px" height="500px" />
+<img src="Figures/Ting/Upload_file.png" width="800px" height="450px" />
 
 ***
 
