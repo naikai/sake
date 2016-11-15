@@ -210,7 +210,7 @@ body <- dashboardBody(
                                                   selected = "mad")),
                       column(width=4, sliderInput("top.num",
                                                   label = "How many genes to select", ticks = FALSE,
-                                                  min=20, max=15000, value=5000, step = 1000)
+                                                  min=500, max=20000, value=5000, step = 500)
                       )
                     ),
                     conditionalPanel(

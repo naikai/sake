@@ -26,7 +26,7 @@ Normalization allows you to compare read counts between samples and detect diffe
 
 - **Upper quartile normalization**: noramlize the gene count based on upper quartile value from each library
 
-<img src="Figures/Normalization.png" width="700px" height="450px" />
+<img src="Figures/Ting/Normalization.png" width="700px" height="450px" />
 
 ## Transformation 
 
@@ -36,7 +36,7 @@ Transformation allows you to take into account the presence of extreme values in
 
 - **Log transformation**: transform the gene count by log2(count+1)
 
-<img src="Figures/Transformation.png" width="700px" height="450px" />
+<img src="Figures/Ting/Transformation.png" width="700px" height="450px" />
 
 ## Filtering 
 After data normalization or transformation, there are two simple data metrics to help identify samples that deviate from the majority of samples, which can be selected and removed before downstream analysis.
@@ -49,16 +49,19 @@ Read distribution summerizes the total number of read counts for each sample. Th
 
 Gene coverage summarizes the total number of genes with at least one read in each sample. This number should be relatively stable across libraries. Low gene coverage in a sample can indicate poor quality of a single-cell library. However, the number of expressed genes may be altered based on the difference between cell types, experimental conditions or sequencing protocals, intrinsic heterogeneity among cell population, among other reasons. User should be aware of these factors and decide how to treat outlier samples for downstream analysis.
 
-### 
+*** 
 
 An example QC plot displaying read distribution (x-axis) and gene coverage (y-axis) will be used for identifying potential problematic samples. 
 
-<img src="Figures/QC_plot.png" width="700px" height="450px" />
+<img src="Figures/Ting/QC_plot.png" width="700px" height="450px" />
 
 Samples with relatively low total transcript counts and gene coverage rates usually represent degraded or poorly amplified libraries. These can be identified visually and removed from the sample set before proceeding with downstream analyses.
 User will be able to use a selection box to highlight samples in the left bottom corner. Samples within the selection box will be shown on the top right table. User can then inspect each of them and click on the ones they want to remove from downstream analysis. Selected samples will be displayed on the bottom right, and user can hit `Submit` button when they are ready to discard these samples. 
 
-In this case, we remove 3 samples `ESC_13, ESC_28`, and `ESC_3` for downstream analysis. 
+In this case, we will just demostrate how you can select and remove 3 samples `CTC_plt_MP4_13, CTC_plt_MP4_14`, and `CTC_plt_MP4_17` just for demonstration purpose. We actually did not remove any samples for downstream analysis in order to compare our clustering results to the published results. 
+
+*Note: Users have to be cautious when removing samples. Sometimes they may represent a special cell type which has very different transcriptomic pattern than all the other cells. *
+
 
 ***
 

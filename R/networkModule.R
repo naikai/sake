@@ -16,7 +16,7 @@ networkUI <- function(id, title) {
                 actionButton(ns("cor_forcego_yes"), 'Yes'),
                 actionButton(ns("cor_forcego_no"), 'No')
         ),
-        bsModal(ns("modal2"), "Stop!\nThis module will not work for gene size over 3000, please select a smaller number.",
+        bsModal(ns("modal2"), "Stop!\nThis module will not work for gene size over 5000, please select a smaller number.",
                 trigger = "", size = "small"
         )
       ),
@@ -57,7 +57,7 @@ network <- function(input, output, session, data){
   })
 
   observeEvent(input$runSamCor, {
-    if(nrow(data()) > 3000){
+    if(nrow(data()) > 5000){
       toggleModal(session, "modal2", toggle = "open")
     }else if(nrow(data()) > 1000){
       toggleModal(session, "modal1", toggle = "open")
@@ -91,8 +91,8 @@ network <- function(input, output, session, data){
                               reshape2::melt(.) %>%
                               dplyr::filter(value==1) %>%
                               dplyr::select(-value)
-              print('dim networkData')
-              print(dim(networkData))
+              #print('dim networkData')
+              #print(dim(networkData))
             })
 
             output$simplenetwork <- renderSimpleNetwork({

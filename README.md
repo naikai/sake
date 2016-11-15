@@ -34,10 +34,8 @@ For **Mac OS** (tested on Sierra 10.12.1)
 ``` bash
 # follow instructions to install brew on MAC
 http://brew.sh
-
 # install required packages 
 brew install curl openssl libpng libxslt libxml2 
-
 # update gcc
 brew install gcc48
 ```
@@ -46,7 +44,7 @@ brew install gcc48
 
 -   Download and [Install Rstudio](https://www.rstudio.com/products/rstudio/download/) (Suggested but not required)
 
-#### To install the latest development version from GitHub (around 30-40 minutes)
+#### To install the latest development version from GitHub (around 30 minutes)
 
 ``` r
 source("http://bioconductor.org/biocLite.R")
@@ -77,10 +75,12 @@ Getting Started
 Please follow the links to briefly walk you through the functions of `sake` package.
 
 -   [Data input](vignettes/Data_Input.Rmd)
--   [Data Metrics](vignettes/Data_Metrics.Rmd)
+-   [Quality control](vignettes/Quality_Control.Rmd)
 -   [Filtering](vignettes/Filtering.Rmd)
 -   [Run NMF](vignettes/NMF.Rmd)
 -   [Visualization](vignettes/Visualization.Rmd)
+
+-   [Example1: Ting et al](vignettes/Ting.Rmd)
 
 Copying & Distribution
 ----------------------

@@ -13,7 +13,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-One of the steps we can do before clustering is to filter genes with variations due to technical noises, as those genes tend to generate more noise that hinder the real signal than provide useful information about the underlying grouping structure. In this tab we also provide preliminary correlation analysis between all samples, a tool to visualize genetic networks in the data, and a scatter plot comparison of genes in two different samples. 
+One of the steps we can do before clustering is to filter genes with small variations due to technical or biological noises.  In this tab we also provide preliminary correlation analysis between all samples, a tool to visualize genetic networks in the data, and a scatter plot comparison of genes in two different samples. 
 
 
 ## Filtering
@@ -26,21 +26,22 @@ We provide three different methods to filter genes from your dataset before down
 
 - **Upload gene list:** You also have the option to upload a text file which contains your gene of interest. This is typically done when you have a list of marker genes for specific hypothesis and want to see how samples cluster accordingly. 
 
-An example gene list file should look like [this](inst/extdata/genefile/genelist.EMT.txt):
+An example gene list file should look like [this](../inst/extdata/genefile/genelist.EMT.txt):
 
-Gene         | 
------------- | -------------
-CREB3L1      |
-MMP2         |
-TMEM216      |
-LRRC37A5P		 |  
-LOC653712		 |		
-GPR98				 |
-RXFP3				 |
-SOX4         |
+Gene        | 
+------------| -------------
+AHNAK       |
+BMP1        |
+CALD1       |
+CAMK2N1     |
+CDH2        |
+COL1A2      |
+COL3A1      |
+COL5A2      |
+FN1         |
 
                      
-The first row should be a character string `Gene`. The following rows should be the names/IDs of your gene of interest. 
+The first row should be a character string **Gene**. The following rows should be the names/IDs of your gene of interest. 
                 
 ## Sample Correlation and Gene Networks
 
@@ -48,23 +49,27 @@ We provide two tools to visualize correlations in your data and observe how filt
 
 ### Sample Correlation 
 
-Sample correlation creates a matrix with your samples as the rows and columns. The tool calculates the pearson correlation between each of your samples using the genes you selected to filter. More similar samples are red, while dissimilar samples are blue. Large groupings of red indicate tight clusters of samples. 
+Sample correlation creates a matrix with your samples as the rows and columns. The tool calculates the `Pearson correlation` between each of your samples using the genes you selected to filter. More similar samples are red, while dissimilar samples are blue. Large groupings of red indicate tight clusters of samples. 
 
-<img src="Figures/Sample_Correlation.png" width="400px" height="500px" />
+<img src="Figures/Ting/Sample_Correlation.png" width="400px" height="420px" />
 
-In this case, we might estimate there are 2-3 subclusters in this data sets^[Treutlein *et al*, Dissecting direct reprogramming from fibroblast to neuron using single-cell RNA-seq, Nature, 2016]. This is just to provide an overview of how the samples correlate with each other using `Pearson correlation`. However, `Pearson correlation` can easily be altered by few genes with high expression. Therefore, we tend to be more confident about the clustering result identified from using NMF method which will be described in the next section.  
+In this case, we might estimate there are 5 major subclusters in this data sets^[Ting *et al*, Single-Cell RNA Sequencing Identifies Extracellular Matrix Gene Expression by Pancreatic Circulating Tumor Cells, Cell Reports, 2014]. This is just to provide an overview of how the samples correlate with each other using `Pearson correlation`. However, `Pearson correlation` can easily be altered by few genes with high expression. Therefore, we tend to be more confident about the clustering result identified from using NMF method which will be described in the next section.  
                     
                     
 ### Gene Network 
 This tool analyzes genes whose expression is co-expressed with one another and creates a visual network to view these associations. Currently we use the absolute value of `Pearson correlation` to assess the strength of the connectivity. Hub genes indicate genes that are highly connected to other genes within the same network, and these genes are usualy the candidate genes for further investigation.
 
-<img src="Figures/Gene_Network.png" width="400px" height="500px" />
+In this example, we will only use the **Top MAD 1500** genes for running this module. 
+
+<img src="Figures/Ting/SelTopMAD1500.png" width="400px" height="50px" />
+
+<img src="Figures/Ting/Gene_Network.png" width="400px" height="420px" />
 
 ## Sample scatter plot
 
 You can compare the expression levels of whole transcriptome between two samples with a scatter plot. Genes that lie above the reference line are more highly expressed in the sample on the Y-axis, while genes that lie below the reference line are more highly expressed in the sample in the X-axis. Users can choose to log transform their gene counts, display *R^2^* coefficent of determination, or show a two-fold change line to assess genes that have large changes in expression between the two samples. 
 
-<img src="Figures/Scatter_plot.png" width="700px" height="450px" />
+<img src="Figures/Ting/Scatter_plot.png" width="700px" height="450px" />
 
 ***
 

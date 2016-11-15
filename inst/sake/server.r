@@ -120,7 +120,7 @@ shinyServer(function(input, output, session) {
         rawdata <- myfread.table(filepath, check.platform=T, sep=input$sep, detect.file.ext=FALSE)
       }
     })
-    colnames(rawdata) <- gsub("\\.", "_", colnames(rawdata))
+    colnames(rawdata) <- gsub("\\.", "-", colnames(rawdata))
     return (rawdata)
   })
 
@@ -172,7 +172,7 @@ shinyServer(function(input, output, session) {
   run_selsamp <- reactiveValues(go=FALSE)
 
   run_trans <- function(rawdata){
-    transdata <- rmv_constant_0(rawdata, pct=0.9, minimum=0)
+    transdata <- rawdata
 
     n <- 2
     withProgress(message = 'Transforming data', value = 0, {
@@ -186,6 +186,8 @@ shinyServer(function(input, output, session) {
       }else if(input$normdata=="takeuq"){
         transdata <- uq(transdata)
       }
+
+      transdata <- rmv_constant_0(transdata, pct=0.95, minimum=0)
 
       if(input$transformdata=="takevst"){
         transdata <- vst(round(transdata))
@@ -216,7 +218,7 @@ shinyServer(function(input, output, session) {
     },
     content = function(file) {
       data <- transform_data$data
-      colnames(data) <- gsub("\\.", "_", colnames(data))
+      colnames(data) <- gsub("\\.", "-", colnames(data))
       write.table(data, file = file, quote=F, row.names=T, sep="\t")
     }
   )
@@ -528,7 +530,7 @@ shinyServer(function(input, output, session) {
       # Run NMF on local server
       ptm <- proc.time()
       withProgress(message = 'Running NMF', value = 0, {
-        incProgress(1/2, detail = "Takes around 30~60 seconds")
+        incProgress(1/2, detail = "Takes around 30~60 seconds for each K")
         nmfres <- myNMF(merged,
                         mode=input$mode,
                         cluster=input$num_cluster,
