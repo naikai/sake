@@ -63,7 +63,7 @@ In this example, we will only use the **Top MAD 1500** genes for running this mo
 
 <img src="Figures/Ting/SelTopMAD1500.png" width="400px" height="50px" />
 
-<img src="Figures/Ting/Gene_Network.png" width="400px" height="420px" />
+<img src="Figures/Ting/Gene_network.png" width="400px" height="420px" />
 
 ## Sample scatter plot
 
