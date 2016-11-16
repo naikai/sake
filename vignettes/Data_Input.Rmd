@@ -1,6 +1,6 @@
 ---
-title: "Data_Input"
-author: "Yu-Jui Ho and Toby Aicher"
+title: "Data Input"
+author: "Yu-Jui Ho and Toby Aicher, M Hammell Lab"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
@@ -15,19 +15,19 @@ vignette: >
 
 There are three different ways you can upload files into `sake` pacakge. It can either be 
 
-- Rawdata file 
-- Preloaded data
-- Saved run result
+- New Gene Count Data File 
+- Pre-loaded Demo Data (for testing)
+- Saved run result (for advanced users)
 
-## Rawdata file
+## New Gene Count Data file
 
-The gene count data file is one of the most common types of data format. Each row represents expression value from a gene, and each column represents transcriptome library derived from a single sample. The package requires the first row to be the header, which you can provide information about each sample. The first column is required to be names/ID for each gene/transcript. 
+The gene count data file is one of the most common formats for RNA-seq assays. Each row represents the expression value for a gene (in raw counts or normalized RPM, TPM, etc.), and each column represents a single sample. The package requires the first row to be the header, containing unique names for each sample. The first column is required to be the names/ID for each gene/transcript. 
 
-You can also specify the delimiter according to different file type.
+While the gene count file is expected to be tab-demlited, you can specify other characters used to separate fields.
 
 - Tab (\\t) - Default setting for `.txt` or `.out` file
 - Comma (,) - Usually used by `.csv` file
-- Semicolon (;) - Not so common, but some use this type
+- Semicolon (;) - Less common
 
 Example data sets should look like this
 
@@ -42,19 +42,12 @@ Gm12359 |1.225    |13.159   |1.846    |0.000    |0.320
 Gm16039 |0.408    |2.861    |0.154    |0.360    |56.406
 Gm11149 |0.204    |0.000    |0.000    |0.000    |0.000
 
-## Preloaded data
+## Pre-loaded Demo Data
 
-There are several preloaded gene expression data from published single-cell studies that were already been preloaded with the package. They include studies relate to neuronal differentiation^[Treutlein *et al*, Dissecting direct reprogramming from fibroblast to neuron using single-cell RNA-seq, Nature, 2016] and circulating tumor cells in pancreatic cancer^[Ting *et al*, Single-Cell RNA Sequencing Identifies Extracellular Matrix Gene Expression by Pancreatic Circulating Tumor Cells, Cell Reports, 2014]. The user can sift through and test each module using these data.   
+There are several pre-loaded gene expression datasets from published single-cell studies available for learning how to use the SAKE package. These include  one study exploring neuronal differentiation over a time-course^[Treutlein *et al*, Dissecting direct reprogramming from fibroblast to neuron using single-cell RNA-seq, Nature, 2016] as well as a second study evaluating circulating tumor cells in a pancreatic cancer mouse model^[Ting *et al*, Single-Cell RNA Sequencing Identifies Extracellular Matrix Gene Expression by Pancreatic Circulating Tumor Cells, Cell Reports, 2014]. These datasets allow the user to reproduce the analysis results presented in in the SAKE paper.
 
-## Saved run result
 
-User has the option to utlize [yabi](https://demo.bsr.tools/yabi/login/?next=/yabi/) to run clustering analysis through its user-friendlly web interface. This is especially useful when the sample sizes of the single-cell study becomes larger and larger. The previous run results can be saved in [.rda](https://stat.ethz.ch/R-manual/R-devel/library/base/html/load.html) format and then loaded back to `sake` package. Once the analysis is done, it will include data analysis of NMF, t-SNE, and DESeq2 (if specified). 
-
-Example saved data can be downloaded [here](../data/Ting.NMF5.rda)
-
-*** 
-
-In this case, we will select data published from Ting *et al*. 
+An example screenshot shows selection of the pre-loaded data set downloaded from GEO and published in Ting *et al* (2014). 
 
 <img src="Figures/Ting/preload.png" width="800px" height="450px" />
 
@@ -65,9 +58,17 @@ A successfully loaded data will look like this
 
 ***
 
+
+
+## Saved run result
+
+Users familiar with SAKE have the option to run most of the computationally intensive portions of the SAKE clustering  algorithm on their own clustered compute servers, then upload these results to our web host for interactive analysis of the results. This is especially useful when the sample sizes of the single-cell study become too large for this web host to analyze in real time (greater than ~200 cells). The previous run results can be saved in [.rda](https://stat.ethz.ch/R-manual/R-devel/library/base/html/load.html) format and then loaded back to `sake`. Saved run results will include data analysis of NMF, t-SNE, and DESeq2 (if specified). Uploading these results to the `sake` server allows for interactive figure generation. 
+
+Example saved data can be downloaded [here](../data/Ting.NMF5.rda)
+
+*** 
+
 Continue on the next section [Quality Control](Quality_Control.Rmd)
 
 *** 
 
-> "*If you are thinking without writing, you only think your're thinking* - Leslie Lamport"
-([via](https://www.youtube.com/watch?v=-4Yp3j_jk8Q))

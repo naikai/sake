@@ -542,7 +542,7 @@ run_CoExpression <- function(expdata, thresh="soft", tao=0.7, beta=10, method="P
 #' Detect edge genes in each block and their gene idx
 #' Go back to the original 100x100 matrix and use the edge genes (idx) to define block
 #'
-#' @param core_sub_jaccard_dist
+#' @param core_sub_jaccard_dist jaccard distance for sub core genes
 #' @keywords network, co-expression
 #' @export
 #' @examples

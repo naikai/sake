@@ -1,0 +1,34 @@
+---
+title: "Data Visualization"
+author: "Yu-Jui Ho and Toby Aicher, M Hammell Lab"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    fig_caption: yes
+    toc: true
+    keep_md: true
+vignette: >
+  %\VignetteIndexEntry{Data Visualization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+After getting the classification results from running NMF method, users can use DESeq to do differential expression analysis. This way they can assess more markers that are statistically different between groups of interest.  
+
+## Differential Expression Analysis
+
+<img src="Figures/Ting/NMF_Ting_K5_DESeq2_Group1.png" width="800px" height="500px" />
+
+<img src="Figures/Ting/NMF_Ting_K5_DESeq2_Group3.png" width="800px" height="500px" />
+
+
+
+## Enrichment Analysis 
+
+<img src="Figures/Ting/NMF_Ting_K5_Enrich_Sel_Mouse.png" width="800px" height="500px" />
+
+<img src="Figures/Ting/NMF_Ting_K5_Enrich_Res.png" width="800px" height="500px" />
+
+<img src="Figures/Ting/NMF_Ting_K5_Enrich_Modify.png" width="800px" height="500px" />
+
+<img src="Figures/Ting/NMF_Ting_K5_Pathview.png" width="800px" height="500px" />

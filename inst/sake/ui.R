@@ -193,13 +193,13 @@ body <- dashboardBody(
                            selectInput("list_type",
                                        label = "How to extract genes",
                                        choices = c("Whole transcriptome",
-                                                   "Rank from data",
+                                                   "Top Ranks",
                                                    "Upload gene list"),
-                                       selected = "Rank from data"
+                                       selected = "Top Ranks"
                            )
                     ),
                     conditionalPanel(
-                      condition = "input.list_type == 'Rank from data'",
+                      condition = "input.list_type == 'Top Ranks'",
                       column(width=2, selectInput("orders",
                                                   label = "Rank order by",
                                                   choices = c("top", "bottom"),

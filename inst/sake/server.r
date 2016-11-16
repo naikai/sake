@@ -307,7 +307,7 @@ shinyServer(function(input, output, session) {
       rawdata <- rawdata[, input$selected_samples]
     }
 
-    if(input$list_type=='Rank from data'){
+    if(input$list_type=='Top Ranks'){
       select.genes <- select_top_n(apply(rawdata,1,input$math), n=input$top.num, bottom=ifelse(input$orders=="bottom", T, F))
       genelist <- names(select.genes)
     }else if(input$list_type=='Upload gene list'){

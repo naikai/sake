@@ -7,6 +7,9 @@
 summarize_module2(core_sub_jaccard_dist, old, current, blk_cnt, genenames,
   original_names, res_summary, res_genelist, size, min.size = 5, start_idx)
 }
+\arguments{
+\item{core_sub_jaccard_dist}{jaccard distance for sub core genes}
+}
 \description{
 Run for loops to detect the block
 Detect edge genes in each block and their gene idx
