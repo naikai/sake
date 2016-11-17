@@ -279,7 +279,31 @@ The user can choose which principal components to use as axes to visualize their
 
 The user can also designante the size of each sample dot, whether to display its label, the size of the label, and the alpha value (the transparency of each of the dots).
 
-<img src="Figures/Ting/NMF_Ting_K5_PCA.png" width="700px" height="380px" />
+<img src="Figures/Ting/NMF_Ting_K5_PCA.png" width="700px" height="350px" />
+
+### Compare with published results
+
+SAKE provides options to color samples based on NMF groups, filename, or expression level for specific markers. 
+
+- **NMF groups:** By default, samples are colored based on NMF group assignments.
+- **Filename:** User can modify the colnames of the input gene count table to include experimental information that might be useful for comparison or check for batch effect. There can be mutliple categories separated by `_`. For example: `Type1` \_ `Batch1` \_ `Lane1`
+
+<img src="Figures/Ting/NMF_Ting_K5_PCA_Filename.png" width="700px" height="350px" />
+
+*Note: we can change the coloring order of the NMF group to match the colors derived from filename. This function will be implemented soon in the next version of the package*
+  
+   
+- **Specific markers:** User can also select specific markers from the drop down menu and check whether the expression of this gene/transcript is expressed in particular NMF group. 
+
+We will demonstrate by plotting *`Klf4`* (key stem cell reprogramming factors marker) and *`Igfbp5`* (extracellular growth factor binding protein) according to Ting et al, 2014. 
+
+*`Klf4`* is enriched in `NMF group3`, whereas most of the samples in this group are marked as `CTC-c` in original published results. 
+
+<img src="Figures/Ting/NMF_Ting_K5_PCA_Klf4.png" width="700px" height="430px" />
+
+*`Igfbp5`* is enriched in `NMF group3`, whereas most of the samples in this group are marked as `CTC-c` in original published results. 
+
+<img src="Figures/Ting/NMF_Ting_K5_PCA_Igfbp5.png" width="700px" height="430px" />
 
 ## Heatmap
 
@@ -345,3 +369,31 @@ Based on these criteria for the samples displayed below, NMF group2 and group3 c
 
 ***
 
+# Differential Expression and Enrichment Analysis
+
+
+Differential expression (DE) analysis between NMF clusters allows for the identification of additional genes differentially expressed in each NMF cluster with statistical analyses calculated via the [DESeq](http://bioconductor.org/packages/release/bioc/html/DESeq.html) algorithm (Love et al., 2014). Expression distributions for DE genes across NMF groups are displayed together with RefSeq annotation. 
+
+## Differential Expression 
+
+<img src="Figures/Ting/NMF_Ting_K5_DESeq2_Group1.png" width="800px" height="450px" />
+
+<img src="Figures/Ting/NMF_Ting_K5_DESeq2_Group3.png" width="800px" height="450px" />
+
+
+
+## Enrichment Analysis 
+
+[GO Term enrichments](http://bioconductor.org/packages/devel/bioc/html/gage.html) allow for the identification of functional categories enriched in each NMF cluster, which can serve as guidance for further investigation and follow up studies. 
+
+*Note: Make sure to select the correct species. SAKE currently supports `Human` and `Mouse`.*
+
+<img src="Figures/Ting/NMF_Ting_K5_Enrich_Sel_Mouse.png" width="800px" height="450px" />
+
+Summary table and plots for the enrichment analysis. 
+
+<img src="Figures/Ting/NMF_Ting_K5_Enrich_Res.png" width="800px" height="400px" />
+
+User can also click on one of the enriched KEGG pathways they are interested in. [Pathview](https://bioconductor.org/packages/release/bioc/html/pathview.html) will maps and renders pathway grpahs. In this case, we select `TGF-beta signaling pathway` from `NMF Group3`. Red color indicates genes that are upregulated in selected NMF cluster as compared to all the other clusters. 
+
+<img src="Figures/Ting/NMF_Ting_K5_Pathview.png" width="800px" height="500px" />

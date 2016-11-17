@@ -782,7 +782,7 @@ body <- dashboardBody(
                       column(width=1, numericInput("plot_label_size", label = "LabelSize", value=9)),
                       column(width=1, checkboxInput('plot_label', 'Add label', FALSE)),
                       column(width=1, checkboxInput('plot_legend', 'Add legend', TRUE)),
-                      column(width=2, selectInput("pt_sel_grp_order", label="Group Order", choices=c("Default", "Manual"), selected="Default")),
+                      # column(width=2, selectInput("pt_sel_grp_order", label="Group Order", choices=c("Default", "Manual"), selected="Default")),
                       conditionalPanel(
                         condition = "input.pt_sel_grp_order == 'Manual' & (input.pt_col == 'Filename' || input.pt_col == 'NMF Group')",
                         column(width=2, selectizeInput("pt_grp_order",

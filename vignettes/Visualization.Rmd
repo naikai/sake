@@ -110,4 +110,8 @@ Based on these criteria for the samples displayed below, NMF group2 and group3 c
 <img src="Figures/Ting/NMF_Ting_K5_groupstats.png" width="800px" height="300px" />
 
 
+***
+
+Continue on the next section [Differential Expression and Enrichment Analysis](DE_Enrich.Rmd)
+
 
