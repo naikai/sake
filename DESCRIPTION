@@ -1,7 +1,7 @@
 Package: sake
 Type: Package
 Title: Single-cell RNA-Seq Analysis and Klustering Evaluation
-Version: 0.3.2
+Version: 0.3.3
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 Authors@R: c(
     person("Yu-Jui", "Ho", email = "naikai@gmail.com", role = c("aut", "cre")),
@@ -18,6 +18,8 @@ Remotes:
     renozao/pkgmaker@develop,
     renozao/NMF,
     bmbolstad/preprocessCore,
+    ropensci/plotly@6d7ddad,
+    tidyverse/ggplot2@338e82a,
     rstudio/DT,
     rstudio/d3heatmap@colorlabels
 Depends:
@@ -32,11 +34,9 @@ Imports:
     d3heatmap,
     data.table,
     DESeq2,
-    ggplot2 (>= 2.1.0),
     GO.db,
     matrixStats,
     pathview,
-    plotly (>= 3.6.0),
     RcppArmadillo,
     Rtsne,
     shiny,

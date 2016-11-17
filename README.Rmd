@@ -84,6 +84,7 @@ Please follow the links to briefly walk you through the functions of `sake` pack
 - [Filtering](vignettes/Filtering.Rmd)
 - [Run NMF](vignettes/NMF.Rmd)
 - [Visualization](vignettes/Visualization.Rmd)
+- [DE and Enrichment](vignettes/DE_Enrich.Rmd)
 
 - [Example1: Ting et al](vignettes/Ting.Rmd)
 - [Example2: Treutlein et al](vignettes/Treutlein.Rmd)
