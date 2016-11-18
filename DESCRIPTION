@@ -6,7 +6,8 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 Authors@R: c(
     person("Yu-Jui", "Ho", email = "naikai@gmail.com", role = c("aut", "cre")),
     person("David", "Molik", email = "dmolik@nd.edu", role = "aut"),
-    person("Toby", "Aicher", email = "tpaicher@gmail.com", role = "aut")
+    person("Toby", "Aicher", email = "tpaicher@gmail.com", role = "aut"),
+    person("Molly", "Hammell", email = "mhammell@cshl.edu", role = "aut")
     )
 Description: This tool can help you quickly navigate through the expression profile,
     Using NMF method for unsupervised clustering.

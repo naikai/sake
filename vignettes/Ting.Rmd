@@ -51,12 +51,11 @@ There are several pre-loaded gene expression datasets from published single-cell
 
 An example screenshot shows selection of the pre-loaded data set downloaded from GEO and published in Ting *et al* (2014). 
 
-<img src="Figures/Ting/preload.png" width="800px" height="450px" />
-
+<img src="Figures/Ting/preload.png" width="700px" height="370px" />
 
 A successfully loaded data will look like this  
 
-<img src="Figures/Ting/loaded_file.png" width="800px" height="450px" />
+<img src="Figures/Ting/loaded_file.png" width="700px" height="400px" />
 
 ***
 
@@ -177,8 +176,6 @@ This tool identifies genes whose expression is correlated with one another acros
 
 In this example, we used the **Top MAD 1500** genes from the same dataset shown in the heatmap above for running this gene expression network module. 
 
-<img src="Figures/Ting/SelTopMAD1500.png" width="400px" height="50px" />
-
 <img src="Figures/Ting/Gene_network.png" width="400px" height="420px" />
 
 ## Sample scatter plot
@@ -206,8 +203,8 @@ The first step of running NMF is to decide the number of clusters (K) present in
 
 An example result is shown below for the consensus plots and distributions of cophenetic coefficients and silhouette index for different values of K using a published single-cell RNA-seq dataset^[Ting *et al*, Single-Cell RNA Sequencing Identifies Extracellular Matrix Gene Expression by Pancreatic Circulating Tumor Cells, Cell Reports, 2014] is displayed below. In this case, the estimated number of clusters present in the data is **5**, as indicated by the consensus plots, cophenetic coefficients, and silhouette index. 
 
-<img src="./Figures/Ting/NMF_Ting_EstimK_consensus.png" width="800px" height="600px" />
-<img src="./Figures/Ting/NMF_Ting_EstimK_stats.png" width="800px" height="600px" />
+<img src="./Figures/Ting/NMF_Ting_EstimK_consensus.png" width="700px" height="500px" />
+<img src="./Figures/Ting/NMF_Ting_EstimK_stats.png" width="700px" height="500px" />
 
 *Note: It takes around 20 minutes to run 20 iterations for each value of K on a MacBook Pro (Retina, 15-inch, Mid 2015), 2.5 GHz Intel Core i7, with 16 GB 1600 MHz DDR3*
 
@@ -228,7 +225,7 @@ Usually, samples from the same NMF group form tight clusters on the t-SNE plot. 
 
 ####
 
-<img src="./Figures/Ting/NMF_Ting_K5_Group.png" width="800px" height="500px" />  
+<img src="./Figures/Ting/NMF_Ting_K5_Group.png" width="700px" height="420px" />  
 
 ## Enriched Features
 
@@ -236,7 +233,7 @@ The `feature` tab includes the enriched features (gene markers) in each NMF-assi
 
 Genes are ordered by their featureScore ranks in each group. Users can click on the name of the gene of interest, which will link to the `GeneCards`^[GeneCards: http://www.genecards.org] page with more detailed information. Users can also click on the gene row (as highlighted in the figure below), which will display a boxplot of the gene expression values across samples in each NMF group, at right. In this example, `Gp9` is an enriched feature identified in `NMF group1`, therefore its expression value is expected to be generally highest in `NMF group1`. 
 
-<img src="./Figures/Ting/NMF_Ting_K5_Feature.png" width="800px" height="500px" />  
+<img src="./Figures/Ting/NMF_Ting_K5_Feature.png" width="700px" height="420px" />  
 
 ## More Information
 
@@ -342,7 +339,7 @@ The first row should be a character string **Gene**. The following rows should b
 
 An example heatmap using genes from NMF selected features is shown below. The color bar on the top of the heatmap indicates which NMF group each sample is assigned to.  
 
-<img src="Figures/Ting/NMF_Ting_K5_heatmap.png" width="800px" height="550px" />
+<img src="Figures/Ting/NMF_Ting_K5_heatmap.png" width="700px" height="500px" />
 
      
                 
@@ -365,7 +362,7 @@ Several options are available to display summary statistics within NMF assigned 
 
 Based on these criteria for the samples displayed below, NMF group2 and group3 contained samples with higher levels of heterogeneity. A majority of the cells in NMF group2 were identified as deriving from a single cell type in the original author's publication, whereas cells in NMF group3 were identified as deriving from two distinct cell types (Ting et al., 2014).   
 
-<img src="Figures/Ting/NMF_Ting_K5_groupstats.png" width="800px" height="300px" />
+<img src="Figures/Ting/NMF_Ting_K5_groupstats.png" width="700px" height="250px" />
 
 ***
 
@@ -376,9 +373,9 @@ Differential expression (DE) analysis between NMF clusters allows for the identi
 
 ## Differential Expression 
 
-<img src="Figures/Ting/NMF_Ting_K5_DESeq2_Group1.png" width="800px" height="450px" />
+<img src="Figures/Ting/NMF_Ting_K5_DESeq2_Group1.png" width="700px" height="400px" />
 
-<img src="Figures/Ting/NMF_Ting_K5_DESeq2_Group3.png" width="800px" height="450px" />
+<img src="Figures/Ting/NMF_Ting_K5_DESeq2_Group3.png" width="700px" height="400px" />
 
 
 
@@ -388,12 +385,12 @@ Differential expression (DE) analysis between NMF clusters allows for the identi
 
 *Note: Make sure to select the correct species. SAKE currently supports `Human` and `Mouse`.*
 
-<img src="Figures/Ting/NMF_Ting_K5_Enrich_Sel_Mouse.png" width="800px" height="450px" />
+<img src="Figures/Ting/NMF_Ting_K5_Enrich_Sel_Mouse.png" width="700px" height="400px" />
 
 Summary table and plots for the enrichment analysis. 
 
-<img src="Figures/Ting/NMF_Ting_K5_Enrich_Res.png" width="800px" height="400px" />
+<img src="Figures/Ting/NMF_Ting_K5_Enrich_Res.png" width="700px" height="350px" />
 
 User can also click on one of the enriched KEGG pathways they are interested in. [Pathview](https://bioconductor.org/packages/release/bioc/html/pathview.html) will maps and renders pathway grpahs. In this case, we select `TGF-beta signaling pathway` from `NMF Group3`. Red color indicates genes that are upregulated in selected NMF cluster as compared to all the other clusters. 
 
-<img src="Figures/Ting/NMF_Ting_K5_Pathview.png" width="800px" height="500px" />
+<img src="Figures/Ting/NMF_Ting_K5_Pathview.png" width="700px" height="420px" />

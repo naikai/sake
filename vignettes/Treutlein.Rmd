@@ -246,7 +246,7 @@ SAKE provides options to color samples based on NMF groups, filename, or express
 
 - **Specific markers:** User can also select specific markers from the drop down menu and check whether the expression of this gene/transcript is expressed in particular NMF group. 
 
-In this case, we will demonstrate by using `Syp` (Neuronal marker) and `Tnnc2` (Myocyte marker). 
+We will demonstrate by plotting *`Syp`* (Neuronal marker) and *`Tnnc2`* (Myocyte marker) according to Treutlein et al, 2016.  
 
 `Syp` is enriched in `NMF group5`, whereas most of the samples in this group are marked as induced neurons in original published results. 
 
@@ -347,5 +347,5 @@ Summary table and plots for the enrichment analysis.
 
 User can also click on one of the enriched KEGG pathways they are interested in. [Pathview](https://bioconductor.org/packages/release/bioc/html/pathview.html) will maps and renders pathway grpahs. In this case, we select `Synaptic vesicle cycle` from `NMF Group5`. According to annotation from the original authoer's publication, most of the cells in this groups are Neurons. Red color indicates genes that are upregulated in selected NMF cluster as compared to all the other clusters. 
 
-<img src="Figures/Treutlein/NMF_Treutlein_K5_Enrich_pathview.png" width="800px" height="500px" />
+<img src="Figures/Treutlein/NMF_Treutlein_K5_Enrich_Pathview.png" width="800px" height="500px" />
 
