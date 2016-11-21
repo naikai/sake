@@ -15,7 +15,7 @@ vignette: >
 
 # Data Input 
 
-There are three different ways you can upload files into `sake` pacakge. It can either be 
+There are three different ways you can upload files into the `sake` pacakge. It can either be: 
 
 - New Gene Count Data File 
 - Pre-loaded Demo Data (for testing)
@@ -66,7 +66,7 @@ Example saved data can be downloaded [here](../data/Treutlein.NMF5.rda)
 
 # Quality Control
 
-Following succesful data upload, the gene count expression table must be normalized before proceeding with quality control and analysis. We provide several options for data normalization, variance stabilizing transformations, and quality control (QC). QC analysis is generally aimed at identifying very noisy samples due to technical issues in library construction and/or sample preparation. Two simple data metrics can help identify samples unusually low transcript counts or coverage rates, as described below.
+Following succesful data upload, the gene count expression table must be normalized before proceeding with quality control and analysis. We provide several options for data normalization, variance stabilizing transformations, and quality control (QC). QC analysis is generally aimed at identifying very noisy samples due to technical issues in library construction and/or sample preparation. Two simple data metrics can help identify samples with unusually low transcript counts or coverage rates, as described below.
 
 ## Normalization 
 
@@ -84,7 +84,7 @@ Normalization allows you to compare read counts between samples and detect diffe
 
 Transformation mitigates the effects of extreme values in scRNA-seq data (from the large dynamic range measured) and adjusts for mean-variance dependency (the observation that genes with higher expression often have larger aboslute variance across samples). Two methods to transform scRNA-Seq data are provided.
 
-- **Variance stablizing transformation (VST)**: transform the gene count using a method intoduced in the DEseq package.
+- **Variance stablizing transformation (VST)**: transform the gene count using the VST method intoduced in the DEseq package.
 
 - **Log transformation**: transform the gene count by *log2(count+1)*
 
@@ -102,7 +102,7 @@ The read counts distribution summerizes the total number of read counts annotate
 
 Gene coverage summarizes the total number of genes with at least one read in each sample. This number should be relatively stable across libraries. Low gene coverage in a sample can indicate poor quality of a single-cell library. However, the number of expressed genes may also be altered based on biological differences between cell types or experimental conditions, or intrinsic heterogeneity among cell populations. Selection of outlier samples for pre-analysis removal is optional, but can improve downstream analysis.
 
-An example QC plot displaying read distribution (x-axis) and gene coverage (y-axis) will be used for identifying potential problematic samples. 
+An example QC plot displaying read distribution (x-axis) and gene coverage (y-axis) will be used for identifying potentially problematic samples. 
 
 ![QC_plot](Figures/Treutlein/QC_plot.png)
 
@@ -126,7 +126,7 @@ We provide three different methods to filter genes from your dataset before down
 
 - **Top Ranks:** you can rank and filter genes based on simple statistics calculated for each gene across all samples. There are currently four ways of ranking genes: mean, median, median absolute deviation (MAD), and variance. Using the top ranked genes by "mean" or "median" equates to using the most abundant genes for downstream analysis. Using the top ranked genes by "variance" equates to using the genes that change the most across samples, but this gene list can often be dominated by noise from low abundance genes.  In our experience, we find using gene lists with the top ranked `Median Absolute Deviation (MAD)` often gives the most reproducible results, as these genes have relatively high abundance and also show differential abundance between samples.  We suggest using the Top **5000 - 8000** MAD genes for `single-cell RNA-Seq` data. 
 
-- **Upload gene list:** You also have the option to upload a text file which contains your pre-determined genes of interest. This is typically done when you have a list of marker genes used to test a specific hypothesis and want to see how samples cluster accordingly. 
+- **Upload gene list:** Users also have the option to upload a text file which contains the pre-determined genes of interest. This is typically done when you have a list of marker genes used to test a specific hypothesis and want to see how samples cluster accordingly. 
 
 An example gene list file should look like [this](../inst/extdata/genefile/genelist.EMT.txt):
 
@@ -167,14 +167,14 @@ In this example, we used the **Top MAD 1500** genes from the same dataset shown 
 
 ## Sample scatter plot
 
-You can compare the expression levels of whole transcriptome between two samples with a scatter plot. Genes that lie above the reference line are more highly expressed in the sample on the Y-axis, while genes that lie below the reference line are more highly expressed in the sample in the X-axis. Users can choose to log transform their gene counts, display *R^2^* coefficent of correlation, or show a two-fold change line to assess genes that have large changes in expression between the two samples. 
+Users can also compare the expression levels of whole transcriptome between two samples with a scatter plot. Genes that lie above the reference line are more highly expressed in the sample on the Y-axis, while genes that lie below the reference line are more highly expressed in the sample in the X-axis. Users can choose to log transform their gene counts, display *R^2^* coefficent of correlation, or show a two-fold change line to assess genes that have large changes in abundance between the two samples. 
 
 <img src="Figures/Treutlein/Scatter_plot.png" width="700px" height="450px" />
 
 
 # NMF
 
-The central part of the SAKE package uses non-negative matrix factorization (NMF) to decompose a gene expression matrix V into two non-negative matrices, W and H, via a multiplicative updates algorithm. NMF was originally developed to be used in image analysis and language processing[cite]. More recently, it has been sucessfully applied to the field of computational biology as an unsupervised clustering method that helps classify samples/patients into functional groups in an unbiased manner^[Genomic Classification of Cutaneous Melanoma., Cell, 2015].
+The central part of the SAKE package uses non-negative matrix factorization (NMF) to decompose a gene expression matrix V into two non-negative matrices, W and H, via a multiplicative updates algorithm. NMF was originally developed to be used in image analysis and language processing^[Lee and Seung, Learning the parts of objects by non-negative matrix factorization, Nature, 1999]. More recently, it has been sucessfully applied to the field of computational biology as an unsupervised clustering method that helps classify samples/patients into functional groups in an unbiased manner^[Genomic Classification of Cutaneous Melanoma., Cell, 2015].
 
 For running NMF:
 
@@ -256,7 +256,7 @@ SAKE provide t-SNE plots both in 2-D and 3-D for users to better understand the 
 SAKE provides options to color samples based on NMF groups, filename, or expression level for specific markers. 
 
 - **NMF groups:** By default, samples are colored based on NMF group assignments.
-- **Filename:** User can modify the colnames of the input gene count table to include experimental information that might be useful for comparison or check for batch effect. There can be mutliple categories separated by `_`. For example: `Type1` \_ `Batch1` \_ `Lane1` ^[Note: we can change the coloring order of the NMF group to match the colors derived from filename. This function will be implemented soon in the next version of the package]
+- **Filename:** User can modify the column names of the input gene count table to include experimental information that might be useful for comparisons or checkinh for batch effects. There can be mutliple categories separated by underscores, `_`. For example: `Type1` \_ `Batch1` \_ `Lane1`. 
 
 ![t-SNE plots colored by experimental information](Figures/Treutlein/NMF_Treutlein_K5_t-SNE_Filename.png)
 

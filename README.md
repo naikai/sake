@@ -57,7 +57,7 @@ devtools::install_github("naikai/sake")
 
 #### To install the latest development version from [Packrat](https://rstudio.github.io/packrat/) (around 10 minutes)
 
--   Download [file](https://drive.google.com/open?id=0B1IIy0OXXU2keGZGY21jaExxU00)
+-   Download [file](https://drive.google.com/open?id=0B1IIy0OXXU2kQWwzUnBGdTdOc0U)
 -   Unarchive file, open the folder, start `R` in this folder
 -   Packrat will then automate the whole process for you
 
