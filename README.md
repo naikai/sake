@@ -81,8 +81,8 @@ Please follow the links to briefly walk you through the functions of `sake` pack
 -   [Visualization](vignettes/Visualization.Rmd)
 -   [DE and Enrichment](vignettes/DE_Enrich.Rmd)
 
--   [Example1: Ting et al](vignettes/Ting.Rmd)
--   [Example2: Treutlein et al](vignettes/Treutlein.Rmd)
+-   Example1 - Ting et al [HTML](vignettes/Ting.Rmd) [PDF](vignettes/Ting_pdf.pdf)
+-   Example2 - Treutlein et al [HTML](vignettes/Treutlein.Rmd) [PDF](vignettes/Treutlein_pdf.pdf)
 
 Copying & Distribution
 ----------------------
