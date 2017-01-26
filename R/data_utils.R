@@ -44,7 +44,9 @@ compare_group <- function(group1, group2, file.prefix="Compare.group", title="",
   ### Create values for text positions.
   naikai$position = (naikai$ymax + naikai$ymin)/2
   ### round up numbers and convert to character.
-  foo <- round(summary.pct[order(summary.pct$group1), "value"], digits=2)
+  ### We need to reorder group1, desc(group2) in order to get the correct y position
+  # foo <- round(summary.pct[order(summary.pct$group1, decreasing=TRUE), "value"], digits=2)
+  foo <- summary.pct %>% arrange(group1, desc(group2)) %>% .$value %>% round(digits=2)
   ### Create a column for text
   naikai$label <- paste0(foo, "%")
   ### Plot again
