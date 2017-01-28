@@ -62,7 +62,7 @@ brew install gcc48
 #### To install the latest development version from GitHub (around 30 minutes)
 ```R
 source("http://bioconductor.org/biocLite.R")
-biocLite(c("annotate", "AnnotationHub", "biomaRt", "DESeq2", "gage", "gageData", "GO.db", "pathview"))
+biocLite(c("annotate", "AnnotationHub", "biomaRt", "DESeq2", "gage", "gageData", "GO.db", "pathview", "plotly"))
 
 install.packages("devtools")
 devtools::install_github("renozao/pkgmaker", ref="develop")
