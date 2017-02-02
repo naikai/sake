@@ -250,6 +250,69 @@ plot_gene_expression <- function (data, gene, groups, type="boxplot", data.retur
 	return(p)
 }
 
+#' simple PCA plot
+#'
+#' This is a simple version of PCA plot
+pcaplot <- function(data, takelog=FALSE, center=TRUE, scale=FALSE, pca_x=1, pca_y=2, group=NULL, opacity=0.6, plotsize=7, labsize=4, legend=TRUE){
+  # remove genes with zero read
+  idx <- which(rowSums(data) == 0)
+  if (length(idx>0)){
+    data <- data[-idx, ]
+  }
+
+  if(takelog){ 
+    if(any(data < 0)){
+      warning("ERROR: data contain negative values. Can not perform log transformation")
+    }else{
+      data <- log2(data + 0.1) 
+    }
+  }
+
+  if(!is.null(group)){
+    if(length(group) == ncol(data)){
+      # sort the data according to order of the group
+      idx <- order(group)
+      group <- group[idx]
+      data <- data[, idx]
+      color = create.brewer.color(group, length(unique(group)), "naikai")
+    }else{
+      warning("ERROR: length of group is not the same as number of columns in the input data")
+      group = "D"
+      legend = FALSE
+    }
+  }else{
+    group = "D"
+    color = "black"
+    legend = FALSE
+  }
+
+  #pc <- prcomp(t(data), center=center, scale.=scale)
+  pc <- prcomp(t(data), center=center, scale.= FALSE)
+  vars <- pc$sdev^2
+  vars <- signif(vars/sum(vars) * 100, 2)
+  idx <- c(pca_x, pca_y)
+
+  projection <- as.data.frame(pc$x) %>% 
+    dplyr::select(idx) %>% 
+    set_colnames(c("pca_x", "pca_y")) %>% 
+    mutate(group = group, 
+           color = color,
+           Sample = rownames(pc$x)) %>%
+    arrange(group)
+
+  title = paste(paste0("PC", idx), paste0("(", vars[idx], "% Var)"))
+
+  t <- list( size=labsize, color=toRGB("grey50") )
+  p <- plot_ly(projection, x = ~pca_x, y = ~pca_y, type="scatter", mode="markers",
+   color = ~group, colors = ~unique(color), 
+   text = ~paste(Sample, '</br>Group:', group), hoverinfo="text", textposition="top middle",
+   marker = list(size=plotsize, opacity=opacity))
+
+  p %>% layout(showlegend = legend,
+   xaxis = list(title = title[pca_x], zeroline=FALSE),
+   yaxis = list(title = title[pca_y], zeroline=FALSE))
+}
+
 
 #' Reorder dendrogram based on mean expression for RNA-Seq
 #' @param d dendrogram

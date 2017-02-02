@@ -759,8 +759,8 @@ body <- dashboardBody(
                       ),
                       conditionalPanel(
                         condition = "input.pt_col == 'Filename'",
-                        column(width=2, selectizeInput("pt_file_grp",
-                                                       label="Which Group",
+                        column(width=1, selectizeInput("pt_file_grp",
+                                                       label="Group#",
                                                        choices=NULL, multiple=TRUE,
                                                        options = list(
                                                          onInitialize = I('function() { this.setValue(""); }')
@@ -775,7 +775,9 @@ body <- dashboardBody(
                       conditionalPanel(
                         condition = "input.VisType == 't-SNE'",
                         column(width=1, numericInput("tsne_perplexity", label = "Perplexity", value=10)),
-                        column(width=1, numericInput("tsne_iter", label = "Iterations", value=20))
+                        column(width=1, numericInput("tsne_iter", label = "Iterations", value=20)),
+                        column(width=1, numericInput("tsne_theta", label = "theta", value=0.5, step = 0.01, min = 0)),
+                        column(width=1, numericInput("tsne_pca_num", label = "PCA #", value=50, step = 5, min = 10))
                       ),
                       column(width=1, numericInput("plot_point_size", label = "DotSize", value=7)),
                       column(width=1, numericInput("plot_point_alpha", label = "Alpha", value=0.75, step=0.05)),

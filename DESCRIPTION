@@ -1,7 +1,7 @@
 Package: sake
 Type: Package
 Title: Single-cell RNA-Seq Analysis and Klustering Evaluation
-Version: 0.3.3
+Version: 0.4.0
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 Authors@R: c(
     person("Yu-Jui", "Ho", email = "naikai@gmail.com", role = c("aut", "cre")),

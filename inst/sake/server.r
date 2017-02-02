@@ -735,11 +735,13 @@ shinyServer(function(input, output, session) {
         incProgress(1/3, detail = "For t-SNE 2D")
         try(
           tsne_2d$data <- run_tsne(plot_data, iter=input$tsne_iter, dims=2,
+                                   initial_dims = input$tsne_pca_num, theta = input$tsne_theta,
                                    perplexity=input$nmftsne_perplexity, cores=cores())
         )
         incProgress(2/3, detail = "For t-SNE 3D")
         try(
           tsne_3d$data <- run_tsne(plot_data, iter=input$tsne_iter, dims=3,
+                                   initial_dims = input$tsne_pca_num, theta = input$tsne_theta,
                                    perplexity=input$nmftsne_perplexity, cores=cores())
         )
       })
@@ -1516,41 +1518,63 @@ shinyServer(function(input, output, session) {
     data <- plot_data()[['plot_data']]
     withProgress(message = 'Generating 2d PCA plot', value = NULL, {
       pc <- prcomp(t(data))
-      projection <- as.data.frame(pc$x)
-      pca_x <- as.numeric(input$pca_x)
-      pca_y <- as.numeric(input$pca_y)
+      idx <- c(as.numeric(input$pca_x), as.numeric(input$pca_y))
+
+      vars<- pc$sdev^2
+      vars<- signif(vars/sum(vars) * 100, 2)
+      title = paste(paste0("PC", 1:length(vars)), paste0("(", vars, "% Var)"))
+
+      projection <- as.data.frame(pc$x) %>%
+        dplyr::select(idx) %>%
+        set_colnames(c("pca_x", "pca_y")) %>%
+        mutate(color = point_col()[['color']] %>% as.character(),
+               group = point_col()[['group']] %>% as.character(),
+               Sample = rownames(pc$x)) %>%
+        arrange(group)
 
       if(input$plot_label){
         t <- list( size=input$plot_label_size, color=toRGB("grey50") )
-        p <- plot_ly(x=projection[,pca_x], y=projection[,pca_y], mode="markers+text",
-                     color = point_col()[['group']],
-                     text=rownames(projection), hoverinfo="text", textfont=t, textposition="top middle",
-                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+        p <- plot_ly(projection, x = ~pca_x, y = ~pca_y, type="scatter", mode="markers+text",
+                     color = ~group, colors = ~unique(color),
+                     text = ~paste(Sample, '</br>Group:', group), hoverinfo="text", textfont=t, textposition="top middle",
+                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }else{
-        p <- plot_ly(x=projection[,pca_x], y=projection[,pca_y], mode="markers",
-                     text=rownames(projection), hoverinfo="text",
-                     color = point_col()[['group']],
-                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+        p <- plot_ly(projection, x = ~pca_x, y = ~pca_y, type="scatter", mode="markers",
+                     color = ~group, colors = ~unique(color),
+                     text = ~paste(Sample, '</br>Group:', group), hoverinfo="text",
+                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }
       p %>% layout(showlegend = input$plot_legend,
-                   xaxis = list(title = paste0("PC", pca_x), zeroline=FALSE),
-                   yaxis = list(title = paste0("PC", pca_y), zeroline=FALSE))
+                   xaxis = list(title = title[idx[1]], zeroline=FALSE),
+                   yaxis = list(title = title[idx[2]], zeroline=FALSE))
     })
   })
   output$pcaPlot_3D <- renderPlotly({
     data <- plot_data()[['plot_data']]
     withProgress(message = 'Generating 3d PCA plot', value = NULL, {
       pc <- prcomp(t(data))
-      projection <- as.data.frame(pc$x)
-      N <- nrow(projection)
-      plot_ly(x=projection[,1], y=projection[,2], z=projection[,3], type="scatter3d", mode="markers",
-              color=point_col()[['group']], text=rownames(projection), hoverinfo="text",
-              marker = list(color=point_col()[['color']], size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
+      idx <- c(1,2,3)
+
+      projection <- as.data.frame(pc$x) %>%
+        dplyr::select(idx) %>%
+        set_colnames(c("pca_x", "pca_y", "pca_z")) %>%
+        mutate(color = point_col()[['color']] %>% as.character(),
+               group = point_col()[['group']] %>% as.character(),
+               Sample = rownames(pc$x)) %>%
+        arrange(group)
+
+      vars<- pc$sdev^2
+      vars<- signif(vars/sum(vars) * 100, 2)
+      title = paste(paste0("PC", 1:length(vars)), paste0("(", vars, "% Var)"))
+
+      plot_ly(data=projection, x = ~pca_x, y = ~pca_y, z = ~pca_z, type="scatter3d", mode="markers",
+              color = ~group, colors = ~unique(color), text = ~Sample, hoverinfo="text",
+              marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
         layout(showlegend = input$plot_legend,
                scene = list(
-                 xaxis = list(title = "PC1"),
-                 yaxis = list(title = "PC2"),
-                 zaxis = list(title = "PC3"))
+                 xaxis = list(title = title[1]),
+                 yaxis = list(title = title[2]),
+                 zaxis = list(title = title[3]))
         )
     })
   })
@@ -1601,19 +1625,24 @@ shinyServer(function(input, output, session) {
       incProgress(2/3, detail = "Usually takes 15~20 seconds")
       color <- "steelblue"
 
-      projection <- parse_tsne_res(tsne_out) %>% data.frame
-      projection$color <- color
+      projection <- parse_tsne_res(tsne_out) %>%
+        data.frame %>%
+        mutate(group = point_col()[['group']] %>% as.character(),
+               color = point_col()[['color']] %>% as.character(),
+               Sample = rownames(.)) %>%
+        arrange(group)
+
       min.cost <- signif(tsne_out$itercosts[length(tsne_out$itercosts)], 2)
       if(input$plot_label){
         t <- list( size=input$plot_label_size, color=toRGB("grey50") )
-        p <- plot_ly(projection, x=projection$x, y=projection$y, mode="markers+text",
-                     color = point_col()[['group']],
-                     text=rownames(projection), hoverinfo="text", textposition="top middle", textfont=t,
-                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+        p <- plot_ly(projection, x = ~x, y = ~y, type="scatter", mode="markers+text",
+                     color = ~group, colors = ~unique(color),
+                     text= ~Sample, hoverinfo="text", textposition="top middle", textfont=t,
+                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }else{
-        p <- plot_ly(projection, x=projection$x, y=projection$y, mode="markers", text=rownames(projection), hoverinfo="text",
-                     color = point_col()[['group']],
-                     marker = list(color=point_col()[['color']], size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+        p <- plot_ly(projection, x = ~x, y = ~y, type="scatter", mode="markers", text= ~Sample, hoverinfo="text",
+                     color = ~group, colors = ~unique(color),
+                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }
       p %>% layout(showlegend = input$plot_legend,
                    title = title,
@@ -1627,12 +1656,17 @@ shinyServer(function(input, output, session) {
   output$tsneplot_3d <- renderPlotly({
     nsamples <- ncol(plot_data()[['plot_data']])
     if(is.null(tsne_3d$data)) return ()
-    projection <- isolate(as.data.frame(tsne_3d$data$Y))
-    labels <- rownames(projection)
-    N <- nrow(projection)
-    plot_ly(x=projection[,1], y=projection[,2], z=projection[,3], type="scatter3d", mode="markers",
-                 color=point_col()[['group']], text=labels, hoverinfo="text",
-                 marker = list(color=point_col()[['color']], size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
+
+    projection <- isolate(as.data.frame(tsne_3d$data$Y)) %>%
+        set_colnames(c("tsne_1", "tsne_2", "tsne_3")) %>%
+        mutate(group = point_col()[['group']] %>% as.character(),
+               color = point_col()[['color']] %>% as.character(),
+               Sample = rownames(.)) %>%
+        arrange(group)
+
+    plot_ly(data=projection, x = ~tsne_1, y = ~tsne_2, z = ~tsne_3, type="scatter3d", mode="markers",
+                 color = ~group, colors = ~unique(color), text= ~Sample, hoverinfo="text",
+                 marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
       layout(showlegend = input$plot_legend,
              scene = list(
                xaxis = list(title = "Component 1"),

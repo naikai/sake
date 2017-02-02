@@ -10,7 +10,7 @@
 #' @export
 #' @examples
 #' run_tsne(mtcars, iter=200, perplexity = 2, cores=4)
-run_tsne <- function(data, iter=10, perplexity=10, dims=2, cores=1){
+run_tsne <- function(data, iter=10, perplexity=10, dims=2, theta=0.5, initial_dims=50, cores=1){
    if(perplexity * 3 > (ncol(data) - 1)){
      warning(paste("Perpleixty", perplexity,
                     "is too large compared to num of samples", ncol(data)))
@@ -21,7 +21,7 @@ run_tsne <- function(data, iter=10, perplexity=10, dims=2, cores=1){
    if(cores==1){
       cost <- 1000
       for(i in 1:iter){
-         temp <- Rtsne::Rtsne(as.matrix(t(data)), perplexity=perplexity, dims=dims)
+         temp <- Rtsne::Rtsne(as.matrix(t(data)), perplexity=perplexity, dims=dims, theta=theta, initial_dims=initial_dims)
          min.cost <- temp$itercosts[length(temp$itercosts)]
          if( min.cost < cost){
             cost <- min.cost
@@ -34,7 +34,7 @@ run_tsne <- function(data, iter=10, perplexity=10, dims=2, cores=1){
       snowfall::sfLibrary(Rtsne)
 
       processInput <- function(j){
-        res <- Rtsne::Rtsne(as.matrix(t(data)), perplexity=perplexity, dims=dims)
+        res <- Rtsne::Rtsne(as.matrix(t(data)), perplexity=perplexity, dims=dims, theta=theta, initial_dims=initial_dims)
         return(res)
       }
       tmp_out <- vector("list", length = iter)
