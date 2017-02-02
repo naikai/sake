@@ -19,8 +19,8 @@ Remotes:
     renozao/pkgmaker@develop,
     renozao/NMF,
     bmbolstad/preprocessCore,
-    ropensci/plotly@6d7ddad,
-    tidyverse/ggplot2@338e82a,
+    ropensci/plotly@5b4606c,
+    tidyverse/ggplot2@bd7d9d6,
     rstudio/DT,
     rstudio/d3heatmap@colorlabels
 Depends:

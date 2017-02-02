@@ -398,7 +398,7 @@ shinyServer(function(input, output, session) {
     transform_data <- transform_data$data
     x <- scatterData()$x %>% as.numeric
     y <- scatterData()$y %>% as.numeric
-    plot_range <- min(x,y):max(x,y)
+    plot_range <- c(0, min(x,y):max(x,y), max(x,y) + 0.2)
     reg = lm(y ~ x)
     modsum = summary(reg)
     r <- signif(cor(x,y), 3)
@@ -407,25 +407,31 @@ shinyServer(function(input, output, session) {
 
     n <- 2
     withProgress(message = 'Generating Scatter Plot', value = 0, {
-      p <- plot_ly(x=x, y=y, text=textlab, type="scattergl", source = "scatter",
+      # p <- (x=~x, y=~y, text=~textlab, type="scattergl", #source = "scatter",
+      #              mode="markers", hoverinfo="text",
+      #              #themes="Catherine",
+      #              marker = list(size=8, opacity=0.65)) %>%
+      p <- plot_ly() %>%
+       add_trace(x=~x, y=~y, text=~textlab, type="scattergl",
                    mode="markers", hoverinfo="text",
-                   themes="Catherine",
                    marker = list(size=8, opacity=0.65)) %>%
+       add_trace(x=~plot_range, y=~plot_range, type="scattergl", mode = "lines", name = "Ref", line = list(width=2)) %>%
             layout(title = paste("cor:", r),
                    xaxis = list(title = input$cor_sample1, zeroline=TRUE),
                    yaxis = list(title = input$cor_sample2, zeroline=TRUE),
                    showlegend=FALSE)
-      p <- add_trace(p, x=plot_range, y=plot_range, type = "scattergl", mode = "lines", name = "Ref", line = list(width=2))
     })
-    if(input$show_r2){
-      p <- p %>% layout( annotations = list(x = x, y = y, text=paste0("R2=", R2), showarrow=FALSE) )
-    }
+    # if(input$show_r2){
+    #   p <- p %>% layout( annotations = list(x = x, y = y, text=paste0("R2=", R2), showarrow=FALSE) )
+    # }
 
     if(input$show_fc){
-      p <- add_trace(p, x=plot_range, y=plot_range[plot_range<=(max(plot_range)-1)]+1, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
-      p <- add_trace(p, x=plot_range[plot_range>=1], y=plot_range[plot_range>=1]-1, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
+      df <- data.frame(x = plot_range[plot_range>=1], y=plot_range[plot_range>=1]-1)
+      p <- p %>%
+        add_trace(data=df, x= ~x, y= ~y, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f")) %>%
+        add_trace(data=df, x= ~y, y= ~x, type = "scattergl", mode = "lines", name = "2-FC", line = list(width=1.5, color="#fec44f"))
     }
-    p
+    p #%>% toWebGL()
   })
   output$scatterdatatbl = DT::renderDataTable({
     x <- scatterData()$x
@@ -1513,23 +1519,41 @@ shinyServer(function(input, output, session) {
     return(res)
   })
 
-  #' PCA plot
-  output$pcaPlot_2D <- renderPlotly({
+  pca_data <- reactive({
     data <- plot_data()[['plot_data']]
-    withProgress(message = 'Generating 2d PCA plot', value = NULL, {
-      pc <- prcomp(t(data))
-      idx <- c(as.numeric(input$pca_x), as.numeric(input$pca_y))
+    withProgress(message = 'Calculating PCs', value = NULL, {
+      pc <- prcomp(t(data), center = TRUE)
 
       vars<- pc$sdev^2
       vars<- signif(vars/sum(vars) * 100, 2)
       title = paste(paste0("PC", 1:length(vars)), paste0("(", vars, "% Var)"))
 
-      projection <- as.data.frame(pc$x) %>%
-        dplyr::select(idx) %>%
+      projection <- as.data.frame(pc$x)
+    })
+
+    res <- list()
+    res[['proj']] <- projection
+    res[['title']] <- title
+    return(res)
+  })
+
+  #' PCA plot
+  output$pcaPlot_2D <- renderPlotly({
+    projection <- pca_data()[['proj']]
+    title <- pca_data()[['title']]
+
+    validate(
+      need(as.numeric(input$pca_x) != as.numeric(input$pca_y), "PC on the X-axis is the same as PC on the Y-axis.\nPlease select different number for these two axes")
+    )
+    idx <- c(as.numeric(input$pca_x), as.numeric(input$pca_y))
+
+    withProgress(message = 'Generating 2d PCA plot', value = NULL, {
+      projection <- projection %>%
+        dplyr::select(idx)  %>%
         set_colnames(c("pca_x", "pca_y")) %>%
         mutate(color = point_col()[['color']] %>% as.character(),
                group = point_col()[['group']] %>% as.character(),
-               Sample = rownames(pc$x)) %>%
+               Sample = colnames(plot_data()[['plot_data']])) %>%
         arrange(group)
 
       if(input$plot_label){
@@ -1544,32 +1568,30 @@ shinyServer(function(input, output, session) {
                      text = ~paste(Sample, '</br>Group:', group), hoverinfo="text",
                      marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }
-      p %>% layout(showlegend = input$plot_legend,
+      p %>% toWebGL() %>%
+        layout(showlegend = input$plot_legend,
                    xaxis = list(title = title[idx[1]], zeroline=FALSE),
                    yaxis = list(title = title[idx[2]], zeroline=FALSE))
     })
   })
   output$pcaPlot_3D <- renderPlotly({
-    data <- plot_data()[['plot_data']]
-    withProgress(message = 'Generating 3d PCA plot', value = NULL, {
-      pc <- prcomp(t(data))
-      idx <- c(1,2,3)
+    projection <- pca_data()[['proj']]
+    title <- pca_data()[['title']]
+    idx <- c(1,2,3)
 
-      projection <- as.data.frame(pc$x) %>%
-        dplyr::select(idx) %>%
+    withProgress(message = 'Generating 3d PCA plot', value = NULL, {
+      projection <- projection %>%
+        dplyr::select(idx)  %>%
         set_colnames(c("pca_x", "pca_y", "pca_z")) %>%
         mutate(color = point_col()[['color']] %>% as.character(),
                group = point_col()[['group']] %>% as.character(),
-               Sample = rownames(pc$x)) %>%
+               Sample = colnames(plot_data()[['plot_data']])) %>%
         arrange(group)
-
-      vars<- pc$sdev^2
-      vars<- signif(vars/sum(vars) * 100, 2)
-      title = paste(paste0("PC", 1:length(vars)), paste0("(", vars, "% Var)"))
 
       plot_ly(data=projection, x = ~pca_x, y = ~pca_y, z = ~pca_z, type="scatter3d", mode="markers",
               color = ~group, colors = ~unique(color), text = ~Sample, hoverinfo="text",
               marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
+        toWebGL() %>%
         layout(showlegend = input$plot_legend,
                scene = list(
                  xaxis = list(title = title[1]),
@@ -1644,7 +1666,9 @@ shinyServer(function(input, output, session) {
                      color = ~group, colors = ~unique(color),
                      marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }
-      p %>% layout(showlegend = input$plot_legend,
+      p %>%
+        toWebGL() %>%
+        layout(showlegend = input$plot_legend,
                    title = title,
                    xaxis = list(title = "Component 1", zeroline=FALSE),
                    yaxis = list(title = "Component 2", zeroline=FALSE))
@@ -1968,7 +1992,7 @@ shinyServer(function(input, output, session) {
       hi_res[range, ] <- sapply(goRes, function(x) x$greater[hi_genenames, "p.val"])
       total_hi_names[range] <- hi_genenames
 
-      if(!is.na(goRes[[i]]$less)){
+      if(!is.na(goRes[[i]]$less[1])){
         lo_genenames <- goRes[[i]]$less %>% rownames %>% head(n = num_genes)
         lo_res[range, ] <- sapply(goRes, function(x) x$less[lo_genenames, "p.val"])
         total_lo_names[range] <- lo_genenames
@@ -1991,15 +2015,20 @@ shinyServer(function(input, output, session) {
 
   output$goplot_hi <- renderPlotly({
     req(go_summary())
-    withProgress(message = 'Generating summary plot for GO term', value = NULL, {
-      aa <- melt(go_summary()[["hi_sub_pval"]])
-      colnames(aa) <- c("GO", "NMF", "P")
-      aa$P[is.na(aa$P)] <- 1
+    validate(
+      need(!is.na(go_summary()[["hi_sub_pval"]]), "Did not find any GO terms for greater, maybe you select the wrong 'species'?")
+    )
+    withProgress(message = 'Generating summary plot for GO term (Hi)', value = NULL, {
+      aa <- isolate(
+        melt(go_summary()[["hi_sub_pval"]]) %>%
+        set_colnames(c("GO", "NMF", "P")) %>%
+        mutate(P = replace(P, is.na(P), 1))
+      )
 
       if(input$go_logscale){
-        p <- plot_ly(aa, x = NMF, y = GO, z = log10(P), type = "heatmap", colors = input$go_colorscale)
+        p <- plot_ly(aa, x = ~NMF, y = ~GO, z = ~log10(P), type = "heatmap", colors = input$go_colorscale)
       }else{
-        p <- plot_ly(aa, x = NMF, y = GO, z = P, type = "heatmap", colors = input$go_colorscale)
+        p <- plot_ly(aa, x = ~NMF, y = ~GO, z = ~P, type = "heatmap", colors = input$go_colorscale)
       }
 
       m <- list( l = input$go_leftmargin, r = 10, b = 40, t = 20)
@@ -2009,8 +2038,8 @@ shinyServer(function(input, output, session) {
 
       colorbar_format <- list(family = "Arial", size = 8)
       naikai <- plotly_build(p)
-      naikai$data[[1]]$colorbar <- list(title = "P", thickness = input$go_barwidth, len=0.5, titlefont=colorbar_format, tickfont=colorbar_format)
-      naikai$layout <- l
+      naikai$x$data[[1]]$colorbar <- list(title = "P", thickness = input$go_barwidth, len=0.5, titlefont=colorbar_format, tickfont=colorbar_format)
+      naikai$x$layout <- l
       naikai
     })
   })
@@ -2018,17 +2047,19 @@ shinyServer(function(input, output, session) {
   output$goplot_lo <- renderPlotly({
     req(go_summary())
     validate(
-      need(!is.na(go_summary()[["lo_sub_pval"]]), "Did not find any GO terms for less, maybe your select 'two-directional test'?")
+      need(!is.na(go_summary()[["lo_sub_pval"]]), "Did not find any GO terms for less, maybe you select the wrong 'species'?")
     )
-    withProgress(message = 'Generating summary plot for GO term', value = NULL, {
-      aa <- melt(go_summary()[["lo_sub_pval"]])
-      colnames(aa) <- c("GO", "NMF", "P")
-      aa$P[is.na(aa$P)] <- 1
+    withProgress(message = 'Generating summary plot for GO term (Low)', value = NULL, {
+      aa <- isolate(
+        melt(go_summary()[["lo_sub_pval"]]) %>%
+        set_colnames(c("GO", "NMF", "P")) %>%
+        mutate(P = replace(P, is.na(P), 1))
+      )
 
       if(input$go_logscale){
-        p <- plot_ly(aa, x = NMF, y = GO, z = log10(P), type = "heatmap", colors = input$go_colorscale)
+        p <- plot_ly(aa, x = ~NMF, y = ~GO, z = ~log10(P), type = "heatmap", colors = input$go_colorscale)
       }else{
-        p <- plot_ly(aa, x = NMF, y = GO, z = P, type = "heatmap", colors = input$go_colorscale)
+        p <- plot_ly(aa, x = ~NMF, y = ~GO, z = ~P, type = "heatmap", colors = input$go_colorscale)
       }
 
       m <- list( l = input$go_leftmargin, r = 10, b = 40, t = 20)
@@ -2038,8 +2069,8 @@ shinyServer(function(input, output, session) {
 
       colorbar_format <- list(family = "Arial", size = 8)
       naikai <- plotly_build(p)
-      naikai$data[[1]]$colorbar <- list(title = "P", thickness = input$go_barwidth, len=0.5, titlefont=colorbar_format, tickfont=colorbar_format)
-      naikai$layout <- l
+      naikai$x$data[[1]]$colorbar <- list(title = "P", thickness = input$go_barwidth, len=0.5, titlefont=colorbar_format, tickfont=colorbar_format)
+      naikai$x$layout <- l
       naikai
     })
   })
