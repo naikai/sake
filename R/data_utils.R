@@ -1,7 +1,8 @@
 #' Compare two groups assignment results
 #'
 #' This function allows you to express your love of cats.
-#' @param love Do you love cats? Defaults to TRUE.
+#' @param group1 vector of clustering 1
+#' @param group2 vector of clustering 2
 #' @keywords compare
 #' @export
 #' @examples
@@ -71,6 +72,98 @@ compare_group <- function(group1, group2, file.prefix="Compare.group", title="",
   }
   # or just simply return the plot
   return (ray)
+}
+
+#' Calculate Mutual information from confusion matrix
+#' @param a True positive
+#' @param b False negative
+#' @param c False positive
+#' @param d True negative
+#' @keywords mutual information
+#' @export
+mutual_info_from_confmatrix <- function(a, b, c, d){
+  tot <- a + b + c + d
+  MI <- a/tot * log( a*tot / ((a+b)*(a+c)) ) +
+        b/tot * log( b*tot / ((b+a)*(b+d)) ) +
+        c/tot * log( c*tot / ((c+a)*(c+d)) ) +
+        d/tot * log( d*tot / ((d+b)*(d+c)) )
+  return(MI)
+}
+
+#' calculate Mutual information from two vector
+#'
+#' first generate summary table, then use equation to calculate mutual info
+#' @export
+mutual_info_from_vector <- function(x, y, base=exp(1)){
+  if (length(x) != length(y))
+    stop("arguments must be vectors of the same length")
+  x <- as.vector(x)
+  y <- as.vector(y)
+  N <- length(x)
+
+  tab <- table(x, y)
+  tab.da <- tab %>% data.frame
+  prop.x <- tab.da %>% group_by(x) %>% summarise(freq.x = sum(Freq)/N)
+  prop.y <- tab.da %>% group_by(y) %>% summarise(freq.y = sum(Freq)/N)
+
+  inner_join(tab.da, prop.x, by="x") %>%
+    inner_join(., prop.y, by="y") %>%
+    mutate(prop = Freq / N) %>%
+    mutate(MI = prop * log(prop /(freq.x * freq.y), base = base)) %>%
+    dplyr::select(MI) %>%
+    sum(na.rm=TRUE)
+}
+
+#' calculate entroyp
+#'
+#' @export
+cal_entropy <- function(x, base=exp(1)){
+  if (!is.vector(x))
+    stop("arguments must be a vector")
+  probs <- table(x) / length(x)
+  -sum(probs * log(probs, base = base))
+}
+
+#' Calculate statistics comparing two clustering results
+#'
+#' @param x reference for cluster
+#' @param y prediction for cluster
+#' @keywords compare
+#' @export
+compare_groups_stats <- function(x, y, method="rand", base=exp(1), beta=1){
+  x <- as.vector(x)
+  y <- as.vector(y)
+  if (length(x) != length(y))
+    stop("arguments must be vectors of the same length")
+  tab <- table(x, y)
+  if (all(dim(tab) == c(1, 1)))
+    return(1)
+
+  a <- sum(choose(tab, 2)) #TP
+  b <- sum(choose(rowSums(tab), 2)) - a #FN
+  c <- sum(choose(colSums(tab), 2)) - a #FP
+  d <- choose(sum(tab), 2) - a - b - c  #TN
+  P <- a / (a+b)
+  R <- a / (a+c)
+
+  if(method == "rand"){
+    (a+d) / (a+b+c+d)
+  }else if(method == "adj.rand"){
+    (2*a*d - 2*b*c) / (b^2 + c^2 + a*b + a*c + b*d + c*d + 2*a*d )
+  }else if(method == "f.score"){
+    (beta^2 + 1)*P*R / (beta^2*P + R)
+  }else if(method == "purity"){
+    tab %>% apply(., 2, max) %>% sum / length(x)
+  }else if(method == "mi"){
+    mutual_info_from_vector(x, y, base = base)
+  }else if(method == "nmi"){
+    mi <- mutual_info_from_vector(x, y, base = base)
+    avg_entropy <- (cal_entropy(x, base = base) + cal_entropy(y, base = base)) / 2
+    mi / avg_entropy
+  }else if(method == "vi"){
+    mi <- mutual_info_from_vector(x, y, base = base)
+    cal_entropy(x, base = base) + cal_entropy(y, base = base) - 2 * mi
+  }
 }
 
 

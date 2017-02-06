@@ -9,7 +9,9 @@ compare_group(group1, group2, file.prefix = "Compare.group", title = "",
   title.size = 36, angle = 45)
 }
 \arguments{
-\item{love}{Do you love cats? Defaults to TRUE.}
+\item{group1}{vector of clustering 1}
+
+\item{group2}{vector of clustering 2}
 }
 \description{
 This function allows you to express your love of cats.
