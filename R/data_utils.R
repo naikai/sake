@@ -139,14 +139,25 @@ compare_groups_stats <- function(x, y, method="rand", base=exp(1), beta=1){
   if (all(dim(tab) == c(1, 1)))
     return(1)
 
+  # TP(a) | FN(b) # TPR, Recall
+  # FP(c) | TN(d) # FPR, 1 - Specificity
+  # --------------
+  # Preci
+
   a <- sum(choose(tab, 2)) #TP
   b <- sum(choose(rowSums(tab), 2)) - a #FN
   c <- sum(choose(colSums(tab), 2)) - a #FP
   d <- choose(sum(tab), 2) - a - b - c  #TN
-  P <- a / (a+b)
-  R <- a / (a+c)
+  R <- a / (a+b)
+  P <- a / (a+c)
 
-  if(method == "rand"){
+  if(method == "precision"){
+    P
+  }else if(method == "recall" | method == "tpr"){
+    R
+  }else if(method == "fpr"){
+    c / (c+d)
+  }else if(method == "rand"){
     (a+d) / (a+b+c+d)
   }else if(method == "adj.rand"){
     (2*a*d - 2*b*c) / (b^2 + c^2 + a*b + a*c + b*d + c*d + 2*a*d )
