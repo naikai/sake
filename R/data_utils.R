@@ -150,11 +150,17 @@ compare_groups_stats <- function(x, y, method="rand", base=exp(1), beta=1){
   d <- choose(sum(tab), 2) - a - b - c  #TN
   R <- a / (a+b)
   P <- a / (a+c)
+  TT <- a + d
+  FF <- b + c
 
   if(method == "precision"){
     P
   }else if(method == "recall" | method == "tpr"){
     R
+  }else if(method == "tt"){
+    TT / (a+b+c+d)
+  }else if(method == "ff"){
+    FF / (a+b+c+d)
   }else if(method == "fpr"){
     c / (c+d)
   }else if(method == "rand"){
