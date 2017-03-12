@@ -556,16 +556,6 @@ shinyServer(function(input, output, session) {
     return(nmfres)
   })
 
-  ori_plus_nmfResult <-reactive({
-    rawdata <- rawdata()
-    validate(
-      need(!is.null(nmf_groups()), "Please run NMF and get the result first")
-    )
-    idx <- match(colnames(rawdata), nmf_groups()$Sample_ID)
-    colnames(rawdata) <- paste(paste0("NMF",nmf_groups()$nmf_subtypes[idx]), colnames(rawdata), sep="_")
-    return(rawdata)
-  })
-
   ### Download NMF ###
   observeEvent(input$runNMF, {
     output$dlNMF_UI <- renderUI({
@@ -583,11 +573,18 @@ shinyServer(function(input, output, session) {
       tmpdir <- tempdir()
       current_dir <- getwd()
       setwd(tmpdir)
+
       filenames <- sapply(c("nmf_Groups", "nmf_Features", "Original_plus_NMF"),
                           function(x) paste(file_prefix(), x, "csv", sep="."))
       write.csv(nmf_groups(), filenames[1], quote=F, row.names=F)
       write.csv(nmf_features(), filenames[2], quote=F, row.names=F)
-      write.csv(ori_plus_nmfResult(), filenames[3], quote=F)
+      write.csv(ori_plus_nmfResult()[["Total"]], filenames[3], quote=F)
+
+      for(i in 1:(length(ori_plus_nmfResult())-1)){
+        filenames <- c(filenames, paste(file_prefix(), paste0("onlyNMF", i), "csv", sep="."))
+        write.csv(ori_plus_nmfResult()[[paste("NMF", i)]], filenames[length(filenames)], quote=F)
+      }
+
       nmfres <- nmf_res()
       rawdata <- rawdata()
       nmfres_filename <- paste(file_prefix(), "nmfres", "rda", sep=".")
@@ -1002,12 +999,12 @@ shinyServer(function(input, output, session) {
     )
   }, server = FALSE)
 
-  output$nmf_boxplot <- renderPlotly({
+  output$nmf_vioplot <- renderPlotly({
     req(nmf_features_annot())
     validate(
       need(!is.null(input$nmfFeatures_rows_selected), "Please select a gene")
     )
-    withProgress(message = 'Generating boxplot', value = NULL, {
+    withProgress(message = 'Generating vioplot', value = NULL, {
       gene <- nmf_features_annot()[input$nmfFeatures_rows_selected, "GeneCard"] %>%
               gsub(".*'>(.*)</a>", "\\1", .)
       gene.data <- transform_data$data[gene, ]
@@ -1019,13 +1016,13 @@ shinyServer(function(input, output, session) {
       num_clus <- gene.data$NMF %>% levels %>% length
       mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
       a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
-            geom_boxplot(aes(color = NMF)) +
+            geom_violin(aes(color = NMF), scale="width", width=0.6) +
             geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
-            theme_bw() +
+            theme_classic() +
             scale_colour_manual(values = mycolor) +
             labs(title=gene, x="", y="Expression", colour="")
       p <- plotly_build(a)
-      # remove outliers for plotly boxplot
+      # remove outliers for plotly violin plot
       p$data <- lapply(p$data, FUN = function(x){
         if(x$type == "box"){
           x$marker = list(opacity = 0)
@@ -1046,9 +1043,19 @@ shinyServer(function(input, output, session) {
     validate(
       need(!is.null(nmf_groups()), "Please run NMF and get the result first")
     )
+    res <- list()
     idx <- match(colnames(rawdata), nmf_groups()$Sample_ID)
-    colnames(rawdata) <- paste(paste0("NMF",nmf_groups()$nmf_subtypes[idx]), colnames(rawdata), sep="_")
-    return(rawdata)
+    newdata <- rawdata
+    colnames(newdata) <- paste(paste0("NMF",nmf_groups()$nmf_subtypes[idx]), colnames(newdata), sep="_")
+    res[["Total"]] <- newdata
+
+    # add separate files for each NMF group
+    for(i in 1:length(unique(nmf_groups()$nmf_subtypes))){
+      subidx <- nmf_groups()$nmf_subtypes == i
+      res[[paste("NMF", i)]] <- newdata[, idx[subidx]]
+    }
+
+    return(res)
   })
 
   ### Statistics ###

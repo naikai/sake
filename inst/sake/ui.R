@@ -457,7 +457,7 @@ body <- dashboardBody(
                   ),
                   fluidRow(
                     column(width=8, DT::dataTableOutput('nmfFeatures')),
-                    column(width=4, plotlyOutput('nmf_boxplot', height = "500px"))
+                    column(width=4, plotlyOutput('nmf_vioplot', height = "500px"))
                   )
               )
             )
