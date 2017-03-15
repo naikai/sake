@@ -1007,20 +1007,41 @@ shinyServer(function(input, output, session) {
     withProgress(message = 'Generating vioplot', value = NULL, {
       gene <- nmf_features_annot()[input$nmfFeatures_rows_selected, "GeneCard"] %>%
               gsub(".*'>(.*)</a>", "\\1", .)
-      gene.data <- transform_data$data[gene, ]
+      gene.data <- transform_data$rawdata[gene, ]
       gene.data <- data.frame(Sample = names(gene.data),
                               Expr = as.numeric(gene.data),
                               NMF = factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
+      if(input$sel_vioscale == "raw"){
+        print('Use original scale')
+      }else if(input$sel_vioscale == "log2"){
+        gene.data$Expr <- log2(gene.data$Expr+1)
+      }else if(input$sel_vioscale == "log10"){
+        gene.data$Expr <- log10(gene.data$Expr+1)
+      }
 
       # match the coloring from PCA, t-SNE, and heatmap
       num_clus <- gene.data$NMF %>% levels %>% length
       mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
-      a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
-            geom_violin(aes(color = NMF), scale="width", width=0.6) +
-            geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
-            theme_classic() +
-            scale_colour_manual(values = mycolor) +
-            labs(title=gene, x="", y="Expression", colour="")
+
+      # add option to select either boxplot or violin plot
+      if(input$sel_vioplot == "violin plot"){
+        a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
+          geom_violin(aes(color = NMF), scale="width", width=0.6) +
+          geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
+          theme_classic() +
+          scale_colour_manual(values = mycolor) +
+          labs(title=gene, x="", y="Expression", colour="")
+      }else if(input$sel_vioplot == "boxplot"){
+        a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
+          geom_boxplot(aes(color = NMF)) +
+          geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
+          theme_classic() +
+          scale_colour_manual(values = mycolor) +
+          labs(title=gene, x="", y="Expression", colour="")
+      }else{
+        warning(paste("Unknown plot type:", input$sel_vioplot, "Please check again"))
+      }
+
       p <- plotly_build(a)
       # remove outliers for plotly violin plot
       p$data <- lapply(p$data, FUN = function(x){
@@ -1567,16 +1588,16 @@ shinyServer(function(input, output, session) {
         t <- list( size=input$plot_label_size, color=toRGB("grey50") )
         p <- plot_ly(projection, x = ~pca_x, y = ~pca_y, type="scatter", mode="markers+text",
                      color = ~group, colors = ~unique(color),
-                     text = ~paste(Sample, '</br>Group:', group), hoverinfo="text", textfont=t, textposition="top middle",
+                     text = ~Sample, hoverinfo="text", textfont=t, textposition="top middle",
                      marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha))
       }else{
         p <- plot_ly(projection, x = ~pca_x, y = ~pca_y, type="scatter", mode="markers",
                      color = ~group, colors = ~unique(color),
-                     text = ~paste(Sample, '</br>Group:', group), hoverinfo="text",
-                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     text = ~Sample, hoverinfo="text",
+                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha)) %>%
+        toWebGL()
       }
-      p %>% toWebGL() %>%
-        layout(showlegend = input$plot_legend,
+      p %>% layout(showlegend = input$plot_legend,
                    xaxis = list(title = title[idx[1]], zeroline=FALSE),
                    yaxis = list(title = title[idx[2]], zeroline=FALSE))
     })
@@ -1595,16 +1616,23 @@ shinyServer(function(input, output, session) {
                Sample = colnames(plot_data()[['plot_data']])) %>%
         arrange(group)
 
-      plot_ly(data=projection, x = ~pca_x, y = ~pca_y, z = ~pca_z, type="scatter3d", mode="markers",
-              color = ~group, colors = ~unique(color), text = ~Sample, hoverinfo="text",
-              marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
-        toWebGL() %>%
-        layout(showlegend = input$plot_legend,
-               scene = list(
-                 xaxis = list(title = title[1]),
-                 yaxis = list(title = title[2]),
-                 zaxis = list(title = title[3]))
-        )
+      if(input$plot_label){
+        p <- plot_ly(data=projection, x = ~pca_x, y = ~pca_y, z = ~pca_z, type="scatter3d", mode="markers+text",
+                      color = ~group, colors = ~unique(color), text = ~Sample, hoverinfo="text",
+                      marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha))
+      }else{
+        p <- plot_ly(data=projection, x = ~pca_x, y = ~pca_y, z = ~pca_z, type="scatter3d", mode="markers",
+                color = ~group, colors = ~unique(color), text = ~Sample, hoverinfo="text",
+                marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
+        toWebGL()
+      }
+
+      p %>% layout(showlegend = input$plot_legend,
+                   scene = list(
+                     xaxis = list(title = title[1]),
+                     yaxis = list(title = title[2]),
+                     zaxis = list(title = title[3]))
+      )
     })
   })
 
@@ -1671,11 +1699,10 @@ shinyServer(function(input, output, session) {
       }else{
         p <- plot_ly(projection, x = ~x, y = ~y, type="scatter", mode="markers", text= ~Sample, hoverinfo="text",
                      color = ~group, colors = ~unique(color),
-                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha))
+                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha)) %>%
+          toWebGL()
       }
-      p %>%
-        toWebGL() %>%
-        layout(showlegend = input$plot_legend,
+      p %>% layout(showlegend = input$plot_legend,
                    title = title,
                    xaxis = list(title = "Component 1", zeroline=FALSE),
                    yaxis = list(title = "Component 2", zeroline=FALSE))
@@ -1695,15 +1722,23 @@ shinyServer(function(input, output, session) {
                Sample = rownames(.)) %>%
         arrange(group)
 
-    plot_ly(data=projection, x = ~tsne_1, y = ~tsne_2, z = ~tsne_3, type="scatter3d", mode="markers",
-                 color = ~group, colors = ~unique(color), text= ~Sample, hoverinfo="text",
-                 marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
-      layout(showlegend = input$plot_legend,
-             scene = list(
-               xaxis = list(title = "Component 1"),
-               yaxis = list(title = "Component 2"),
-               zaxis = list(title = "Component 3"))
-      )
+    if(input$plot_label){
+      p <- plot_ly(data=projection, x = ~tsne_1, y = ~tsne_2, z = ~tsne_3, type="scatter3d", mode="markers+text",
+                   color = ~group, colors = ~unique(color), text= ~Sample, hoverinfo="text",
+                   marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha))
+    }else{
+      p <- plot_ly(data=projection, x = ~tsne_1, y = ~tsne_2, z = ~tsne_3, type="scatter3d", mode="markers",
+                   color = ~group, colors = ~unique(color), text= ~Sample, hoverinfo="text",
+                   marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
+        toWebGL()
+    }
+
+    p %>% layout(showlegend = input$plot_legend,
+                 scene = list(
+                   xaxis = list(title = "Component 1"),
+                   yaxis = list(title = "Component 2"),
+                   zaxis = list(title = "Component 3"))
+    )
   })
 
 

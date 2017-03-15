@@ -453,11 +453,23 @@ body <- dashboardBody(
                                             min=0.5, max=1, value=0.86, step = 0.01)
                         )
                       )
+                    ),
+                    column(width=2,
+                           selectInput("sel_vioplot",
+                                       label = "Plot type:",
+                                       choices = c("boxplot", "violin plot"),
+                                       selected = "violin plot")
+                    ),
+                    column(width=2,
+                           selectInput("sel_vioscale",
+                                       label = "Y-axis scale:",
+                                       choices = c("Raw", "log2", "log10"),
+                                       selected = "log2")
                     )
                   ),
                   fluidRow(
-                    column(width=8, DT::dataTableOutput('nmfFeatures')),
-                    column(width=4, plotlyOutput('nmf_vioplot', height = "500px"))
+                    column(width=7, DT::dataTableOutput('nmfFeatures')),
+                    column(width=5, plotlyOutput('nmf_vioplot', height = "500px"))
                   )
               )
             )
