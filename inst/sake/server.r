@@ -1024,22 +1024,30 @@ shinyServer(function(input, output, session) {
       mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
 
       # add option to select either boxplot or violin plot
-      if(input$sel_vioplot == "violin plot"){
+      if(input$sel_vioplot == "violin"){
         a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
           geom_violin(aes(color = NMF), scale="width", width=0.6) +
           geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
-          theme_classic() +
+          theme_bw() +
           scale_colour_manual(values = mycolor) +
           labs(title=gene, x="", y="Expression", colour="")
-      }else if(input$sel_vioplot == "boxplot"){
+      }else if(input$sel_vioplot == "box"){
         a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
           geom_boxplot(aes(color = NMF)) +
           geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
-          theme_classic() +
+          theme_bw() +
           scale_colour_manual(values = mycolor) +
           labs(title=gene, x="", y="Expression", colour="")
       }else{
         warning(paste("Unknown plot type:", input$sel_vioplot, "Please check again"))
+      }
+
+      # custom range for Y-axis is only being triggered when ymax > 0
+      if(!is.na(input$sel_ymax) & input$sel_ymax>0){
+        validate(
+          need(input$sel_ymax > input$sel_ymin, "Please make sure 'ymax' is greater than 'ymin'")
+        )
+        a <- a + ylim(c(input$sel_ymin, input$sel_ymax))
       }
 
       p <- plotly_build(a)

@@ -134,12 +134,14 @@ nmf_extract_feature <- function(res, rawdata=NULL, manual.num=0, method="default
          if(is.null(rawdata)){
             stop("error: need to provide original expression data if method is 'rank' ")
          }
-         data.feature <- cbind(data.feature, math=apply(log2(rawdata+1), 1, math)) %>%
+         # data.feature <- cbind(data.feature, math=apply(log2(rawdata+1), 1, math)) %>%
+         data.feature <- cbind(data.feature, math=apply(rawdata, 1, math)) %>%
                               filter(featureScore>=FScutoff) %>%
                               arrange(Group, dplyr::desc(math), dplyr::desc(prob))
          if(manual.num>0){
             data.feature <- group_by(data.feature, Group) %>%
-                              top_n(manual.num, math)
+                              top_n(manual.num)
+                              # top_n(manual.num, math)
                               # filter(min_rank(desc(math))<=manual.num)
          }
       }

@@ -454,17 +454,23 @@ body <- dashboardBody(
                         )
                       )
                     ),
-                    column(width=2,
-                           selectInput("sel_vioplot",
-                                       label = "Plot type:",
-                                       choices = c("boxplot", "violin plot"),
-                                       selected = "violin plot")
+                    column(width=1, selectInput("sel_vioplot",
+                                       label = "Plot type",
+                                       choices = c("box", "violin"),
+                                       selected = "violin")
                     ),
-                    column(width=2,
-                           selectInput("sel_vioscale",
-                                       label = "Y-axis scale:",
+                    column(width=1, selectInput("sel_vioscale",
+                                       label = "Y-scale",
                                        choices = c("Raw", "log2", "log10"),
                                        selected = "log2")
+                    ),
+                    column(width=1, numericInput("sel_ymax",
+                                       label = "Ymax:",
+                                       min=0, max=1000000, value=0, step=1)
+                    ),
+                    column(width=1, numericInput("sel_ymin",
+                                       label = "Ymin:",
+                                       min=0, max=1000000, value=0, step=1)
                     )
                   ),
                   fluidRow(
