@@ -783,12 +783,23 @@ body <- dashboardBody(
                                                        options = list(
                                                          onInitialize = I('function() { this.setValue(""); }')
                                                        ))
+                        ),
+                        column(width=1, selectInput("pt_sel_grp_order", label="Order", choices=c("Default", "Manual"), selected="Default")),
+                        conditionalPanel(
+                          condition = "input.pt_sel_grp_order == 'Manual'",
+                          column(width=2, selectizeInput("pt_grp_order",
+                                                         label="Select group order",
+                                                         choices=NULL, multiple=TRUE,
+                                                         options = list(
+                                                           onInitialize = I('function() { this.setValue(""); }')
+                                                         ))
+                          )
                         )
                       ),
                       conditionalPanel(
                         condition = "input.VisType == 'PCA'",
-                        column(width=2, selectInput("pca_x", label="PC on X-axis", choices=seq(1,10), selected = 1)),
-                        column(width=2, selectInput("pca_y", label="PC on Y-axis", choices=seq(1,10), selected = 2))
+                        column(width=1, selectInput("pca_x", label="PC on X", choices=seq(1,10), selected = 1)),
+                        column(width=1, selectInput("pca_y", label="PC on Y", choices=seq(1,10), selected = 2))
                       ),
                       conditionalPanel(
                         condition = "input.VisType == 't-SNE'",
@@ -802,17 +813,10 @@ body <- dashboardBody(
                       column(width=1, numericInput("plot_label_size", label = "LabelSize", value=9)),
                       column(width=1, checkboxInput('plot_label', 'Add label', FALSE)),
                       column(width=1, checkboxInput('plot_legend', 'Add legend', TRUE)),
-                      # column(width=2, selectInput("pt_sel_grp_order", label="Group Order", choices=c("Default", "Manual"), selected="Default")),
-                      conditionalPanel(
-                        condition = "input.pt_sel_grp_order == 'Manual' & (input.pt_col == 'Filename' || input.pt_col == 'NMF Group')",
-                        column(width=2, selectizeInput("pt_grp_order",
-                                                       label="Select group order",
-                                                       choices=NULL, multiple=TRUE,
-                                                       options = list(
-                                                         onInitialize = I('function() { this.setValue(""); }')
-                                                       ))
-                        )
-                      ),
+                      # conditionalPanel(
+                      #   # condition =  "input.pt_col == 'Filename' || input.pt_col == 'NMF Group')",
+                      #   condition =  "input.pt_col == 'Filename'",
+                      # ),
                       uiOutput("visualperplexity_UI"),
                       column(width=6, bsAlert("visualperplexityAlert"))
                     )
@@ -1012,70 +1016,3 @@ dashboardPage(
   sidebar,
   body
 )
-
-
-
-
-
-
-#       conditionalPanel(
-#         condition = "input.Modules == 'Pathway'",
-#         selectizeInput("pathway_group",
-#                        label = "Display results for which NMF groups?",
-#                        choices=NULL, multiple=FALSE,
-#                        options = list(placeholder='Choose a NMF group')
-#         ),
-#         tags$hr(),
-#         selectInput("gmt_type",
-#                     label = "Which gene sets file to use?",
-#                     choices = c("Preloaded gene sets" = "preload",
-#                                 "Upload your own gene set (.gmt) file" = "upload"),
-#                     selected = "preload"
-#         ),
-#         conditionalPanel(
-#           condition = "input.gmt_type == 'preload'",
-#           selectizeInput("predefined_list",
-#                          label = "Select from predefined gene sets",
-#                          choices = list(
-#                            GSEA = c(`Hallmark`='h.all',
-#                                     `c1 - Positional`='c1.all',
-#                                     `c2 - Curated`='c2.all',
-#                                     `c3 - Motif` = "c3.all",
-#                                     `c4 - Computational module` = "c4.all",
-#                                     `c5 - Gene Ontology (GO)` = "c5.all",
-#                                     `c6 - Oncogenic` = "c6.all",
-#                                     `c7 - Immunological` = "c7.all"
-#                            )
-#                          ),
-#                          selected = 'c5.all', multiple=F
-#           )
-#         ),
-#         conditionalPanel(
-#           condition = "input.gmt_type == 'upload'",
-#           fileInput('gmtfile1', 'Uploda your own gene set file',
-#                     accept=c('text/csv',
-#                              'text/comma-separated-values,text/plain',
-#                              '.csv'))
-#         ),
-#         downloadButton('downloadPathData', 'Download Enrichment Analysis Result'),
-#
-#         checkboxInput('moreopt2', 'More Options', FALSE),
-#         conditionalPanel(
-#           condition = "input.moreopt2 == true",
-#           selectInput("piano_algorithm",
-#                       label = "What kind of algorithm (for piano)?",
-#                       choices = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon", "mean", "median", "sum", "maxmean", "gsea", "page"),
-#                       selected = "mean"),
-#           sliderInput("nPerm",
-#                       label = "Number of permutation:",
-#                       min=100, max=1000, value=200, step=50),
-#           selectInput("pathway_mode",
-#                       label = "Enrichment Analysis or Raw LogFC?",
-#                       choices = c("Enrichment Analysis" = "enrich",
-#                                   "Expression log Fold Change across groups" = "logFC"),
-#                       selected = "enrich"
-#           )
-#         )
-#       ) # end if Modules = "Pathway"
-#     ),
-#     mainPanel(

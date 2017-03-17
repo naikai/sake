@@ -1476,13 +1476,18 @@ shinyServer(function(input, output, session) {
                          choices = choices,
                          selected = choices[1]
     )
+  })
+  observeEvent(input$pt_file_grp, {
+    # this should change with respect to the selection of filename group
+    choices <- rawdata() %>% colnames() %>% strsplit("_") %>%
+      sapply(., function(x) x[as.numeric(input$pt_file_grp)]) %>% unique %>% length %>%
+      seq(1, .) %>% as.character()
     updateSelectizeInput(session, 'pt_grp_order',
                          server = TRUE,
                          choices = choices,
                          selected = choices[1]
     )
   })
-
   observeEvent(transform_data$data, {
     updateSelectizeInput(session, 'pt_allgene',
                          server = TRUE,
@@ -1505,7 +1510,8 @@ shinyServer(function(input, output, session) {
   })
 
   point_col <- reactive({
-    col <- toRGB("steelblue")
+    # col <- toRGB("steelblue")
+    col <- "steelblue"
     plot_data <- plot_data()[['plot_data']]
     group <- NULL
     if(input$pt_col == "Default"){
@@ -1527,6 +1533,15 @@ shinyServer(function(input, output, session) {
       filename <- sapply(strsplit(filename, "_"), function(x) paste0(x[as.numeric(input$pt_file_grp)], collapse = "_"))
       col <- create.brewer.color(filename, length(unique(filename)), "naikai") %>% as.matrix
       group <- filename %>% as.matrix
+
+      # add option to manual select the order of coloring
+      if(input$pt_sel_grp_order == "Manual"){
+        col <- col[, 1]
+        col.num <- as.numeric(factor(col))
+        col.lvl <- levels(factor(col))
+        col.lvl <- col.lvl[as.numeric(input$pt_grp_order)]
+        col <- col.lvl[col.num] %>% as.matrix
+      }
     }else if(input$pt_col == "GeneExpr"){
       req(input$pt_allgene)
       idx <- match(colnames(plot_data), colnames(transform_data$data))
@@ -1602,8 +1617,8 @@ shinyServer(function(input, output, session) {
         p <- plot_ly(projection, x = ~pca_x, y = ~pca_y, type="scatter", mode="markers",
                      color = ~group, colors = ~unique(color),
                      text = ~Sample, hoverinfo="text",
-                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha)) %>%
-        toWebGL()
+                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha)) #%>%
+        # toWebGL()
       }
       p %>% layout(showlegend = input$plot_legend,
                    xaxis = list(title = title[idx[1]], zeroline=FALSE),
@@ -1631,8 +1646,8 @@ shinyServer(function(input, output, session) {
       }else{
         p <- plot_ly(data=projection, x = ~pca_x, y = ~pca_y, z = ~pca_z, type="scatter3d", mode="markers",
                 color = ~group, colors = ~unique(color), text = ~Sample, hoverinfo="text",
-                marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha)) %>%
-        toWebGL()
+                marker = list(color = ~color, size=input$plot_point_size, opacity=input$plot_point_alpha)) #%>%
+        # toWebGL()
       }
 
       p %>% layout(showlegend = input$plot_legend,
