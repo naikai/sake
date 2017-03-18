@@ -471,6 +471,21 @@ body <- dashboardBody(
                     column(width=1, numericInput("sel_ymin",
                                        label = "Ymin:",
                                        min=0, max=1000000, value=0, step=1)
+                    ),
+                    column(width=1, selectInput("sel_grp",
+                                       label = "Order:",
+                                       choices = c("Default", "Manual"),
+                                       selected = "Default")
+                    ),
+                    conditionalPanel(
+                      condition = "input.sel_grp == 'Manual'",
+                      column(width=2, selectizeInput("sel_grp_order",
+                                                     label="Select group order",
+                                                     choices=NULL, multiple=TRUE,
+                                                     options = list(
+                                                       onInitialize = I('function() { this.setValue(""); }')
+                                                     ))
+                      )
                     )
                   ),
                   fluidRow(

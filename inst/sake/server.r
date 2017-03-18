@@ -1023,18 +1023,24 @@ shinyServer(function(input, output, session) {
       num_clus <- gene.data$NMF %>% levels %>% length
       mycolor <- create.brewer.color(1:num_clus, num=num_clus, name="naikai")
 
+      if(input$sel_grp == "Manual"){
+          col.num <- as.numeric(factor(mycolor, levels = mycolor))
+          col.lvl <- as.character(mycolor)
+          col.lvl <- col.lvl[as.numeric(input$sel_grp_order)]
+          mycolor <- col.lvl[col.num]
+      }
       # add option to select either boxplot or violin plot
       if(input$sel_vioplot == "violin"){
         a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
-          geom_violin(aes(color = NMF), scale="width", width=0.6) +
-          geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
+          geom_violin(aes(color = NMF), scale="width", width=0.6, show.legend = FALSE) +
+          geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1, show.legend = FALSE) +
           theme_bw() +
           scale_colour_manual(values = mycolor) +
           labs(title=gene, x="", y="Expression", colour="")
       }else if(input$sel_vioplot == "box"){
         a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
-          geom_boxplot(aes(color = NMF)) +
-          geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1) +
+          geom_boxplot(aes(color = NMF), show.legend = FALSE) +
+          geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1, show.legend = FALSE) +
           theme_bw() +
           scale_colour_manual(values = mycolor) +
           labs(title=gene, x="", y="Expression", colour="")
@@ -1508,6 +1514,14 @@ shinyServer(function(input, output, session) {
                          selected = as.character(nmf_features()$Gene[1])
     )
   })
+  observeEvent(nmf_groups()$nmf_subtypes, {
+    choices <- nmf_groups()$nmf_subtypes %>% unique %>% length %>% seq(1, .) %>% as.character()
+    updateSelectizeInput(session, 'sel_grp_order',
+                         server = TRUE,
+                         choices = choices,
+                         selected = choices[1]
+    )
+  })
 
   point_col <- reactive({
     # col <- toRGB("steelblue")
@@ -1537,8 +1551,8 @@ shinyServer(function(input, output, session) {
       # add option to manual select the order of coloring
       if(input$pt_sel_grp_order == "Manual"){
         col <- col[, 1]
-        col.num <- as.numeric(factor(col))
-        col.lvl <- levels(factor(col))
+        col.num <- as.numeric(factor(col, levels = unique(col) %>% sort))
+        col.lvl <- unique(col)
         col.lvl <- col.lvl[as.numeric(input$pt_grp_order)]
         col <- col.lvl[col.num] %>% as.matrix
       }
@@ -1722,8 +1736,8 @@ shinyServer(function(input, output, session) {
       }else{
         p <- plot_ly(projection, x = ~x, y = ~y, type="scatter", mode="markers", text= ~Sample, hoverinfo="text",
                      color = ~group, colors = ~unique(color),
-                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha)) %>%
-          toWebGL()
+                     marker = list(color = ~color, size=input$plot_point_size+3, opacity=input$plot_point_alpha)) #%>%
+          # toWebGL()
       }
       p %>% layout(showlegend = input$plot_legend,
                    title = title,
