@@ -1004,7 +1004,7 @@ shinyServer(function(input, output, session) {
     validate(
       need(!is.null(input$nmfFeatures_rows_selected), "Please select a gene")
     )
-    withProgress(message = 'Generating vioplot', value = NULL, {
+    withProgress(message = 'Generating box/violin plot', value = NULL, {
       gene <- nmf_features_annot()[input$nmfFeatures_rows_selected, "GeneCard"] %>%
               gsub(".*'>(.*)</a>", "\\1", .)
       gene.data <- transform_data$rawdata[gene, ]
@@ -1033,17 +1033,19 @@ shinyServer(function(input, output, session) {
       if(input$sel_vioplot == "violin"){
         a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
           geom_violin(aes(color = NMF), scale="width", width=0.6, show.legend = FALSE) +
-          geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1, show.legend = FALSE) +
+          geom_jitter(aes(color=NMF), alpha=0.6, width=0.1, show.legend = FALSE) +
           theme_bw() +
           scale_colour_manual(values = mycolor) +
-          labs(title=gene, x="", y="Expression", colour="")
+          labs(title=gene, plot.title = element_text(hjust = 5),
+               x="", y="Expression", colour="")
       }else if(input$sel_vioplot == "box"){
         a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
           geom_boxplot(aes(color = NMF), show.legend = FALSE) +
-          geom_jitter(aes(color=NMF, text=Sample), alpha=0.6, width=0.1, show.legend = FALSE) +
+          geom_jitter(aes(color=NMF), alpha=0.6, width=0.1, show.legend = FALSE) +
           theme_bw() +
           scale_colour_manual(values = mycolor) +
-          labs(title=gene, x="", y="Expression", colour="")
+          labs(title=gene, plot.title = element_text(hjust = 5),
+               x="", y="Expression", colour="")
       }else{
         warning(paste("Unknown plot type:", input$sel_vioplot, "Please check again"))
       }
@@ -1058,17 +1060,19 @@ shinyServer(function(input, output, session) {
 
       p <- plotly_build(a)
       # remove outliers for plotly violin plot
-      p$data <- lapply(p$data, FUN = function(x){
+      p[[1]]$data <- lapply(p[[1]]$data, FUN = function(x){
         if(x$type == "box"){
-          x$marker = list(opacity = 0)
+          x$marker = list(outliercolor = 0)
         }
         return(x)
       })
-      p$layout$margin$l <- p$layout$margin$l + 15
-      p$layout$annotations[[1]]$x <- -0.1
-      p$layout$xaxis$tickfont$size <- 8
-      p$layout$annotations[[1]]$font$size <- 11
-      p$layout$yaxis$tickfont$size <- 10
+      p[[1]]$layout$margin$l <- p$layout$margin$l + 15
+      p[[1]]$layout$legend$font$size <- input$sel_legend_size
+      p[[1]]$layout$showlegend = input$sel_show_legend
+      p[[1]]$layout$annotations[[1]]$x <- -0.1
+      p[[1]]$layout$annotations[[1]]$font$size <- 10
+      p[[1]]$layout$xaxis$tickfont$size <- input$sel_xfont_size
+      p[[1]]$layout$yaxis$tickfont$size <- input$sel_yfont_size
       p
     })
   })
