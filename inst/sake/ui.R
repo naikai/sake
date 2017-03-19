@@ -485,32 +485,40 @@ body <- dashboardBody(
                         )
                       ),
                       column(width=1, numericInput("sel_xfont_size",
-                                                   label = "Xlab size:",
-                                                   min=1, max=20, value=11, step=0.5)
+                                                   label = "Xlab size",
+                                                   min=1, max=20, value=11, step=1)
                       ),
                       column(width=1, numericInput("sel_yfont_size",
-                                                   label = "Ylab size:",
-                                                   min=1, max=20, value=12, step=0.5)
+                                                   label = "Ylab size",
+                                                   min=1, max=20, value=12, step=1)
+                      ),
+                      column(width=1, numericInput("sel_ncol",
+                                                   label = "# Column",
+                                                   min=1, max=10, value=1, step=1)
                       ),
                       column(width=1, numericInput("sel_ymax",
-                                                   label = "Ymax:",
+                                                   label = "Ymax",
                                                    min=0, max=1000000, value=0, step=1)
                       ),
                       column(width=1, numericInput("sel_ymin",
-                                                   label = "Ymin:",
+                                                   label = "Ymin",
                                                    min=0, max=1000000, value=0, step=1)
                       ),
-                      column(width=2, numericInput("sel_legend_size",
-                                                   label = "Legend size:",
-                                                   min=1, max=20, value=9, step=0.5)
+                      column(width=1, numericInput("sel_title_size",
+                                                   label = "Title size",
+                                                   min=1, max=20, value=14, step=1)
                       ),
-                      column(width=2, checkboxInput("sel_show_legend", label="Show Legend", TRUE))
+                      column(width=2, numericInput("sel_legend_size",
+                                                   label = "Legend size",
+                                                   min=1, max=20, value=9, step=1)
+                      ),
+                      column(width=1, checkboxInput("sel_show_legend", label="Show Legend", TRUE))
                     )
                   ),
                   fluidRow(
                     column(width=7, DT::dataTableOutput('nmfFeatures')),
-                    # column(width=5, plotlyOutput('nmf_vioplot', height = "500px"))
-                    column(width=5, plotlyOutput('nmf_vioplot'))
+                    column(width=5, plotlyOutput('nmf_vioplot', height = "500px"))
+                    # column(width=5, plotlyOutput('nmf_vioplot'))
                   )
               )
             )

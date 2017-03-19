@@ -980,7 +980,7 @@ shinyServer(function(input, output, session) {
   output$nmfFeatures <- DT::renderDataTable({
     filename <- "nmf_features"
     DT::datatable(nmf_features_annot(), rownames=FALSE, escape=-1,
-                  extensions = 'Buttons', selection = 'single',
+                  extensions = 'Buttons', selection = 'multiple',
                   options = list(dom = 'Bfrtip',
                                  buttons =
                                    list('copy', 'print', list(
@@ -1008,9 +1008,12 @@ shinyServer(function(input, output, session) {
       gene <- nmf_features_annot()[input$nmfFeatures_rows_selected, "GeneCard"] %>%
               gsub(".*'>(.*)</a>", "\\1", .)
       gene.data <- transform_data$rawdata[gene, ]
-      gene.data <- data.frame(Sample = names(gene.data),
-                              Expr = as.numeric(gene.data),
-                              NMF = factor(paste0("NMF", nmf_groups()$nmf_subtypes)))
+
+      gene.data <- gene.data %>%
+        tibble::rownames_to_column() %>%
+        dplyr::rename(genename = rowname) %>%
+        tidyr::gather(Sample, Expr, -genename) %>%
+        dplyr::mutate(NMF = factor(paste0("NMF", rep(nmf_groups()$nmf_subtypes, each=length(gene)))))
       if(input$sel_vioscale == "raw"){
         print('Use original scale')
       }else if(input$sel_vioscale == "log2"){
@@ -1035,17 +1038,17 @@ shinyServer(function(input, output, session) {
           geom_violin(aes(color = NMF), scale="width", width=0.6, show.legend = FALSE) +
           geom_jitter(aes(color=NMF), alpha=0.6, width=0.1, show.legend = FALSE) +
           theme_bw() +
+          facet_wrap(~ genename, ncol = input$sel_ncol) +
           scale_colour_manual(values = mycolor) +
-          labs(title=gene, plot.title = element_text(hjust = 5),
-               x="", y="Expression", colour="")
+          labs(x="", y="", colour="")
       }else if(input$sel_vioplot == "box"){
         a <- ggplot(data=gene.data, aes(x=NMF, y=Expr, color=NMF)) +
           geom_boxplot(aes(color = NMF), show.legend = FALSE) +
           geom_jitter(aes(color=NMF), alpha=0.6, width=0.1, show.legend = FALSE) +
           theme_bw() +
+          facet_wrap(~ genename, ncol = input$sel_ncol) +
           scale_colour_manual(values = mycolor) +
-          labs(title=gene, plot.title = element_text(hjust = 5),
-               x="", y="Expression", colour="")
+          labs(x="", y="", colour="")
       }else{
         warning(paste("Unknown plot type:", input$sel_vioplot, "Please check again"))
       }
@@ -1059,20 +1062,31 @@ shinyServer(function(input, output, session) {
       }
 
       p <- plotly_build(a)
-      # remove outliers for plotly violin plot
+      # remove outliers for plotly boxplot
       p[[1]]$data <- lapply(p[[1]]$data, FUN = function(x){
         if(x$type == "box"){
           x$marker = list(outliercolor = 0)
         }
         return(x)
       })
-      p[[1]]$layout$margin$l <- p$layout$margin$l + 15
+
+      p[[1]]$layout$margin$l <- p[[1]]$layout$margin$l + 5
       p[[1]]$layout$legend$font$size <- input$sel_legend_size
       p[[1]]$layout$showlegend = input$sel_show_legend
-      p[[1]]$layout$annotations[[1]]$x <- -0.1
-      p[[1]]$layout$annotations[[1]]$font$size <- 10
-      p[[1]]$layout$xaxis$tickfont$size <- input$sel_xfont_size
-      p[[1]]$layout$yaxis$tickfont$size <- input$sel_yfont_size
+
+      # loop through ncol(Xaxis) and gene (Yaxis)
+      num_xaxis <- grep("xaxis", names(p[[1]]$layout)) %>% length
+      num_yaxis <- grep("yaxis", names(p[[1]]$layout)) %>% length
+      for(i in 1:num_xaxis){
+        p[[1]]$layout[[paste0("xaxis", ifelse(i>1, i, ""))]]$tickfont$size <- input$sel_xfont_size
+      }
+      for(i in 1:num_yaxis){
+        p[[1]]$layout[[paste0("yaxis", ifelse(i>1, i, ""))]]$tickfont$size <- input$sel_yfont_size
+      }
+      for(i in 1:length(gene)){
+        p[[1]]$layout$annotations[[i]]$font$size <- input$sel_title_size
+      }
+
       p
     })
   })
