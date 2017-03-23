@@ -23,7 +23,7 @@
 #' @export
 #' @examples
 #' myNMF(data, mode="estim", cluster=3, nrun=20)
-myNMF <- function(data, prefix="NMF", cluster=3, top=1500, nrun=100, norm=F, ncores=8, algorithm="brunet", mode="real", seed=123211){
+myNMF <- function(data, prefix="NMF", cluster=3, nrun=100, norm=F, ncores=8, algorithm="brunet", mode="real", seed=123211){
 
    if(mode=="estim"){
       r <- 2:cluster
@@ -32,7 +32,6 @@ myNMF <- function(data, prefix="NMF", cluster=3, top=1500, nrun=100, norm=F, nco
    }else if(mode=="compare"){
       res.multi.method <- nmf(data, cluster, list("brunet", "lee", "ns"), nrun=nrun, .opt=paste0("vtp", ncores), seed=seed)
       # compare(res.multi.method)
-      # print(compare(res.multi.method))
       res <- res.multi.method
    }else if(mode=="real"){
       # option 't' will toggle error track function
@@ -287,3 +286,225 @@ nmf_select_best_k <- function(res, type="consensus"){
     }
     return(data)
 }
+
+
+
+
+#' Run iterative NMF for K=2 until it cannot no longer separate samples
+#'
+#' @param rawdata gene count table
+#' @param nrun number of runs for each NMF
+#' @param min.sample number of required minimum samples in each subclusters
+#' @param mad number of top MAD genes
+#' @param silhouette min required threshold for silhouette index after NMF run
+#' @keywords NMF iterative
+#' @export
+#' @examples
+#' iter_nmf(rawdata, nrun=10, mad=5000)
+iter_nmf <- function(rawdata, nrun=10, round=1, min.sample = 10, mad = 5000, silhouette = 0.95) {
+  repeat {
+    print(paste('Running for iterNMF in round', round))
+    print(paste("before feature selection", dim(rawdata)))
+
+    data <- extract_data_by_mad(rawdata, topN = mad)
+    print(paste("after feature selection", dim(data)))
+
+    nmf_res <- myNMF(data, cluster = 2, nrun=nrun)
+    summary <- nmf_summary(nmf_res)
+    nmf_groups <- nmf_extract_group(nmf_res)
+
+    # exit if the condition is met
+    # cur.silhouette <- summary["silhouette.consensus", ] %>% signif(., 3)
+    cur.silhouette <- median(nmf_groups$sil_width)
+
+    if (cur.silhouette < silhouette) {
+      print(paste("silhouette.consensus", cur.silhouette, "is less than:", silhouette, "don't proceed"))
+      break
+    }else{
+      res <- list()
+      for(grp in c(1,2)){
+        idx <- which(nmf_groups$nmf_subtypes == grp)
+        subdata <- rawdata[, idx] %>% .[rowSums(.) != 0, ]
+
+        # less than 10(default) samples, don't proceed
+        if(length(idx) <= min.sample){
+          print(paste("subdata has", length(idx), "samples, which less or equal than", min.sample, "samples, don't proceed"))
+          # it turns out we need to have another NMF run in order to get NMF_res for the summary later
+          # for cluster == 2, samples have to be greater than 3.
+          if(length(idx) == 1){
+            subdata <- rawdata[, c(idx, idx, idx)] %>% rmv_constant_0(.)
+          }else if(ncol(subdata) == 2){
+            subdata <- rawdata[, c(idx, idx)] %>% rmv_constant_0(.)
+          }else{
+            print(paste("sample number", length(idx), ". Return res and proceed"))
+          }
+          res[[grp]] <- myNMF(subdata[1:100, ], cluster=2, nrun=2)
+        }else{
+          # repeat iter_NMF
+          res[[grp]] <- iter_nmf(subdata, round = round+1, nrun=nrun, min.sample=min.sample, mad=mad)
+        }
+      }
+      res = list(res = res)
+      return(res)
+    }
+  }
+  return(nmf_res)
+}
+
+extract_centroid_from_nmf_res <- function(res, data, method = "mean"){
+  nmf_groups <- nmf_extract_group(res)
+  data[, colnames(data) %in% nmf_groups$Sample_ID] %>%
+    getcentroid(., method = method)
+}
+
+getcentroid <- function(df, method = "mean") {
+  if(method == "mean"){
+    return(rowMeans(df))
+  }else if(method == "median"){
+    return(rowMedians(df))
+  }else{
+    stop("Please check you have specified the correct method")
+  }
+}
+
+
+#' Extract, cleanup, and merge iter_NMF results
+#'
+#' We will only get grouping info for now
+#' @param iter_nmf vairous NMF res in a list format
+#' @param rawdata gene count table for calculating centroids based on the clustering results
+#' @param cor.method method for correlation calculation, default: spearman correlation
+#' @param cor.thresh correlation threshold for merging subclusters
+#' @param ctroid.topN number of top Genes to extract for centroid comparison
+#' @param ctroid.math method for getting centroid, default: mean
+#' @keywords NMF iterative
+#' @export
+#' @examples
+#' clean_iterNMF(inmf_res, rawdata)
+clean_iterNMF <- function(inmf_res, rawdata,
+                          cor.method = "spearman", cor.thresh = 0.9,
+                          ctriod.topN = 5000, ctroid.math = "mean",
+                          return.all = FALSE) {
+
+  bb <- unlist(inmf_res)
+  names(bb) <- names(bb) %>% make.unique()
+
+  # the number of feature selected for centroid will affect how we merge subclusters
+  # using spearman.cor, purpose to rmv_constant_0 and select top rowMean 10K genes
+  clust_data <- rawdata %>%
+    rmv_constant_0(., pct=0.95) %>%
+    extract_data_by_math(., topN = ctriod.topN, math = ctroid.math)
+
+  clust_centroid <- bb %>%
+    sapply(., function(x) extract_centroid_from_nmf_res(res = x, data = clust_data))
+
+  cor_cluster <- clust_centroid %>%
+    cor(., method=cor.method) %>%
+    reshape2::melt() %>%
+    filter(value != 1 & duplicated(value)) %>%
+    dplyr::arrange(Var1, Var2)
+
+  if(cor.thresh > 0){
+    cor_cluster <- cor_cluster %>% filter(value > cor.thresh)
+  }
+
+  ### Check number of samples in each sub-clusters
+  cc <- names(bb) %>% as_tibble() %>%
+    dplyr::select(names = value ) %>%
+    dplyr::mutate(res = bb[names]) %>%
+    dplyr::mutate(nmf_groups = purrr::map(res, ~ nmf_extract_group(.)))
+
+  if(nrow(cor_cluster) > 0){
+    ### Now loop through cor_cluster and merge sub-clusters
+    res <- list()
+    for(i in 1:nrow(cor_cluster)){
+      var1 <- cor_cluster[i, "Var1"] %>% as.character()
+      var2 <- cor_cluster[i, "Var2"] %>% as.character()
+      res[[var1]] <- c(res[[var1]], var2)
+      res[[var2]] <- c(res[[var2]], var1)
+    }
+    # now loop through 5 times and assume this will stablize?
+    res2 <- res
+    for(i in 1:5){
+      for(clust1 in names(res2)){
+        sub_clust <- res[[clust1]]
+        for(clust2 in sub_clust){
+          res2[[clust1]] <- c(res2[[clust1]], res2[[clust2]])
+        }
+        res2[[clust1]] <- unique(res2[[clust1]])
+      }
+    }
+    #
+    dd <- cc %>% mutate(remove = 0)
+    for(clust in names(res2)){
+      idx1 <- which(dd$names == clust)
+      if(dd[idx1, "remove"] == 0){
+
+        for(subclust in res2[[clust]]){
+          if(clust != subclust){
+            idx2 <- which(dd$names == subclust)
+            dd$res[idx1] <- list(c(dd$res[idx1], dd$res[idx2]))
+            dd$nmf_groups[idx1] <- rbind(dd$nmf_groups[idx1][[1]], dd$nmf_groups[idx2][[1]]) %>% list
+            dd[idx2, "remove"] <- 1
+          }
+        }
+
+      }
+    }
+  }else{
+    # no any subclusters are close to each other
+    dd <- cc %>% mutate(remove=0)
+  }
+
+  ### Remove merged subclusters
+  ee <- filter(dd, remove == 0) %>%
+    mutate(grp = 1:nrow(.)) %>%
+    mutate(ori_sample_id = purrr::map(nmf_groups, ~ .$Sample_ID),
+           new_sample_id = purrr::map2(ori_sample_id, grp, ~ paste(paste0("iNMF", .y), .x, sep="_")))
+
+  if(return.all){
+    final_res <- list(res=ee,
+                      cor_cluster = cor_cluster,
+                      groups = cc,
+                      clust_centroid = clust_centroid)
+  }else{
+    final_res <- list(res=ee)
+  }
+  return(final_res)
+}
+
+
+
+# check correlation between subclusters
+plot_cor_subiNMF <- function(inmf_unfilt_res, cor_cluster, clust_centroid){
+
+  for(i in 1:nrow(cor_cluster)){
+    z1 <- inmf_unfilt_res %>% filter(names == cor_cluster$Var1[i]) %>% .$nmf_groups %>% .[[1]]
+    z2 <- inmf_unfilt_res %>% filter(names == cor_cluster$Var2[i]) %>% .$nmf_groups %>% .[[1]]
+
+    z1_name <-
+      gsub(".*_", "", z1$Sample_ID) %>%
+      table %>%
+      data.frame %>%
+      mutate(Freq = paste(., Freq, sep="-")) %>%
+      select(Freq) %>%
+      unlist() %>%
+      paste(., collapse=";")
+
+    z2_name <-
+      gsub(".*_", "", z2$Sample_ID) %>%
+      table %>%
+      data.frame %>%
+      mutate(Freq = paste(., Freq, sep="-")) %>%
+      select(Freq) %>%
+      unlist() %>%
+      paste(., collapse=";")
+
+    c.cor <- cor(clust_centroid[, cor_cluster$Var1[i]], clust_centroid[, cor_cluster$Var2[i]], method = "spearman")
+    smoothScatter(clust_centroid[, cor_cluster$Var1[i]], clust_centroid[, cor_cluster$Var2[i]],
+                  # colramp=viridis,
+                  colramp = colorRampPalette(c("white", blues9)),
+                  main = signif(c.cor,3), xlab = z1_name, ylab = z2_name)
+  }
+}
+

@@ -1569,7 +1569,7 @@ shinyServer(function(input, output, session) {
       # add option to manual select the order of coloring
       if(input$pt_sel_grp_order == "Manual"){
         col <- col[, 1]
-        col.num <- as.numeric(factor(col, levels = unique(col) %>% sort))
+        col.num <- as.numeric(factor(col, levels = unique(col) %>% as.character))
         col.lvl <- unique(col)
         col.lvl <- col.lvl[as.numeric(input$pt_grp_order)]
         col <- col.lvl[col.num] %>% as.matrix

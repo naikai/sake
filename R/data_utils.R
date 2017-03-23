@@ -230,6 +230,31 @@ extract_data_by_mad <- function (data, topN=100, by="row", type="data"){
   }
 }
 
+extract_data_by_math <- function (data, topN=100, by="row", type="data", math="mean"){
+  by.idx <- ifelse(by=="row", 1, 2)
+  if(!(math %in% c("mean", "median", "max", "min", "mad"))){
+    stop( paste("Unknown math operation", math, "Please check it again"))
+  }
+  data.mad.genes <- apply(data, by.idx, math) %>%
+            select_top_n(., topN, bottom=F) %>%
+            names
+  if(type=="data"){
+    if(by=="row"){
+      data <- data[rownames(data) %in% data.mad.genes, ]
+    }else if(by=="col"){
+      data <- data[ ,colnames(data) %in% data.mad.genes]
+    }else{
+      stop("Wrong parameters, by can be 'row' or 'col'")
+    }
+    return(data)
+  }else if(type=="genes"){
+    return(data.mad.genes)
+  }else{
+    stop("Wrong parameters, type can be 'data' or 'genes'")
+  }
+}
+
+
 #' Check whether it is a integer whole value
 #'
 #' @export
