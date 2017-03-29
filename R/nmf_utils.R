@@ -306,7 +306,8 @@ iter_nmf <- function(rawdata, nrun=10, round=1, min.sample = 10, mad = 5000, sil
     print(paste('Running for iterNMF in round', round))
     print(paste("before feature selection", dim(rawdata)))
 
-    data <- extract_data_by_mad(rawdata, topN = mad)
+    data <- rmv_constant_0(rawdata) %>%
+      extract_data_by_math(., topN = mad, math = "mad")
     print(paste("after feature selection", dim(data)))
 
     nmf_res <- myNMF(data, cluster = 2, nrun=nrun)
@@ -314,8 +315,11 @@ iter_nmf <- function(rawdata, nrun=10, round=1, min.sample = 10, mad = 5000, sil
     nmf_groups <- nmf_extract_group(nmf_res)
 
     # exit if the condition is met
-    # cur.silhouette <- summary["silhouette.consensus", ] %>% signif(., 3)
+    cur.silhouette <- summary["silhouette.consensus", ] %>% signif(., 3)
+    print(paste0('summary silhouette consensus', cur.silhouette))
+
     cur.silhouette <- median(nmf_groups$sil_width)
+    print(paste0('median silhouette', cur.silhouette))
 
     if (cur.silhouette < silhouette) {
       print(paste("silhouette.consensus", cur.silhouette, "is less than:", silhouette, "don't proceed"))
@@ -324,7 +328,6 @@ iter_nmf <- function(rawdata, nrun=10, round=1, min.sample = 10, mad = 5000, sil
       res <- list()
       for(grp in c(1,2)){
         idx <- which(nmf_groups$nmf_subtypes == grp)
-        subdata <- rawdata[, idx] %>% .[rowSums(.) != 0, ]
 
         # less than 10(default) samples, don't proceed
         if(length(idx) <= min.sample){
@@ -333,15 +336,19 @@ iter_nmf <- function(rawdata, nrun=10, round=1, min.sample = 10, mad = 5000, sil
           # for cluster == 2, samples have to be greater than 3.
           if(length(idx) == 1){
             subdata <- rawdata[, c(idx, idx, idx)] %>% rmv_constant_0(.)
-          }else if(ncol(subdata) == 2){
+          }else if(length(idx) == 2){
             subdata <- rawdata[, c(idx, idx)] %>% rmv_constant_0(.)
           }else{
+            subdata <- rawdata[, idx] %>% rmv_constant_0(.)
             print(paste("sample number", length(idx), ". Return res and proceed"))
           }
           res[[grp]] <- myNMF(subdata[1:100, ], cluster=2, nrun=2)
         }else{
           # repeat iter_NMF
-          res[[grp]] <- iter_nmf(subdata, round = round+1, nrun=nrun, min.sample=min.sample, mad=mad)
+          subdata <- rawdata[, idx] %>% rmv_constant_0(.)
+          res[[grp]] <- iter_nmf(subdata, round = round+1,
+                                 nrun=nrun, min.sample=min.sample,
+                                 mad=mad, silhouette = silhouette)
         }
       }
       res = list(res = res)
@@ -358,12 +365,17 @@ extract_centroid_from_nmf_res <- function(res, data, method = "mean"){
 }
 
 getcentroid <- function(df, method = "mean") {
-  if(method == "mean"){
-    return(rowMeans(df))
-  }else if(method == "median"){
-    return(rowMedians(df))
+  # only 1 group in this nmf_group
+  if(is.null(ncol(df))){
+    return(df)
   }else{
-    stop("Please check you have specified the correct method")
+    if(method == "mean"){
+      return(rowMeans(df))
+    }else if(method == "median"){
+      return(rowMedians(df))
+    }else{
+      stop("Please check you have specified the correct method")
+    }
   }
 }
 

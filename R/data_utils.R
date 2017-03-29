@@ -230,6 +230,14 @@ extract_data_by_mad <- function (data, topN=100, by="row", type="data"){
   }
 }
 
+#' Extract data by 'math' operation
+#'
+#' @param data Original gene expression data
+#' @param topN How many genes from Top 'operation' list
+#' @keywords data extraction
+#' @export
+#' @examples
+#' extract_data_by_math(mtcars, topN=10, type="data", math="mean")
 extract_data_by_math <- function (data, topN=100, by="row", type="data", math="mean"){
   by.idx <- ifelse(by=="row", 1, 2)
   if(!(math %in% c("mean", "median", "max", "min", "mad"))){
@@ -573,3 +581,22 @@ vst <- function(countdata, fast=TRUE){
 }
 
 
+
+#' Clustering by hierarchical
+#' @param data integer data frame
+#' @keywords write.matrix
+#' @export
+#' @examples
+#' my.write.matrix(data)
+clust_by_hier <- function(data, K, takelog=FALSE, method="ward.D"){
+  if(takelog){
+    expdata <- log2(expdata + 1)
+  }
+  #distance <- 1 - cor(expdata, method="spearman") %>% as.dist
+  distance <- dist(t(expdata))
+
+  res <- hclust(distance, method = method) %>%
+    cutree(k = K) %>%
+    data_frame(Sample_ID=names(.), groups = .) %>%
+    separate(Sample_ID, into = c("GEO", "Patient", "Lane", "ID", "Celltype"))
+}
