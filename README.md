@@ -92,4 +92,4 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 Web version
 -----------
 
-Feel free to try out the web verison of the tool at url [sake](http://sake.mhammell.tools)
+Feel free to try out the web verison of the tool at url [sake](http://54.226.1.134)
