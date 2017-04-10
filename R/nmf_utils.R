@@ -288,6 +288,13 @@ nmf_select_best_k <- function(res, type="consensus"){
 }
 
 
+#' calculate weighted silhouette_width as threshold for running iter_NMF
+#'
+#' @param nmf_groups grouping infor after NMF run
+weighted.silhouette <- function(nmf_groups){
+  prop <- table(nmf_groups$nmf_subtypes) %>% prop.table
+  group_by(inmf_groups, nmf_subtypes) %>% summarise(m = median(sil_width))
+}
 
 
 #' Run iterative NMF for K=2 until it cannot no longer separate samples
@@ -301,37 +308,51 @@ nmf_select_best_k <- function(res, type="consensus"){
 #' @export
 #' @examples
 #' iter_nmf(rawdata, nrun=10, mad=5000)
-iter_nmf <- function(rawdata, nrun=10, round=1, min.sample = 10, mad = 5000, silhouette = 0.95) {
+iter_nmf <- function(rawdata, nrun=10, round=1, min.sample = 10, mad = 5000,
+                     silhouette = 0.95, w.silhouette = 0.7, w.min.sample = 10, ncores=8) {
   repeat {
-    print(paste('Running for iterNMF in round', round))
-    print(paste("before feature selection", dim(rawdata)))
+    cat(paste('\n\n### Running for iterNMF in round', round, "\n"))
+    print("Dim of rawdata")
+    print(dim(rawdata))
 
-    data <- rmv_constant_0(rawdata) %>%
+    data <- rmv_constant_0(rawdata, pct = 0.95) %>%
       extract_data_by_math(., topN = mad, math = "mad")
-    print(paste("after feature selection", dim(data)))
 
-    nmf_res <- myNMF(data, cluster = 2, nrun=nrun)
-    summary <- nmf_summary(nmf_res)
-    nmf_groups <- nmf_extract_group(nmf_res)
-
-    # exit if the condition is met
-    cur.silhouette <- summary["silhouette.consensus", ] %>% signif(., 3)
-    print(paste0('summary silhouette consensus', cur.silhouette))
+    nmf_res <- myNMF(data, cluster = 2, nrun=nrun, ncores = ncores)
+    nmf_groups <- nmf_extract_group(nmf_res, type="samples")
 
     cur.silhouette <- median(nmf_groups$sil_width)
-    print(paste0('median silhouette', cur.silhouette))
+    print(paste('median silhouette is', signif(cur.silhouette, 3)))
 
+    run_iter <- FALSE
     if (cur.silhouette < silhouette) {
-      print(paste("silhouette.consensus", cur.silhouette, "is less than:", silhouette, "don't proceed"))
-      break
+      print("check here")
+      if((weighted.silhouette(nmf_groups) > w.silhouette) & (ncol(data) > w.min.sample)){
+        print(paste("weighted.silhouette is", weighted.silhouette, ". Proceed"))
+        run_iter <- TRUE
+      }else{
+        print(paste("silhouette.consensus", cur.silhouette, "is less than:", silhouette, "don't proceed"))
+        break
+      }
     }else{
+      # if both of the sub_clusters have greater than 6 samples
+      if( sum(table(nmf_groups$nmf_subtypes) > 6) == 2){
+        print("Fit min samples criteria in subclusters")
+        # prop <- table(nmf_groups$nmf_subtypes) %>% prop.table
+        run_iter <- TRUE
+      }else{
+        print("Sample distribution in subclusters is so different, probably due to outliers. Stop clustering here")
+      }
+    }
+
+    if(run_iter){
       res <- list()
       for(grp in c(1,2)){
         idx <- which(nmf_groups$nmf_subtypes == grp)
 
         # less than 10(default) samples, don't proceed
         if(length(idx) <= min.sample){
-          print(paste("subdata has", length(idx), "samples, which less or equal than", min.sample, "samples, don't proceed"))
+          print(paste("subdata has", length(idx), "samples, which is less or equal than", min.sample, "samples, don't proceed"))
           # it turns out we need to have another NMF run in order to get NMF_res for the summary later
           # for cluster == 2, samples have to be greater than 3.
           if(length(idx) == 1){
@@ -340,19 +361,22 @@ iter_nmf <- function(rawdata, nrun=10, round=1, min.sample = 10, mad = 5000, sil
             subdata <- rawdata[, c(idx, idx)] %>% rmv_constant_0(.)
           }else{
             subdata <- rawdata[, idx] %>% rmv_constant_0(.)
-            print(paste("sample number", length(idx), ". Return res and proceed"))
           }
-          res[[grp]] <- myNMF(subdata[1:100, ], cluster=2, nrun=2)
+          # sometimes we will get samples with all zeros in the data
+          res[[grp]] <- myNMF(subdata[1:100, ] + 0.0001, cluster=2, nrun=2, ncores = ncores)
         }else{
           # repeat iter_NMF
           subdata <- rawdata[, idx] %>% rmv_constant_0(.)
-          res[[grp]] <- iter_nmf(subdata, round = round+1,
+          res[[grp]] <- iter_nmf(subdata, round = paste0(round, "-", grp),
                                  nrun=nrun, min.sample=min.sample,
-                                 mad=mad, silhouette = silhouette)
+                                 mad=mad, silhouette = silhouette,
+                                 ncores = ncores)
         }
       }
       res = list(res = res)
       return(res)
+    }else{
+      break
     }
   }
   return(nmf_res)
@@ -488,18 +512,24 @@ clean_iterNMF <- function(inmf_res, rawdata,
 
 
 # check correlation between subclusters
-plot_cor_subiNMF <- function(inmf_unfilt_res, cor_cluster, clust_centroid){
+#' @param iter_nmf_res vairous NMF res in a list format
+#' @param cor_cluster correlation between subcluster
+#' @param clust_centroid centroids in each subcluster
+#' @keywords NMF iterative
+#' @export
+#' @examples
+plot_cor_subiNMF <- function(inmf_res, cor_cluster, clust_centroid){
 
   for(i in 1:nrow(cor_cluster)){
-    z1 <- inmf_unfilt_res %>% filter(names == cor_cluster$Var1[i]) %>% .$nmf_groups %>% .[[1]]
-    z2 <- inmf_unfilt_res %>% filter(names == cor_cluster$Var2[i]) %>% .$nmf_groups %>% .[[1]]
+    z1 <- inmf_res %>% filter(names == cor_cluster$Var1[i]) %>% .$nmf_groups %>% .[[1]]
+    z2 <- inmf_res %>% filter(names == cor_cluster$Var2[i]) %>% .$nmf_groups %>% .[[1]]
 
     z1_name <-
       gsub(".*_", "", z1$Sample_ID) %>%
       table %>%
       data.frame %>%
       mutate(Freq = paste(., Freq, sep="-")) %>%
-      select(Freq) %>%
+      dplyr::select(Freq) %>%
       unlist() %>%
       paste(., collapse=";")
 
@@ -508,7 +538,7 @@ plot_cor_subiNMF <- function(inmf_unfilt_res, cor_cluster, clust_centroid){
       table %>%
       data.frame %>%
       mutate(Freq = paste(., Freq, sep="-")) %>%
-      select(Freq) %>%
+      dplyr::select(Freq) %>%
       unlist() %>%
       paste(., collapse=";")
 

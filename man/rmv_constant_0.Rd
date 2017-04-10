@@ -4,7 +4,8 @@
 \alias{rmv_constant_0}
 \title{Remove genes that with too many constant 0 expression across samples}
 \usage{
-rmv_constant_0(data, by = "row", pct = 0.75, minimum = 0)
+rmv_constant_0(data, by = "row", pct = 0.75, minimum = 0,
+  verbose = FALSE)
 }
 \arguments{
 \item{data}{Input data set}

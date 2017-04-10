@@ -740,9 +740,9 @@ body <- dashboardBody(
                           column(width=2, selectInput("SelColSideColors",
                                                       label = "Show columns in order:",
                                                       multiple = TRUE,
-                                                      choices = c(1,2,3,4,5),
+                                                      choices = c(1,2,3,4,5,6),
                                                       selected = 1)),
-                          column(width=2, sliderInput("ColSideColorsNum", label = "Modify Which Column:", min=1, max=5, value=1, ticks = F)),
+                          column(width=2, sliderInput("ColSideColorsNum", label = "Modify Which Column:", min=1, max=6, value=1, ticks = F)),
                           # Need to fix this later
                           conditionalPanel(
                             condition = "input.ColSideColorsNum == 1",
@@ -783,6 +783,14 @@ body <- dashboardBody(
                                                         choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
                                                         selected = "Pastel1")),
                             column(width=2, numericInput("ColScheme5.num", label = "Num of colors:", value = 10))
+                          ),
+                          conditionalPanel(
+                            condition = "input.ColSideColorsNum == 6",
+                            column(width=2, selectInput("ColScheme6",
+                                                        label = "Column Color 6:",
+                                                        choices = c("naikai", "naikai2", "Set1", "Set2", "Set3","YlGn", "YlGnBu", "YlOrRd", "Greys", "Pastel1", "Pastel2", "Paired", "Dark2"),
+                                                        selected = "naikai")),
+                            column(width=2, numericInput("ColScheme6.num", label = "Num of colors:", value = 10))
                           )
                         )
                       )

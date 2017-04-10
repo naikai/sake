@@ -5,7 +5,7 @@
 \title{Run iterative NMF for K=2 until it cannot no longer separate samples}
 \usage{
 iter_nmf(rawdata, nrun = 10, round = 1, min.sample = 10, mad = 5000,
-  silhouette = 0.95)
+  silhouette = 0.95, w.silhouette = 0.7, w.min.sample = 10, ncores = 8)
 }
 \arguments{
 \item{rawdata}{gene count table}

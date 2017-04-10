@@ -29,6 +29,12 @@ sudo yum install devtoolset-3-toolchain
 scl enable devtoolset-3 bash
 ```
 
+For **Ubuntu** (tested on 16.10)
+
+``` bash
+sudo apt-get install libcurl4-openssl-dev libpng-dev libxslt-dev libssl-dev libxml2-dev xsltproc
+```
+
 For **Mac OS** (tested on Sierra 10.12.1)
 
 ``` bash
@@ -48,7 +54,7 @@ brew install gcc48
 
 ``` r
 source("http://bioconductor.org/biocLite.R")
-biocLite(c("annotate", "AnnotationHub", "biomaRt", "DESeq2", "gage", "gageData", "GO.db", "pathview"))
+biocLite(c("annotate", "AnnotationHub", "biomaRt", "DESeq2", "gage", "gageData", "GO.db", "pathview", "plotly", "DT"))
 
 install.packages("devtools")
 devtools::install_github("renozao/pkgmaker", ref="develop")
@@ -92,4 +98,4 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 Web version
 -----------
 
-Feel free to try out the web verison of the tool at url [sake](http://54.226.1.134)
+Feel free to try out the web verison of the tool at url [sake](http://sake.mhammell.tools)

@@ -400,7 +400,7 @@ norm_factors <- function(data) {
 #' @export
 #' @examples
 #' rmv_constant_0(data, by="row", pct=0.75)
-rmv_constant_0 <- function(data, by="row", pct=0.75, minimum=0){
+rmv_constant_0 <- function(data, by="row", pct=0.75, minimum=0, verbose=FALSE){
    alt_by=""
    if(by=="row"){
       num_all_var <- dim(data)[1]
@@ -413,7 +413,9 @@ rmv_constant_0 <- function(data, by="row", pct=0.75, minimum=0){
       num_rmv_var <- dim(data)[2]
       alt_by="row"
    }
-   message(sprintf ("Original data: %d %s, Removed %d because these %s have values below or equal to %s in more than %d percent of all %s", num_all_var, by, num_all_var-num_rmv_var, by, minimum, pct*100, alt_by))
+   if(verbose){
+     message(sprintf ("Original data: %d %s, Removed %d because these %s have values below or equal to %s in more than %d percent of all %s", num_all_var, by, num_all_var-num_rmv_var, by, minimum, pct*100, alt_by))
+   }
    return(data)
 }
 

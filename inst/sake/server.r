@@ -1307,7 +1307,7 @@ shinyServer(function(input, output, session) {
   })
   ColScheme <- reactive({
     ColScheme <- list()
-    ColScheme <- c(input$ColScheme1, input$ColScheme2, input$ColScheme3, input$ColScheme4, input$ColScheme5)
+    ColScheme <- c(input$ColScheme1, input$ColScheme2, input$ColScheme3, input$ColScheme4, input$ColScheme5, input$ColScheme6)
     return(ColScheme)
   })
 
@@ -1323,8 +1323,8 @@ shinyServer(function(input, output, session) {
       res[['name']] <- paste0("NMF", nmf_subtypes) %>% as.matrix
     }else if(input$ColClrBy == 'Filename'){
       res <- name_to_color(colnames(heatmap_data), split_pattern ="\\_",
-                           num_color = 5,
-                           ColScheme = ColScheme()[1:5] )
+                           num_color = 6,
+                           ColScheme = ColScheme()[1:6] )
                            # num_color = input$ColSideColorsNum,
                            # ColScheme = ColScheme()[1:input$ColSideColorsNum] )
       # add options to select which column to show
