@@ -388,6 +388,12 @@ extract_centroid_from_nmf_res <- function(res, data, method = "mean"){
     getcentroid(., method = method)
 }
 
+#' Get centroid from data frame
+#'
+#' @param df gene count table
+#' @param method mean or median for calculating centroid
+#' @keywords NMF centroid iterative
+#' @export
 getcentroid <- function(df, method = "mean") {
   # only 1 group in this nmf_group
   if(is.null(ncol(df))){
@@ -403,6 +409,20 @@ getcentroid <- function(df, method = "mean") {
   }
 }
 
+#' Calculate silhouette index between two data frame
+#'
+#' @param clust1 data in cluster1
+#' @param clust2 data in cluster2
+#' @param method method for calculating distance metrics
+#' @keywords NMF iterative silhouette
+#' @export
+clust_silhouette <- function(clust1, clust2, method="euclidean"){
+  sil.data <- list()
+  sil.data$data <- cbind(clust1, clust2)
+  sil.data$clustering <- c(rep(1, ncol(clust1)), rep(2, ncol(clust2)))
+  sil.dist <- dist(t(sil.data$data), method = method)
+  silhouette(sil.data, sil.dist)
+}
 
 #' Extract, cleanup, and merge iter_NMF results
 #'
@@ -426,7 +446,7 @@ clean_iterNMF <- function(inmf_res, rawdata,
   names(bb) <- names(bb) %>% make.unique()
 
   # the number of feature selected for centroid will affect how we merge subclusters
-  # using spearman.cor, purpose to rmv_constant_0 and select top rowMean 10K genes
+  # using spearman.cor, purpose to rmv_constant_0 and select top rowMean 5K genes
   clust_data <- rawdata %>%
     rmv_constant_0(., pct=0.95) %>%
     extract_data_by_math(., topN = ctriod.topN, math = ctroid.math)

@@ -117,7 +117,7 @@ body <- dashboardBody(
                       ),
                       tabPanel("System setup",
                                selectInput("ncores", label = "Specify number of cores to run analysis",
-                                           choices = c(1,2,4,8,16),
+                                           choices = c(1,2,4,8,16,24,32,48,64),
                                            selected = 16)
                       )
               ),
