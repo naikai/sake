@@ -1,7 +1,7 @@
 library(sake)
 library(networkD3)
 
-options(shiny.maxRequestSize=500*1024^2)
+options(shiny.maxRequestSize=1000*1024^2)
 raw_fd <- system.file('extdata', 'rawdata', package="sake")
 filenames<-list.files(path=raw_fd)
 # filenames<-list.files(path="./extdata", pattern="\\.txt$")
