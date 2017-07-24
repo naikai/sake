@@ -134,7 +134,7 @@ shinyServer(function(input, output, session) {
              "There are columns with the exact same value in your data, Please check and try again!")
     )
     withProgress(message = 'Displying datatable', value = NULL, {
-      DT::datatable(rawdata[1:20, 1:500], rownames= TRUE,
+      DT::datatable(rawdata[1:20, 1:min(500, ncol(rawdata))], rownames= TRUE,
                     options = list(scroll = TRUE,
                                    scrollX = TRUE,
                                    scrollY = TRUE,
