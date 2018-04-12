@@ -58,7 +58,7 @@ biocLite(c("annotate", "AnnotationHub", "biomaRt", "DESeq2", "gage", "gageData",
 
 install.packages("devtools")
 devtools::install_github("renozao/pkgmaker", ref="develop")
-devtools::install_github("naikai/sake")
+devtools::install_github("naikai/sake") # You may want to consider "devtools::install_github("naikai/sake", CC=gcc-7) to flag for use with the GCC compiler" 
 ```
 
 #### To install the latest development version from [Packrat](https://rstudio.github.io/packrat/) (around 10 minutes)
