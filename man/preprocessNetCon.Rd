@@ -4,8 +4,8 @@
 \alias{preprocessNetCon}
 \title{Preprocess the connecitivty matrix based on mean connectivity and binary switch}
 \usage{
-preprocessNetCon(sub_jaccard_dist, rmv.filter = 0.5, binary.filter = 0.75,
-  plot = F)
+preprocessNetCon(sub_jaccard_dist, rmv.filter = 0.5,
+  binary.filter = 0.75, plot = F)
 }
 \arguments{
 \item{data}{Input expression data}
@@ -28,4 +28,3 @@ preprocessNetCon(sub_jaccard_dist, rmv.filter=0.5, binary.filter=0.75, plot=F)
 \keyword{co-expression,}
 \keyword{connectivity}
 \keyword{network,}
-

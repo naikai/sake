@@ -29,4 +29,3 @@ def_net_modules(data, tao=0.5, beta=10, num_feature=0.01)
 \keyword{co-expression,}
 \keyword{connectivity}
 \keyword{network,}
-

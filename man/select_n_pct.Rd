@@ -20,4 +20,3 @@ select_n_pct(c(1,23,1,412,51,231,516,1,23,13,3,5,1), 10)
 \keyword{n}
 \keyword{percent}
 \keyword{top}
-

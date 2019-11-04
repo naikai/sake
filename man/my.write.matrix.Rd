@@ -4,9 +4,9 @@
 \alias{my.write.matrix}
 \title{Own version of writing matrix output}
 \usage{
-my.write.matrix(x, file = "", sep = "\\t", col.names = T, append = F,
-  row.names = F, justify = c("none", "left", "right"), pval = NULL,
-  newline = "\\n", names = NULL)
+my.write.matrix(x, file = "", sep = "\\t", col.names = T,
+  append = F, row.names = F, justify = c("none", "left", "right"),
+  pval = NULL, newline = "\\n", names = NULL)
 }
 \arguments{
 \item{countdata}{integer data frame}
@@ -18,4 +18,3 @@ Own version of writing matrix output
 my.write.matrix(data)
 }
 \keyword{write.matrix}
-

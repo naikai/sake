@@ -18,4 +18,3 @@ Reorder dendrogram based on mean expression for RNA-Seq
 reorderfun()
 }
 \keyword{reorder}
-

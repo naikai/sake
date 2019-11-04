@@ -19,4 +19,3 @@ create_centroid(mtcars)
 }
 \keyword{centroid}
 \keyword{reshape}
-

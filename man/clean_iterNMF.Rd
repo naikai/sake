@@ -4,8 +4,9 @@
 \alias{clean_iterNMF}
 \title{Extract, cleanup, and merge iter_NMF results}
 \usage{
-clean_iterNMF(inmf_res, rawdata, cor.method = "spearman", cor.thresh = 0.9,
-  ctriod.topN = 5000, ctroid.math = "mean", return.all = FALSE)
+clean_iterNMF(inmf_res, rawdata, cor.method = "spearman",
+  cor.thresh = 0.9, ctriod.topN = 5000, ctroid.math = "mean",
+  return.all = FALSE)
 }
 \arguments{
 \item{rawdata}{gene count table for calculating centroids based on the clustering results}
@@ -28,4 +29,3 @@ clean_iterNMF(inmf_res, rawdata)
 }
 \keyword{NMF}
 \keyword{iterative}
-

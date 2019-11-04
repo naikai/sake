@@ -16,4 +16,3 @@ This function allows you to express your love of cats.
 nmf_estim_plot(estim.r)
 }
 \keyword{silhouette}
-

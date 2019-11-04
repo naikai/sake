@@ -5,7 +5,8 @@
 \title{Identify the the edge of the modules (blocks) within the net connectivity matrix}
 \usage{
 summarize_module2(core_sub_jaccard_dist, old, current, blk_cnt, genenames,
-  original_names, res_summary, res_genelist, size, min.size = 5, start_idx)
+  original_names, res_summary, res_genelist, size, min.size = 5,
+  start_idx)
 }
 \arguments{
 \item{core_sub_jaccard_dist}{jaccard distance for sub core genes}
@@ -20,4 +21,3 @@ summarize_module(core_sub_jaccard_dist, sub_jaccard_dist, min.connectivity=0.2, 
 }
 \keyword{co-expression}
 \keyword{network,}
-

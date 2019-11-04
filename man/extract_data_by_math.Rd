@@ -20,4 +20,3 @@ extract_data_by_math(mtcars, topN=10, type="data", math="mean")
 }
 \keyword{data}
 \keyword{extraction}
-

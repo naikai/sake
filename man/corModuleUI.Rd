@@ -9,4 +9,3 @@ corModuleUI(id)
 \description{
 Sample correlation plot
 }
-

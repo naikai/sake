@@ -17,4 +17,3 @@ cat_function()
 }
 \keyword{centroids}
 \keyword{classify}
-

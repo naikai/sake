@@ -9,4 +9,3 @@ is.whole(a, tol = 1e-07)
 \description{
 Check whether it is a integer whole value
 }
-

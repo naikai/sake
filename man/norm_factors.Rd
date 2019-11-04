@@ -17,4 +17,3 @@ norm_factors(mtcars)
 }
 \keyword{deseq,}
 \keyword{normalization}
-

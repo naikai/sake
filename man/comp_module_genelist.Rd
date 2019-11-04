@@ -20,4 +20,3 @@ comp_module_genelist(final_comp_genelist, folderName0="folder")
 \keyword{co-expression,}
 \keyword{connectivity}
 \keyword{network,}
-

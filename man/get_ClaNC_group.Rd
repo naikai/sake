@@ -16,4 +16,3 @@ Extract which group each point belongs to
 get_ClaNC_group()
 }
 \keyword{ClaNC}
-

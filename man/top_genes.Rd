@@ -22,4 +22,3 @@ top_genes(data)
 \keyword{n}
 \keyword{percent}
 \keyword{top}
-

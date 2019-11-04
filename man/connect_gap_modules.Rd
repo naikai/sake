@@ -22,4 +22,3 @@ connect_gap_modules(final_summary, final_genelist, allow.gap=1)
 \keyword{co-expression,}
 \keyword{connectivity}
 \keyword{network,}
-

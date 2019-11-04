@@ -16,4 +16,3 @@ This function allows you to express your love of cats.
 assign_label_cex(100)
 }
 \keyword{cats}
-

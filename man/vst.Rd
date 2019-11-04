@@ -17,4 +17,3 @@ vst(countdata)
 }
 \keyword{deseq2}
 \keyword{vst,}
-

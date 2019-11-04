@@ -4,8 +4,9 @@
 \alias{run_ClaNC}
 \title{ClaNC run}
 \usage{
-run_ClaNC(data, groups, ColSideColors, active.features = 20, est.num = 20,
-  select.features = 10, file.prefix = "ClaNC", skip.est = F)
+run_ClaNC(data, groups, ColSideColors, active.features = 20,
+  est.num = 20, select.features = 10, file.prefix = "ClaNC",
+  skip.est = F)
 }
 \arguments{
 \item{love}{Do you love cats? Defaults to TRUE.}
@@ -17,4 +18,3 @@ This function allows you to express your love of cats.
 cat_function()
 }
 \keyword{cats}
-

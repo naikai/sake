@@ -21,4 +21,3 @@ then plot 1 will go in the upper left, 2 will go in the upper right, and
 multiplot()
 }
 \keyword{multiplot}
-

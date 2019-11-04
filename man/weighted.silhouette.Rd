@@ -12,4 +12,3 @@ weighted.silhouette(nmf_groups)
 \description{
 calculate weighted silhouette_width as threshold for running iter_NMF
 }
-

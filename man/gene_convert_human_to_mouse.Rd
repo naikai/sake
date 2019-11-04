@@ -17,4 +17,3 @@ we will simply convert the first letter into Capital and return it
 gene_convert_human_to_mouse("TP53")
 }
 \keyword{standardize}
-

@@ -6,15 +6,17 @@
 \usage{
 myd3Heatmap(data, color = rev(brewer.pal(8, "RdYlBu")), type = "cor",
   width = 18, height = 18, title = "", file.prefix = "heatmap",
-  ColSideColors = NULL, ColSideColors.name = NULL, ColSideColorsSize = 1,
-  RowSideColors = NULL, RowSideColors.name = NULL, RowSideColorsSize = 1,
-  dendrogram = "both", dendro.ord = "auto", reorderfun = function(d, w)
-  reorder(d, w), Colv = NULL, Rowv = NULL, na.rm = T,
+  ColSideColors = NULL, ColSideColors.name = NULL,
+  ColSideColorsSize = 1, RowSideColors = NULL,
+  RowSideColors.name = NULL, RowSideColorsSize = 1,
+  dendrogram = "both", dendro.ord = "auto", reorderfun = function(d,
+  w) reorder(d, w), Colv = NULL, Rowv = NULL, na.rm = T,
   cor.method = "pearson", dist.m = "euclidean", hclust.m = "ward.D2",
-  scale = "row", scale.method = "mean", scale.first = F, notecex = 1.4,
-  notecol = "black", show_grid = FALSE, anim_duration = 0.1,
-  col.legend = F, row.legend = F, labRow = T, labCol = T, cexRow = 1,
-  cexCol = 1, lhei = c(1.5, 7), lwid = c(1, 7))
+  scale = "row", scale.method = "mean", scale.first = F,
+  notecex = 1.4, notecol = "black", show_grid = FALSE,
+  anim_duration = 0.1, col.legend = F, row.legend = F, labRow = T,
+  labCol = T, cexRow = 1, cexCol = 1, lhei = c(1.5, 7),
+  lwid = c(1, 7))
 }
 \arguments{
 \item{data}{data.frame for plot}
@@ -27,4 +29,3 @@ myd3Heatmap(mtcars)
 }
 \keyword{d3heatmap}
 \keyword{heatmap,}
-

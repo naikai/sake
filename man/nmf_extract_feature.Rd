@@ -28,4 +28,3 @@ nmf_extract_feature(nmf_res)
 }
 \keyword{NMF}
 \keyword{feature}
-

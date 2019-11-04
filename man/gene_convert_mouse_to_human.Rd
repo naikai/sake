@@ -16,4 +16,3 @@ This function allows you to express your love of cats.
 gene_convert_human_to_mouse("Trp53")
 }
 \keyword{standardize}
-

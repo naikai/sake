@@ -16,4 +16,3 @@ Convert letter to capitalization
 simpleCap("meat is good")
 }
 \keyword{standardize}
-

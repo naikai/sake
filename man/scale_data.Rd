@@ -22,4 +22,3 @@ This function allows you to scale the data based on your metrics of interest
 scale_data(mtcars)
 }
 \keyword{scale}
-

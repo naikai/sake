@@ -18,4 +18,3 @@ Load predefined gene list files for gene set enrichment analysis (GSEA)
 load_geneset("data", ".txt")
 }
 \keyword{lodad}
-

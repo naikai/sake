@@ -18,4 +18,3 @@ myfread.table(system.file('sake', package='sake'))
 }
 \keyword{data}
 \keyword{read}
-

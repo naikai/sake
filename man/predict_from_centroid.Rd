@@ -4,7 +4,8 @@
 \alias{predict_from_centroid}
 \title{Predict group assignment from centroids}
 \usage{
-predict_from_centroid(centroids, data, scale = "none", method = "spearman")
+predict_from_centroid(centroids, data, scale = "none",
+  method = "spearman")
 }
 \arguments{
 \item{centroids}{centroids for each group}
@@ -18,4 +19,3 @@ Predict group assignment from centroids
 predict_from_centroid()
 }
 \keyword{centroid}
-

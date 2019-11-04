@@ -24,4 +24,3 @@ NetConnectivity(mtcars, tao=0.5)
 \keyword{co-expression,}
 \keyword{connectivity}
 \keyword{network,}
-

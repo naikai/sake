@@ -16,4 +16,3 @@ Conversion between affy probe_ID to gene_symbol
 affy_probe_to_gene_symbol("TP53")
 }
 \keyword{standardize}
-

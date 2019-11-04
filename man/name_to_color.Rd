@@ -18,4 +18,3 @@ This function convert the sample_name in the data into different colors
 name_to_color(c("group1", "group1", "group2", "group2"))
 }
 \keyword{color}
-

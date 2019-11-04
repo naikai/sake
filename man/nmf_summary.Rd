@@ -20,4 +20,3 @@ nmf_summary(data)
 }
 \keyword{NMF}
 \keyword{feature}
-

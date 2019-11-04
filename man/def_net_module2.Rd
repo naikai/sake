@@ -5,7 +5,8 @@
 \title{Identify the the edge of the modules (blocks) within the net connectivity matrix}
 \usage{
 def_net_module2(core_sub_jaccard_dist, sub_jaccard_dist,
-  min.connectivity = 0.2, min.size = 5, start_idx = 1, allow.gap = 1)
+  min.connectivity = 0.2, min.size = 5, start_idx = 1,
+  allow.gap = 1)
 }
 \arguments{
 \item{core_sub_jaccard_dist}{preprocessed sub_jaccard_dist matrix (after applying filter, binarized the data)}
@@ -31,4 +32,3 @@ def_net_modules2(core_sub_jaccard_dist, sub_jaccard_dist, min.connectivity=0.2, 
 \keyword{co-expression,}
 \keyword{connectivity}
 \keyword{network,}
-

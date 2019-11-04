@@ -6,7 +6,8 @@
 \usage{
 myboxplot(data, prefix = "Boxplot", method = "vioplot", title = "",
   ylim = c(0.6, 0.85), save.plot = F, axis.text.size = 14,
-  axis.title.size = 16, legend.position = "right", vio.add.method = "dot")
+  axis.title.size = 16, legend.position = "right",
+  vio.add.method = "dot")
 }
 \arguments{
 \item{love}{Do you love cats? Defaults to TRUE.}
@@ -18,4 +19,3 @@ This function allows you to express your love of cats.
 myboxplot()
 }
 \keyword{cats}
-

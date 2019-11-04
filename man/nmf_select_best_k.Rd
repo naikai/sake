@@ -20,4 +20,3 @@ nmf_select_best_k(nmf_res)
 }
 \keyword{NMF}
 \keyword{feature}
-

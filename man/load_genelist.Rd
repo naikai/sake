@@ -18,4 +18,3 @@ Load predefined gene list files for heatmap (clustering) result
 load_genelist("data", ".txt")
 }
 \keyword{lodad}
-

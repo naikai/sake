@@ -4,11 +4,10 @@
 \alias{pcaplot}
 \title{simple PCA plot}
 \usage{
-pcaplot(data, takelog = FALSE, center = TRUE, scale = FALSE, pca_x = 1,
-  pca_y = 2, group = NULL, opacity = 0.6, plotsize = 7, labsize = 4,
-  legend = TRUE)
+pcaplot(data, takelog = FALSE, center = TRUE, scale = FALSE,
+  pca_x = 1, pca_y = 2, group = NULL, opacity = 0.6,
+  plotsize = 7, labsize = 4, legend = TRUE)
 }
 \description{
 This is a simple version of PCA plot
 }
-

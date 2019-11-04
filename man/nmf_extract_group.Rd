@@ -19,4 +19,3 @@ nmf_extract_group(nmf_res)
 }
 \keyword{NMF}
 \keyword{groups}
-

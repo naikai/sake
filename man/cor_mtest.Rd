@@ -18,4 +18,3 @@ Load predefined gene list files for heatmap (clustering) result
 cor_mtest("data", ".txt")
 }
 \keyword{lodad}
-

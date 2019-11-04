@@ -22,4 +22,3 @@ nmf_plot(nmf_res)
 }
 \keyword{NMF}
 \keyword{feature}
-

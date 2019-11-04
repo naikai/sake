@@ -17,4 +17,3 @@ tsne_out <- run_tsne(mtcar, perplexity=3)
 parse_tsne_res(tsne_out)
 }
 \keyword{cats}
-

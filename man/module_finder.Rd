@@ -19,4 +19,3 @@ module_finder(mtcars)
 \keyword{co-expression}
 \keyword{module,}
 \keyword{network,}
-

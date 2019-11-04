@@ -15,4 +15,3 @@ compare_groups_stats(x, y, method = "rand", base = exp(1), beta = 1)
 Calculate statistics comparing two clustering results
 }
 \keyword{compare}
-

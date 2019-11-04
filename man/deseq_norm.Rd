@@ -16,4 +16,3 @@ Normalize data through DESeq size factor
 deseq_norm(countdata)
 }
 \keyword{deseq}
-

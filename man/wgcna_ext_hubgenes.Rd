@@ -26,4 +26,3 @@ wgcna_ext_hubgenes(datExpr)
 \keyword{co-expression,}
 \keyword{network}
 \keyword{wgcna,}
-

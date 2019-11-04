@@ -7,15 +7,15 @@
 myHeatmap.3(data, color = rev(brewer.pal(8, "RdYlBu")), type = "cor",
   save.image = F, width = 18, height = 18, title = "",
   file.prefix = "heatmap", ColSideColors = NULL,
-  ColSideColors.name = NULL, ColSideColorsSize = 1, RowSideColors = NULL,
-  RowSideColors.name = NULL, RowSideColorsSize = 1,
-  reorderfun = function(d, w) reorder(d, w), Colv = NULL, Rowv = NULL,
-  na.rm = T, cor.method = "pearson", dist.m = "euclidean",
-  hclust.m = "ward.D2", scale = "row", scale.method = "mean",
-  scale.first = F, dendrogram = "both", dendro.ord = "auto",
-  notecex = 1.4, notecol = "black", col.legend = F, row.legend = F,
-  labRow = T, labCol = T, cexRow = 1.1, cexCol = 1.1, lhei = c(1.3,
-  7), lwid = c(1, 7))
+  ColSideColors.name = NULL, ColSideColorsSize = 1,
+  RowSideColors = NULL, RowSideColors.name = NULL,
+  RowSideColorsSize = 1, reorderfun = function(d, w) reorder(d, w),
+  Colv = NULL, Rowv = NULL, na.rm = T, cor.method = "pearson",
+  dist.m = "euclidean", hclust.m = "ward.D2", scale = "row",
+  scale.method = "mean", scale.first = F, dendrogram = "both",
+  dendro.ord = "auto", notecex = 1.4, notecol = "black",
+  col.legend = F, row.legend = F, labRow = T, labCol = T,
+  cexRow = 1.1, cexCol = 1.1, lhei = c(1.3, 7), lwid = c(1, 7))
 }
 \arguments{
 \item{love}{Do you love cats? Defaults to TRUE.}
@@ -24,4 +24,3 @@ myHeatmap.3(data, color = rev(brewer.pal(8, "RdYlBu")), type = "cor",
 This function allows you to express your love of cats.
 }
 \keyword{cats}
-

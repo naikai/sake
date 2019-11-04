@@ -19,4 +19,3 @@ create.manual.color(c(1,2,3,1,2,3,2,3), c("red", "blue", "green"))
 }
 \keyword{color}
 \keyword{manual}
-

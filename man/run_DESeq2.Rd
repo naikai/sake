@@ -13,4 +13,3 @@ This function allows you to run DESeq2 if provided required data
 run_DESeq2()
 }
 \keyword{DESeq2}
-

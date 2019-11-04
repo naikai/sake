@@ -40,4 +40,3 @@ myNMF(data, mode="estim", cluster=3, nrun=20)
 }
 \keyword{NMF}
 \keyword{cluster}
-

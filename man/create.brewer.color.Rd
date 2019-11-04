@@ -16,4 +16,3 @@ This function allows you to express your love of cats.
 create.brewer.color()
 }
 \keyword{cats}
-

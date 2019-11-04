@@ -14,4 +14,3 @@ screenshot_plotly(x, file = "webshot.png", ...)
 \description{
 Screen shot of plotly object
 }
-

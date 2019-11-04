@@ -7,8 +7,8 @@
 2. Convert the matrix into binary based on quantile connectivity'}
 \usage{
 run_CoExpression(expdata, thresh = "soft", tao = 0.7, beta = 10,
-  method = "Pearson", folderName0 = "Module", avg_con_thresh = 0.00015,
-  save.data = F)
+  method = "Pearson", folderName0 = "Module",
+  avg_con_thresh = 0.00015, save.data = F)
 }
 \arguments{
 \item{tao}{threshold for hard transformation}
@@ -30,4 +30,3 @@ run_CoExpression(expdata)
 \keyword{co-expression,}
 \keyword{connectivity}
 \keyword{network,}
-

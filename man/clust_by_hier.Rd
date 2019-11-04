@@ -16,4 +16,3 @@ Clustering by hierarchical
 my.write.matrix(data)
 }
 \keyword{write.matrix}
-

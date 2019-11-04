@@ -4,8 +4,9 @@
 \alias{plot_gene_expression}
 \title{Plot expression for each gene}
 \usage{
-plot_gene_expression(data, gene, groups, type = "boxplot", data.return = f,
-  ylim = c(0, 20), title = null, las = 1, cex.axis = 1)
+plot_gene_expression(data, gene, groups, type = "boxplot",
+  data.return = f, ylim = c(0, 20), title = null, las = 1,
+  cex.axis = 1)
 }
 \arguments{
 \item{love}{Do you love cats? Defaults to TRUE.}
@@ -17,4 +18,3 @@ This function allows you to express your love of cats.
 cat_function()
 }
 \keyword{cats}
-

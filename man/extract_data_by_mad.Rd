@@ -19,4 +19,3 @@ extract_data_by_mad(mtcars, topN=10, type="data")
 }
 \keyword{MAD,}
 \keyword{extract}
-

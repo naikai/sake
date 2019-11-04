@@ -5,9 +5,10 @@
 \title{Plot t-SNE results}
 \usage{
 plot_tsne(tsne_out, color = NULL, alpha = 1, title = "tSNE",
-  brewer = "naikai", add.centroids = F, add.line = F, add.errorbar = F,
-  add.label = F, label.size = 3, conf = F, add.legend = F,
-  save.plot = T, real.plot = T, point.size = 3, centroid.size = 6)
+  brewer = "naikai", add.centroids = F, add.line = F,
+  add.errorbar = F, add.label = F, label.size = 3, conf = F,
+  add.legend = F, save.plot = T, real.plot = T, point.size = 3,
+  centroid.size = 6)
 }
 \arguments{
 \item{tsne_out}{t-SNE results from run_tSNE}
@@ -29,4 +30,3 @@ tsne_out <- parse_tsne_res(tsne_out)
 plot_tsne(tsne_out)
 }
 \keyword{tsne}
-

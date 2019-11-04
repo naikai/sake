@@ -20,4 +20,3 @@ Select top # from a vector
 select_top_n(mtcars, 100, bottom=F)
 }
 \keyword{select}
-

@@ -73,5 +73,5 @@ Suggests:
     knitr
 License: GPL (>=2)
 LazyData: TRUE
-RoxygenNote: 5.0.1
+RoxygenNote: 6.1.1
 VignetteBuilder: knitr

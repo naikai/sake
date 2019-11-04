@@ -9,4 +9,3 @@ run_icash()
 \description{
 Wrapper function to run the icahs Shiny App
 }
-

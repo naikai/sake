@@ -20,4 +20,3 @@ You can specify the percentage of 0s as the threshold
 rmv_constant_0(data, by="row", pct=0.75)
 }
 \keyword{rmv_constant_var}
-

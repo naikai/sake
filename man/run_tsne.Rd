@@ -25,4 +25,3 @@ This function allows you to run t-SNE using multi-cores
 run_tsne(mtcars, iter=200, perplexity = 2, cores=4)
 }
 \keyword{t-SNE}
-

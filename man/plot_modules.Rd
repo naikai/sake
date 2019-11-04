@@ -22,4 +22,3 @@ plot_modules(core_sub_jaccard_dist, final_genelist)
 \keyword{co-expression,}
 \keyword{connectivity}
 \keyword{network,}
-

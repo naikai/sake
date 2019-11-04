@@ -9,4 +9,3 @@ mutual_info_from_vector(x, y, base = exp(1))
 \description{
 first generate summary table, then use equation to calculate mutual info
 }
-

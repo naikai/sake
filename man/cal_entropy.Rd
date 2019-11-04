@@ -9,4 +9,3 @@ cal_entropy(x, base = exp(1))
 \description{
 calculate entroyp
 }
-

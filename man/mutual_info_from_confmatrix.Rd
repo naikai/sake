@@ -20,4 +20,3 @@ Calculate Mutual information from confusion matrix
 }
 \keyword{information}
 \keyword{mutual}
-
