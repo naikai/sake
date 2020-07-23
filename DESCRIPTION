@@ -15,7 +15,7 @@ URL: http://github.com/naikai/sake
 BugReports: http://github.com/naikai/sake/issues
 Remotes:
     hadley/devtools,
-    Bioconductor-mirror/biomaRt,
+    bioc::release/biomaRt,
     renozao/pkgmaker@develop,
     renozao/NMF,
     bmbolstad/preprocessCore,
