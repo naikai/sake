@@ -10,4 +10,7 @@ geneset_fd <- system.file("extdata", "geneset", package="sake")
 genefile_fd <- system.file("extdata", "genefile", package="sake")
 pre_geneset <- load_geneset(geneset_fd, ".gmt")
 pre_genelist <- load_genelist(genefile_fd, ".txt")
-`%then%` <- shiny:::`%OR%`
+# `%then%` <- shiny:::`%OR%`
+`%then%` <- function(a, b) {
+  if (is.null(a)) b else a
+}
