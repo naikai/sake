@@ -67,6 +67,16 @@ devtools::install_github("naikai/sake") # You may want to consider "devtools::in
 -   Unarchive file, open the folder, start `R` in this folder
 -   Packrat will then automate the whole process for you
 
+
+#### Quick update 2021-03-25 (inputs from Jarrett Eshima <jarrettbryceeshima@gmail.com>)
+1) Installed RTools40, Devtools, pkgmaker, and SAKE (and dependencies) according to the README rmarkdown file
+2) I removed the following dependent packages from my R library: plotly, shiny, shinydashboard, htmltools, htmlwidgets, promises, crosstalk and DT
+3) I reinstalled older versions of the packages: plotly 4.9.2, shiny 1.5.0, shinydashboard 0.6.1, htmltools 0.5.0, htmlwidgets 1.5.2, promises 1.1.1, crosstalk 1.1.0.1, and DT 0.16 (SessionInfo() output screenshots attached to this email).
+4) Loaded SAKE library and ran shiny::runApp(system.file("sake",package="sake"))
+5) Software was back to normal
+
+
+
 Usage
 -----
 
