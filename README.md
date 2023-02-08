@@ -61,14 +61,41 @@ devtools::install_github("renozao/pkgmaker", ref="develop")
 devtools::install_github("naikai/sake") # You may want to consider "devtools::install_github("naikai/sake", CC=gcc-7) to flag for use with the GCC compiler" 
 ```
 
-#### Quick update 2021-03-25 (inputs from Jarrett Eshima <jarrettbryceeshima@gmail.com>)
-1) Installed RTools40, Devtools, pkgmaker, and SAKE (and dependencies) according to the README rmarkdown file
-2) I removed the following dependent packages from my R library: plotly, shiny, shinydashboard, htmltools, htmlwidgets, promises, crosstalk and DT
-3) I reinstalled older versions of the packages: plotly 4.9.2, shiny 1.5.0, shinydashboard 0.6.1, htmltools 0.5.0, htmlwidgets 1.5.2, promises 1.1.1, crosstalk 1.1.0.1, and DT 0.16 (SessionInfo() output screenshots attached to this email).
-4) Loaded SAKE library and ran shiny::runApp(system.file("sake",package="sake"))
-5) Software was back to normal
+#### Quick update on how to install SAKE. 2023-02-08 (inputs from @savytskanatalia)
 
-It works with latest R (thanks user ZigZag) 
+# I reinstalled older versions of the packages: 
+# plotly 4.9.2,  htmltools 0.5.0, htmlwidgets 1.5.2, 
+# promises 1.1.1, crosstalk 1.1.0.1, and DT 0.16 
+remove.packages("plotly")
+remove.packages("htmltools")
+remove.packages("htmlwidgets")
+remove.packages("promises")
+remove.packages("crosstalk")
+remove.packages("DT")
+install.packages("https://cran.r-project.org/src/contrib/Archive/crosstalk/crosstalk_1.1.0.1.tar.gz", repo=NULL, type="source")
+install.packages("https://cran.r-project.org/src/contrib/Archive/promises/promises_1.1.1.tar.gz", repo=NULL, type="source")
+
+install.packages("https://cran.r-project.org/src/contrib/Archive/plotly/plotly_4.9.2.tar.gz", repo=NULL, type="source")
+install.packages("https://cran.r-project.org/src/contrib/Archive/htmltools/htmltools_0.5.0.tar.gz", repo=NULL, type="source")
+install.packages("https://cran.r-project.org/src/contrib/Archive/htmlwidgets/htmlwidgets_1.5.2.tar.gz", repo=NULL, type="source")
+install.packages("https://cran.r-project.org/src/contrib/Archive/DT/DT_0.16.tar.gz", repo=NULL, type="source")
+# gage_2.36.0
+
+# go even below the versions
+# shiny 1.4.0.2
+# shinydashboard 0.7.1
+# shinythemes 1.1.2
+
+remove.packages("shiny")
+remove.packages("shinydashboard")
+remove.packages("shinythemes")
+
+install.packages("https://cran.r-project.org/src/contrib/Archive/shiny/shiny_1.4.0.2.tar.gz", repo=NULL, type="source")
+install.packages("https://cran.r-project.org/src/contrib/Archive/shinydashboard/shinydashboard_0.7.1.tar.gz", repo=NULL, type="source")
+install.packages("https://cran.r-project.org/src/contrib/Archive/shinythemes/shinythemes_1.1.2.tar.gz", repo=NULL, type="source")
+
+
+
 
 ```
 > sessionInfo()
